@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COEU SIM — Centrale Operativa VA / CO / LC</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+</head>
+<body>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+  /* ===== LSTSim clone - tema chiaro classico ===== */
+  *{ box-sizing:border-box; }
+  body{ text-align:left; background:#c9c9c9; color:#111; font-family:Verdana,Tahoma,Arial,sans-serif; font-size:12px; margin:0; }
+  #app{ max-width:1280px; margin:6px auto; padding:0 6px; }
+  #lstTop{ background:linear-gradient(#fdfdfd,#d9d9d9); border:1px solid #7a7a7a; padding:5px 8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  #lstTop .title{ font-weight:bold; font-size:13px; }
+  #lstTop .title span{ font-weight:normal; color:#444; font-size:11px; }
+  #lstTop .spacer{ flex:1; }
+  .lstBtn{ background:linear-gradient(#ffffff,#d4d0c8); border:1px solid #808080; padding:3px 10px; font-size:12px; cursor:pointer; color:#111; border-radius:2px; font-family:inherit; }
+  .lstBtn:hover{ background:linear-gradient(#fffbe0,#e8e0a0); }
+  .lstBtn.primary{ font-weight:bold; border-color:#555; background:linear-gradient(#fff,#b9d1f0); }
+  .lstBtn.small{ font-size:11px; padding:2px 6px; }
+  .lstBtn.active{ background:linear-gradient(#ffe0a0,#ffb060); }
+  .lstBtn.on{ background:linear-gradient(#fffbe0,#ffd080); font-weight:bold; }
+  #lstStats{ font-size:11px; background:#fff; border:1px solid #808080; padding:2px 8px; }
+  #lstStats b{ font-size:12px; }
+  #lstGridTop{ display:grid; grid-template-columns:1fr 190px 330px; gap:6px; margin-top:6px; }
+  #lstGridBot{ display:grid; grid-template-columns:1fr 290px; gap:6px; margin-top:6px; }
+  @media(max-width:1000px){ #lstGridTop{ grid-template-columns:1fr 1fr; } #pIncident{ grid-column:1/-1; } #lstGridBot{ grid-template-columns:1fr; } }
+  @media(max-width:640px){ #lstGridTop{ grid-template-columns:1fr; } }
+  .lstPanel{ background:#f2f2f2; border:1px solid #7a7a7a; }
+  .lstHead{ background:linear-gradient(#f7f7f7,#dcdcdc); border-bottom:1px solid #7a7a7a; padding:4px 6px; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; }
+  .lstHead .right{ margin-left:auto; font-weight:normal; font-size:11px; display:flex; gap:4px; align-items:center; }
+  .lstHead .tab{ border:1px solid #808080; background:#fff; padding:1px 8px; cursor:pointer; font-weight:normal; }
+  .lstHead .tab.on{ background:#fdf0c0; font-weight:bold; }
+  #mapWrap{ position:relative; }
+  #mapEl{ height:470px; width:100%; background:#e8e4d8; }
+  #mapToggle{ position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:600; display:flex; gap:0; border:1px solid #808080; }
+  #mapToggle button{ border:0; padding:2px 12px; font-size:11px; cursor:pointer; background:#fff; font-family:inherit; }
+  #mapToggle button.on{ background:#ffe9a8; font-weight:bold; }
+  /* status list */
+  #mzList{ height:300px; overflow:auto; background:#fff; }
+  .mzCard{ display:flex; justify-content:space-between; align-items:center; padding:2px 6px; border-bottom:1px solid #ddd; cursor:pointer; font-size:12px; background:#fff; }
+  .mzCard:nth-child(even){ background:#f7f7f7; }
+  .mzCard:hover{ background:#e8f0ff; }
+  .mzCard.selMz{ background:#c0d8ff; }
+  .mzCard .code{ color:#0645ad; }
+  .stBox{ display:inline-block; min-width:16px; text-align:center; font-weight:bold; font-size:11px; border:1px solid #555; padding:0 3px; margin-left:6px; color:#fff; }
+  .st-disponibile{ background:#35a835; } .st-viaggio{ background:#e6a100; } .st-sul_posto{ background:#d00000; }
+  .st-trasporto{ background:#d00000; } .st-ospedale{ background:#7a00c0; } .st-rientro{ background:#888; }
+  #mzDetail{ border-top:1px solid #7a7a7a; background:#ffffe1; border:1px solid #808080; margin:6px; padding:6px; font-size:11px; height:124px; overflow:auto; }
+  /* incident */
+  #incIcons{ display:flex; gap:10px; padding:4px 6px; background:#fff; border-bottom:1px solid #ccc; font-size:12px; }
+  #detailBox{ background:#fff; padding:6px; height:270px; overflow:auto; }
+  #intTopList{ max-height:132px; overflow:auto; background:#fff; border-bottom:1px solid #ccc; }
+  #intTopList .intRow{ display:flex; gap:6px; align-items:center; padding:3px 6px; border-bottom:1px solid #eee; cursor:pointer; font-size:11px; }
+  #intTopList .intRow:hover{ background:#e8f0ff; }
+  #intTopList .intRow.sel{ background:#c0d8ff; }
+  #detailBox .hint{ color:#555; }
+  .detTitle{ font-weight:bold; font-size:13px; border-bottom:1px solid #ccc; padding-bottom:4px; margin-bottom:4px; }
+  .detBtns{ display:flex; flex-direction:column; gap:4px; margin:6px 0; }
+  .detBtns .lstBtn{ width:100%; text-align:left; }
+  .kv{ margin:3px 0; } .kv b{ display:inline-block; min-width:0; }
+  .manualGrid{ display:flex; flex-wrap:wrap; gap:4px; margin:4px 0; }
+  .selGrid{ max-height:150px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; }
+  .selGrid label{ display:block; font-size:11px; padding:2px 0; cursor:pointer; }
+  .selGrid label:hover{ background:#e8f0ff; }
+  #sendSelBtn{ width:100%; font-weight:bold; font-size:13px; padding:6px; margin-top:2px; }
+  .vvfSec{ margin-top:6px; border:1px solid #b33; background:#fff5f5; border-radius:6px; padding:4px 6px; }
+  .vvfSec summary{ cursor:pointer; font-weight:bold; font-size:12px; padding:2px 0; }
+  #vvfGrid{ max-height:170px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; }
+  #vvfGrid label{ display:block; font-size:11px; padding:2px 0 2px 14px; cursor:pointer; }
+  #vvfGrid label:hover{ background:#ffe8e8; }
+  .vvfGroup{ font-size:11px; margin:5px 0 1px; padding-top:4px; border-top:1px dashed #c99; }
+  .vvfGroup:first-child{ border-top:none; padding-top:0; margin-top:0; }
+  #sendVvfBtn{ width:100%; font-weight:bold; font-size:13px; padding:6px; margin-top:2px; }
+  .onSceneRow{ display:flex; gap:4px; align-items:center; background:#f7f7f7; border:1px solid #ccc; padding:2px 4px; margin-bottom:3px; }
+  /* funk + calls */
+  #funkHead{ display:flex; gap:8px; align-items:center; }
+  #logBox{ height:240px; overflow:auto; background:#fff; padding:4px 6px; font-size:11px; }
+  #logBox .lt{ color:#666; font-family:monospace; }
+  #logBox .crit{ background:#ffd9d9; border-left:4px solid #d00000; padding:1px 4px; font-weight:bold; }
+  .funkS{ display:inline-block; font-weight:bold; color:#fff; font-size:10px; padding:0 4px; border:1px solid #555; margin:0 2px; }
+  #intList{ height:190px; overflow:auto; background:#fff; padding:0; display:block; }
+  #callQueue{ max-height:210px; overflow:auto; background:#fff8e1; border-bottom:1px solid #7a7a7a; }
+  .secHead{ background:#e0dcc8; border-bottom:1px solid #7a7a7a; padding:3px 6px; font-weight:bold; font-size:11px; }
+  .callCard{ padding:5px 6px; border-bottom:2px solid #e6a100; background:#fffbe8; }
+  .callCard.flash{ outline:3px solid #e6a100; }
+  .callBtns{ display:flex; gap:4px; margin-top:4px; }
+  .dialogo{ background:#ffffe1; border:1px solid #999; border-left:4px solid #0645ad; padding:5px 7px; margin:5px 0; font-style:italic; font-size:12px; }
+  .colorBtns{ display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:4px 0; }
+  .colorBtns .lstBtn{ text-align:left; font-weight:bold; }
+  .codeRow{ margin-top:4px; font-size:11px; }
+  .codeInput{ font-family:monospace; font-size:12px; border:1px solid #808080; padding:2px 6px; width:110px; }
+  .callDot{ width:22px; height:22px; border-radius:50%; background:#ffdf60; border:3px solid #a07000; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:1px 1px 3px #0009; }
+  .callDot.pulse{ animation:pulse 1s infinite; }
+  .intCard{ padding:4px 6px; border-bottom:1px solid #ddd; cursor:pointer; background:#fff; border-left:6px solid #888; }
+  .intCard:nth-child(even){ background:#f6f6f6; }
+  .intCard:hover{ background:#e8f0ff; }
+  .intCard.sel{ background:#c0d8ff; }
+  .intCard.p1{ border-left-color:#d00000; } .intCard.p2{ border-left-color:#e6a100; }
+  .intCard.p3{ border-left-color:#35a835; } .intCard.p4{ border-left-color:#888; }
+  .intTop{ font-size:12px; } .intTop .cod{ float:right; color:#666; font-family:monospace; font-size:11px; }
+  .prioBadge{ color:#fff; font-weight:bold; font-size:10px; padding:0 4px; border:1px solid #555; }
+  .prioDot{ display:inline-block; width:12px; height:12px; border:1px solid #555; vertical-align:middle; flex:none; }
+  .addrLink{ cursor:pointer; }
+  .addrLink:hover{ text-decoration:underline; }
+  .intAddr{ font-size:11px; } .intMeta{ font-size:10px; color:#555; }
+  .mzType{ font-size:10px; color:#555; }
+  #callsTools{ background:#e8e8e8; border-bottom:1px solid #7a7a7a; padding:4px 6px; display:flex; flex-wrap:wrap; gap:4px; align-items:center; font-size:11px; }
+  #callsTools label{ background:#fff; border:1px solid #999; padding:1px 5px; }
+  #searchInput{ font-family:inherit; font-size:11px; border:1px solid #808080; padding:2px 6px; width:170px; }
+  #toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#ffffe1; border:1px solid #808080; padding:8px 16px; z-index:9999; font-size:12px; box-shadow:2px 2px 6px #0008; }
+  .small{ font-size:11px; color:#333; }
+  /* marker */
+  .intDot{ width:22px; height:22px; border-radius:4px; border:2px solid #555; display:flex; align-items:center; justify-content:center; position:relative; font-size:11px; background:#fff; box-shadow:1px 1px 3px #0009; }
+  .intDot b{ position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); font-size:8px; color:#fff; border-radius:3px; padding:0 3px; border:1px solid #333; }
+  .intDot.pulse{ animation:pulse 1.2s infinite; }
+  @keyframes pulse{ 0%{ box-shadow:0 0 0 0 #d0000088; } 70%{ box-shadow:0 0 0 10px #d0000000; } 100%{ box-shadow:0 0 0 0 #d0000000; } }
+  .mzDot{ width:48px; height:48px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:26px; filter:drop-shadow(1px 1px 1px #000b); }
+  .mzDot.viaggio{ filter:drop-shadow(1px 1px 1px #000b); } .mzDot.sul_posto,.mzDot.trasporto{ filter:drop-shadow(1px 1px 2px #d00000); } .mzDot.ospedale{ filter:drop-shadow(1px 1px 2px #7a00c0); }
+  .sedeDot{ width:18px; height:18px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:15px; filter:drop-shadow(1px 1px 1px #000b); }
+  .ospDot{ width:14px; height:14px; background:#fff; color:#d00000; font-weight:bold; border-radius:2px; display:flex; align-items:center; justify-content:center; border:2px solid #d00000; font-size:8px; }
+  .vvfDot{ width:20px; height:20px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:16px; filter:drop-shadow(1px 1px 1px #000b); }
+  .leaflet-popup-content{ font-family:Verdana,Tahoma,Arial,sans-serif; font-size:12px; line-height:1.5; }
+  .leaflet-popup-content a{ color:#0645ad; }
+  dialog{ font-family:inherit; }
+</style>
+
+<div id="app">
+  <div id="lstTop">
+    <div class="title">🚨 COEU SIM — Varese • Como • Lecco <span>stile LSTSim • mappa Esri (no OSM) • mezzi reali</span></div>
+    <div class="spacer"></div>
+    <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • Punti <b id="statScore">0</b> • <span id="clockEl">08:00</span> • <b style="color:#d00000">🔴 <span id="statC1">0</span></b> <b style="color:#b87f00">🟡 <span id="statC2">0</span></b> <b style="color:#1d7d1d">🟢 <span id="statC3">0</span></b> <b style="color:#666">⚪ <span id="statC4">0</span></b></div>
+    <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
+    <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
+    <button class="lstBtn" onclick="if(confirm('Reset totale?'))COEUSIM.reset()">Reset</button>
+    <button class="lstBtn" onclick="document.getElementById('helpDlg').showModal()">Aiuto</button>
+  </div>
+
+  <div id="lstGridTop">
+    <div class="lstPanel">
+      <div class="lstHead">🗺️ Varese / Como / Lecco <span class="right"><label style="background:#fff;border:1px solid #999;padding:1px 5px;cursor:pointer"><input type="checkbox" checked onchange="COEUSIM.toggleVVF(this.checked)"> 🚒 VVF</label> Esri, no OSM • <span id="intCount"></span></span></div>
+      <div id="mapWrap">
+        <div id="mapEl"></div>
+        <div id="mapToggle"><button id="karteBtn" class="on" onclick="switchBase('karte')">Mappa</button><button id="satBtn" onclick="switchBase('sat')">Satellite</button></div>
+      </div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">Stato, Mezzi <span class="right" id="mzCount"></span></div>
+      <div id="mzList"></div>
+      <div id="mzDetail"><span class="small">Seleziona un mezzo per i dettagli (destinazione / posizione).</span></div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">📋 Interventi in corso <span class="right"><span id="incTimer"></span></span></div>
+      <div id="incIcons"><span>🚑 <b id="icoMz">30</b></span><span>📞 <b id="icoInt">0</b></span><span>🕐 <b id="icoClock">08:00</b></span></div>
+      <div id="intTopList"></div>
+      <div id="detailBox"><div class="hint">Seleziona un intervento...</div></div>
+    </div>
+  </div>
+
+  <div id="lstGridBot">
+    <div class="lstPanel">
+      <div class="lstHead"><span id="funkClock">14:45:50</span><span style="flex:1"></span><span id="wetter">Pioggia, 16 °C 🌧️</span></div>
+      <div id="logBox"></div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">📞 Chiamate <span class="right"><button class="lstBtn small spdBtn on" onclick="setSpeedX(1,this)">1x</button><button class="lstBtn small spdBtn" onclick="setSpeedX(5,this)">5x</button><button class="lstBtn small spdBtn" onclick="setSpeedX(10,this)">10x</button><button class="lstBtn small" onclick="COEUSIM.nuovaChiamata()">Extra</button><button class="lstBtn small" id="pauseBtn" onclick="togglePause(this)">Pausa</button></span></div>
+      <div id="callsTools">
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('VA',this.checked)"> VA</label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('CO',this.checked)"> CO</label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('LC',this.checked)"> LC</label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('P1',this.checked)"> <span style="color:#e33">🔴</span></label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('P2',this.checked)"> <span style="color:#e90">🟡</span></label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('P3',this.checked)"> <span style="color:#2a2">🟢</span></label>
+        <label><input type="checkbox" checked onchange="COEUSIM.setFilter('P4',this.checked)"> ⚪</label>
+        <input id="searchInput" placeholder="Cerca..." oninput="COEUSIM.setSearch(this.value)" />
+        <button class="lstBtn small" onclick="COEUSIM.chiudiChiusi()">Pulisci chiusi</button>
+      </div>
+      <div class="secHead">🔔 In arrivo (<span id="callCount">0</span>)</div>
+      <div id="callQueue"></div>
+    </div>
+  </div>
+  <div class="small" style="margin:6px 2px">Grafica ispirata a LSTSim (Leitstellensimulator): mappa + Stato/Mezzi + Intervento sopra, Radio + Chiamate sotto. Mappa Esri invece di Google/OSM. Mezzi 118 e VVF reali (nominativi radio veri).</div>
+</div>
+
+<div id="toast" hidden></div>
+
+<dialog id="helpDlg">
+  <h3 style="margin-top:0">Come si gioca (stile LSTSim)</h3>
+  <div style="font-size:12px; line-height:1.6">
+    1. Premi <b>📞 Nuova chiamata</b>: squilla il telefono in <b>In arrivo</b> — si vede solo il luogo, NON il motivo.<br>
+    2. Premi <b>Rispondi</b>: il richiedente racconta cosa è successo. Se è un intervento dei <b>🚒 Vigili del Fuoco</b> non c'è nessun codice: premi <b>Prendi in carico</b> e scegli liberamente i mezzi (118 e/o VVF). Altrimenti <b>classifica il codice</b>: 🔴 Rosso, 🟡 Giallo, 🟢 Verde o ⚪ Bianco (alla chiusura scopri cos'era davvero).<br>
+    3. Premi <b>Allarma</b> per inviare i mezzi più vicini, oppure <b>spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (Villa Guardia e Bresso: volano dritti e veloci); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS.<br>
+    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea). Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e sposta le probabilità: col temporale più alberi caduti e allagamenti, ma può arrivare di tutto.<br>
+    5. Dal dettaglio: <b>Chiudi intervento</b> = chiudi, <b>Mostra su mappa</b> = centra, <b>PS</b> = ospedale.
+  </div>
+  <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
+</dialog>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>/* ===== src/data.js ===== */
+// ============================================================
+// DATI GIOCO - COEU SIM VA / CO / LC
+// MODIFICA QUI la lista mezzi quando hai quella vera.
+// Per ora mezzi FITTIZI. Basta editare l'array MEZZI.
+// Formato mezzo: { codice:"VA-01", tipo:"MSA" | "MSB" | "AUTOMEDICA", sede:"Varese" }
+// ============================================================
+
+window.GAME_DATA = (() => {
+
+const COMUNI = [
+  // ---- VARESE (VA) ----
+  { n:"Varese", p:"VA", lat:45.8206, lng:8.8251, peso:10 },
+  { n:"Busto Arsizio", p:"VA", lat:45.6113, lng:8.8524, peso:9 },
+  { n:"Gallarate", p:"VA", lat:45.6602, lng:8.7911, peso:8 },
+  { n:"Saronno", p:"VA", lat:45.6256, lng:9.0332, peso:7 },
+  { n:"Cassano Magnago", p:"VA", lat:45.6847, lng:8.8256, peso:5 },
+  { n:"Tradate", p:"VA", lat:45.7077, lng:8.9085, peso:5 },
+  { n:"Somma Lombardo", p:"VA", lat:45.6833, lng:8.7083, peso:4 },
+  { n:"Lonate Pozzolo", p:"VA", lat:45.6062, lng:8.7540, peso:4 },
+  { n:"Sesto Calende", p:"VA", lat:45.7297, lng:8.6331, peso:3 },
+  { n:"Luino", p:"VA", lat:46.0028, lng:8.7404, peso:4 },
+  { n:"Laveno-Mombello", p:"VA", lat:45.9078, lng:8.6169, peso:3 },
+  { n:"Cittiglio", p:"VA", lat:45.8986, lng:8.6652, peso:2 },
+  { n:"Besozzo", p:"VA", lat:45.8475, lng:8.6642, peso:3 },
+  { n:"Gavirate", p:"VA", lat:45.8397, lng:8.7160, peso:3 },
+  { n:"Malnate", p:"VA", lat:45.7969, lng:8.8832, peso:4 },
+  { n:"Olgiate Olona", p:"VA", lat:45.6309, lng:8.8869, peso:3 },
+  { n:"Fagnano Olona", p:"VA", lat:45.6697, lng:8.8669, peso:3 },
+  { n:"Castellanza", p:"VA", lat:45.6162, lng:8.9008, peso:4 },
+  { n:"Marnate", p:"VA", lat:45.6308, lng:8.9035, peso:2 },
+  { n:"Gorla Minore", p:"VA", lat:45.6445, lng:8.8965, peso:2 },
+  { n:"Solbiate Olona", p:"VA", lat:45.6536, lng:8.8891, peso:2 },
+  { n:"Cairate", p:"VA", lat:45.6940, lng:8.8670, peso:2 },
+  { n:"Carnago", p:"VA", lat:45.7262, lng:8.8317, peso:2 },
+  { n:"Caronno Pertusella", p:"VA", lat:45.5994, lng:9.0556, peso:4 },
+  { n:"Gerenzano", p:"VA", lat:45.6410, lng:9.0011, peso:2 },
+  { n:"Origgio", p:"VA", lat:45.5986, lng:9.0205, peso:2 },
+  { n:"Uboldo", p:"VA", lat:45.6139, lng:9.0044, peso:2 },
+  { n:"Vergiate", p:"VA", lat:45.7227, lng:8.6960, peso:2 },
+  { n:"Besnate", p:"VA", lat:45.6954, lng:8.7674, peso:2 },
+  { n:"Jerago con Orago", p:"VA", lat:45.7062, lng:8.7909, peso:2 },
+  { n:"Albizzate", p:"VA", lat:45.7259, lng:8.8043, peso:2 },
+  { n:"Samarate", p:"VA", lat:45.6267, lng:8.7533, peso:3 },
+  { n:"Ferno", p:"VA", lat:45.6153, lng:8.7555, peso:2 },
+  { n:"Arsago Seprio", p:"VA", lat:45.6833, lng:8.7333, peso:2 },
+  { n:"Lavena Ponte Tresa", p:"VA", lat:45.9667, lng:8.8500, peso:2 },
+  { n:"Porto Ceresio", p:"VA", lat:45.9033, lng:8.9000, peso:2 },
+  { n:"Arcisate", p:"VA", lat:45.8667, lng:8.8667, peso:2 },
+  { n:"Induno Olona", p:"VA", lat:45.8500, lng:8.8333, peso:2 },
+  { n:"Azzate", p:"VA", lat:45.7833, lng:8.8000, peso:2 },
+  { n:"Gallarate - Cedrate", p:"VA", lat:45.6700, lng:8.7700, peso:1 },
+  { n:"Cardano al Campo", p:"VA", lat:45.6467, lng:8.7631, peso:2 },
+
+  // ---- COMO (CO) ----
+  { n:"Como", p:"CO", lat:45.8081, lng:9.0852, peso:10 },
+  { n:"Cantù", p:"CO", lat:45.7401, lng:9.1292, peso:7 },
+  { n:"Mariano Comense", p:"CO", lat:45.6986, lng:9.1819, peso:5 },
+  { n:"Erba", p:"CO", lat:45.8161, lng:9.2219, peso:5 },
+  { n:"Olgiate Comasco", p:"CO", lat:45.7833, lng:8.9667, peso:4 },
+  { n:"Lurate Caccivio", p:"CO", lat:45.7667, lng:9.0000, peso:3 },
+  { n:"Appiano Gentile", p:"CO", lat:45.7372, lng:8.9767, peso:3 },
+  { n:"Fino Mornasco", p:"CO", lat:45.7417, lng:9.0500, peso:3 },
+  { n:"Cermenate", p:"CO", lat:45.7000, lng:9.0833, peso:3 },
+  { n:"Cucciago", p:"CO", lat:45.7333, lng:9.1000, peso:2 },
+  { n:"Inverigo", p:"CO", lat:45.7333, lng:9.2167, peso:3 },
+  { n:"Arosio", p:"CO", lat:45.7167, lng:9.2000, peso:2 },
+  { n:"Carugo", p:"CO", lat:45.7167, lng:9.1667, peso:2 },
+  { n:"Novedrate", p:"CO", lat:45.7000, lng:9.1167, peso:2 },
+  { n:"Figino Serenza", p:"CO", lat:45.7167, lng:9.1333, peso:2 },
+  { n:"Lomazzo", p:"CO", lat:45.7000, lng:9.0333, peso:4 },
+  { n:"Rovellasca", p:"CO", lat:45.6667, lng:9.0500, peso:2 },
+  { n:"Rovello Porro", p:"CO", lat:45.6500, lng:9.0333, peso:2 },
+  { n:"Turate", p:"CO", lat:45.6667, lng:8.9833, peso:2 },
+  { n:"Mozzate", p:"CO", lat:45.6833, lng:8.9500, peso:2 },
+  { n:"Cadorago", p:"CO", lat:45.7167, lng:9.0333, peso:2 },
+  { n:"Cernobbio", p:"CO", lat:45.8364, lng:9.0656, peso:3 },
+  { n:"Moltrasio", p:"CO", lat:45.8600, lng:9.0900, peso:1 },
+  { n:"Torno", p:"CO", lat:45.8536, lng:9.1188, peso:1 },
+  { n:"Blevio", p:"CO", lat:45.8417, lng:9.1056, peso:1 },
+  { n:"Menaggio", p:"CO", lat:46.0231, lng:9.2389, peso:3 },
+  { n:"Bellagio", p:"CO", lat:45.9877, lng:9.2619, peso:3 },
+  { n:"Tremezzina", p:"CO", lat:45.9833, lng:9.2167, peso:2 },
+  { n:"Porlezza", p:"CO", lat:46.0333, lng:9.1333, peso:2 },
+  { n:"San Fedele Intelvi", p:"CO", lat:45.9667, lng:9.0833, peso:1 },
+  { n:"Dongo", p:"CO", lat:46.1294, lng:9.2806, peso:2 },
+  { n:"Gravedona ed Uniti", p:"CO", lat:46.1500, lng:9.3000, peso:2 },
+  { n:"Domaso", p:"CO", lat:46.1500, lng:9.3333, peso:1 },
+  { n:"Carbonate", p:"CO", lat:45.6833, lng:8.9333, peso:2 },
+  { n:"Locate Varesino", p:"CO", lat:45.7000, lng:8.9333, peso:2 },
+  { n:"Guanzate", p:"CO", lat:45.7333, lng:8.9500, peso:2 },
+  { n:"Fenegrò", p:"CO", lat:45.7000, lng:8.9667, peso:2 },
+  { n:"Lurago Marinone", p:"CO", lat:45.7167, lng:8.9833, peso:1 },
+  { n:"Villa Guardia", p:"CO", lat:45.7667, lng:9.0167, peso:2 },
+  { n:"Grandate", p:"CO", lat:45.7753, lng:9.0572, peso:2 },
+
+  // ---- LECCO (LC) ----
+  { n:"Lecco", p:"LC", lat:45.8563, lng:9.3977, peso:10 },
+  { n:"Merate", p:"LC", lat:45.7047, lng:9.4289, peso:6 },
+  { n:"Calolziocorte", p:"LC", lat:45.8022, lng:9.4317, peso:4 },
+  { n:"Casatenovo", p:"LC", lat:45.6982, lng:9.3102, peso:4 },
+  { n:"Oggiono", p:"LC", lat:45.7936, lng:9.3458, peso:4 },
+  { n:"Valmadrera", p:"LC", lat:45.8458, lng:9.3608, peso:3 },
+  { n:"Mandello del Lario", p:"LC", lat:45.9116, lng:9.3218, peso:3 },
+  { n:"Bellano", p:"LC", lat:46.0411, lng:9.3031, peso:2 },
+  { n:"Varenna", p:"LC", lat:46.0117, lng:9.2839, peso:2 },
+  { n:"Dervio", p:"LC", lat:46.0760, lng:9.3073, peso:2 },
+  { n:"Colico", p:"LC", lat:46.1361, lng:9.3742, peso:3 },
+  { n:"Cernusco Lombardone", p:"LC", lat:45.6903, lng:9.3986, peso:2 },
+  { n:"Osnago", p:"LC", lat:45.6792, lng:9.3903, peso:2 },
+  { n:"Lomagna", p:"LC", lat:45.6700, lng:9.3700, peso:2 },
+  { n:"Missaglia", p:"LC", lat:45.7000, lng:9.3333, peso:2 },
+  { n:"Barzanò", p:"LC", lat:45.7333, lng:9.3167, peso:2 },
+  { n:"Sirtori", p:"LC", lat:45.7333, lng:9.3333, peso:1 },
+  { n:"Garlate", p:"LC", lat:45.8167, lng:9.4000, peso:2 },
+  { n:"Olginate", p:"LC", lat:45.8000, lng:9.4167, peso:2 },
+  { n:"Galbiate", p:"LC", lat:45.8167, lng:9.3833, peso:2 },
+  { n:"Ballabio", p:"LC", lat:45.9000, lng:9.4167, peso:2 },
+  { n:"Pasturo", p:"LC", lat:45.9500, lng:9.4333, peso:1 },
+  { n:"Barzio", p:"LC", lat:45.9500, lng:9.4667, peso:2 },
+  { n:"Introbio", p:"LC", lat:45.9667, lng:9.4500, peso:1 },
+  { n:"Premana", p:"LC", lat:46.0333, lng:9.4167, peso:1 },
+  { n:"Casargo", p:"LC", lat:46.0500, lng:9.3833, peso:1 },
+  { n:"Taceno", p:"LC", lat:46.0167, lng:9.3667, peso:1 },
+  { n:"Abbadia Lariana", p:"LC", lat:45.9000, lng:9.3333, peso:2 },
+  { n:"Malgrate", p:"LC", lat:45.8500, lng:9.3833, peso:2 },
+  { n:"Pescate", p:"LC", lat:45.8333, lng:9.4000, peso:1 },
+  { n:"Airuno", p:"LC", lat:45.7500, lng:9.4167, peso:1 },
+  { n:"Brivio", p:"LC", lat:45.7333, lng:9.4333, peso:2 },
+  { n:"Olgiate Molgora", p:"LC", lat:45.7333, lng:9.4000, peso:2 },
+  { n:"Monticello Brianza", p:"LC", lat:45.7167, lng:9.2833, peso:2 },
+  { n:"Cassago Brianza", p:"LC", lat:45.7333, lng:9.2833, peso:1 },
+  { n:"Cremella", p:"LC", lat:45.7500, lng:9.3000, peso:1 },
+  { n:"Bulciago", p:"LC", lat:45.7500, lng:9.2833, peso:1 },
+  { n:"Costa Masnaga", p:"LC", lat:45.7667, lng:9.2833, peso:2 },
+  { n:"Nibionno", p:"LC", lat:45.7500, lng:9.2667, peso:1 },
+  { n:"Bosisio Parini", p:"LC", lat:45.8000, lng:9.2833, peso:2 },
+];
+
+const VIE = [
+  "Via Roma","Via Garibaldi","Via Mazzini","Via Verdi","Via Dante Alighieri","Via Manzoni",
+  "Via Matteotti","Via Marconi","Via Volta","Via Cavour","Via Libertà","Via IV Novembre",
+  "Viale Europa","Viale Lombardia","Viale Brianza","Via Briantea","Via Varesina","Via Comasina",
+  "Via Lecchese","Via Milano","Via Como","Via Varese","Via Lecco","Via Lario","Via Ticino",
+  "Via Adda","Via San Martino","Via Don Minzoni","Via Papa Giovanni XXIII","Via Cadorna",
+  "Via Piave","Via Isonzo","Via Montello","Via delle Rose","Via dei Tigli","Via dei Platani",
+  "Via Statale","Via Provinciale","Piazza Libertà","Piazza Garibaldi","Via Indipendenza",
+  "Via Grandi","Via Diaz","Via Sauro","Via Pellico","Via Parini","Via Fogazzaro","Via Rosselli"
+];
+
+// Tipi intervento: nome, emoji, distribuzione priorità P1/P2/P3/P4, mezzi richiesti, durata min sul posto (game-min), trasporto?
+const TIPI = [
+  { nome:"Arresto cardiaco", peso:6, emoji:"💔", prio:[85,10,4,1], mezzi:{MSA:1,MSB:1,AUTOMEDICA:1}, durata:[12,20], trasporto:true, desc:"Paziente incosciente, non respira. RCP in corso da astanti." },
+  { nome:"Dolore toracico", peso:7, emoji:"🫀", prio:[60,30,9,1], mezzi:{MSA:1,AUTOMEDICA:0}, durata:[8,15], trasporto:true, desc:"Dolore costrittivo al petto, sospetto SCA." },
+  { nome:"Ictus sospetto", peso:6, emoji:"🧠", prio:[65,25,9,1], mezzi:{MSA:1}, durata:[8,14], trasporto:true, desc:"Emiparesi, afasia, Face-Arm-Speech test positivo." },
+  { nome:"Dispnea grave", peso:7, emoji:"😮‍💨", prio:[55,30,12,3], mezzi:{MSA:1}, durata:[8,14], trasporto:true, desc:"Difficoltà respiratoria severa, Sat bassa." },
+  { nome:"Incidente stradale", peso:8, meteo:{Pioggia:1.5}, emoji:"🚗", prio:[50,35,12,3], mezzi:{MSB:1,MSA:0}, durata:[10,22], trasporto:true, desc:"Scontro tra due auto, possibili incastrati." },
+  { nome:"Incidente moto", peso:6, meteo:{Pioggia:1.5}, emoji:"🏍️", prio:[60,28,10,2], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Caduta da moto, casco presente, trauma arti." },
+  { nome:"Investimento pedone", peso:6, emoji:"🚸", prio:[55,30,12,3], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Pedone investito, trauma cranico sospetto." },
+  { nome:"Caduta dall'alto", peso:6, meteo:{Temporale:0.5,Vento:0.5}, emoji:"🪜", prio:[50,35,12,3], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Caduta da impalcatura / tetto ~3m." },
+  { nome:"Caduta in casa", peso:12, emoji:"🤕", prio:[8,30,45,17], mezzi:{MSB:1}, durata:[6,12], trasporto:false, desc:"Anziano caduto in casa, dolore anca." },
+  { nome:"Malore", peso:14, emoji:"😵", prio:[15,40,35,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Malore generico, lipotimia." },
+  { nome:"Sincope", peso:10, emoji:"😶‍🌫️", prio:[12,38,40,10], mezzi:{MSB:1}, durata:[6,12], trasporto:false, desc:"Perdita di coscienza transitoria, ora cosciente." },
+  { nome:"Crisi convulsiva", peso:7, emoji:"⚡", prio:[40,40,15,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, desc:"Crisi epilettica in atto / post-critica." },
+  { nome:"Trauma sportivo", peso:9, meteo:{Sereno:1.5,Pioggia:0.6}, emoji:"⚽", prio:[5,30,50,15], mezzi:{MSB:1}, durata:[6,12], trasporto:false, desc:"Distorsione ginocchio durante partita." },
+  { nome:"Ferita da taglio", peso:8, emoji:"🔪", prio:[20,40,30,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Ferita arto superiore, sanguinamento contenuto." },
+  { nome:"Ustione", peso:6, emoji:"🔥", prio:[30,45,20,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, desc:"Ustione da fiamma / acqua bollente." },
+  { nome:"Intossicazione", peso:5, emoji:"☠️", prio:[30,45,20,5], mezzi:{MSA:1}, durata:[8,15], trasporto:true, desc:"Sospetta ingestione farmaci." },
+  { nome:"Overdose", peso:5, emoji:"💉", prio:[45,40,12,3], mezzi:{MSA:1,AUTOMEDICA:0}, durata:[8,16], trasporto:true, desc:"Sospetta overdose, incosciente." },
+  { nome:"Aggressione", peso:7, meteo:{Pioggia:0.7}, emoji:"👊", prio:[35,40,20,5], mezzi:{MSB:1}, durata:[8,14], trasporto:true, desc:"Aggressione con contusioni, richiedere FFOO." },
+  { nome:"Crisi diabetica", peso:7, emoji:"🍬", prio:[25,45,25,5], mezzi:{MSB:1}, durata:[6,12], trasporto:false, desc:"Ipo/iperglicemia, confusione." },
+  { nome:"Reazione allergica", peso:6, emoji:"🤧", prio:[35,35,25,5], mezzi:{MSA:1}, durata:[7,13], trasporto:true, desc:"Sospetta anafilassi dopo puntura insetto." },
+  { nome:"Parto", peso:5, emoji:"🤰", prio:[40,40,15,5], mezzi:{MSA:1,MSB:0}, durata:[10,18], trasporto:true, desc:"Travaglio in corso, rottura acque." },
+  { nome:"Urgenza psichiatrica", peso:6, emoji:"🧩", prio:[10,35,40,15], mezzi:{MSB:1}, durata:[10,20], trasporto:true, desc:"Agitazione psicomotoria, TSO valutabile." },
+  { nome:"Dolore addominale", peso:9, emoji:"🤢", prio:[8,35,45,12], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Dolore addominale acuto." },
+  { nome:"Febbre alta", peso:13, emoji:"🌡️", prio:[2,15,55,28], mezzi:{MSB:1}, durata:[5,10], trasporto:false, desc:"Febbre 39.5°C, debolezza." },
+  { nome:"Lombalgia", peso:12, emoji:"🦴", prio:[1,10,60,29], mezzi:{MSB:1}, durata:[5,10], trasporto:false, desc:"Blocco lombare, paziente barellabile." },
+  { nome:"Trasporto urgente", peso:6, emoji:"🚑", prio:[5,25,50,20], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Trasporto inter-ospedaliero urgente." },
+  { nome:"Incendio con feriti", peso:5, emoji:"🧯", prio:[55,30,12,3], mezzi:{MSA:1,MSB:1}, durata:[12,22], trasporto:true, desc:"Incendio appartamento, 1 intossicato da fumi + VVF sul posto." },
+  { nome:"Annegamento", peso:4, meteo:{Temporale:2}, emoji:"🌊", prio:[70,20,8,2], mezzi:{MSA:1,AUTOMEDICA:1}, durata:[12,20], trasporto:true, desc:"Recuperato da lago, incosciente." },
+  { nome:"Folgorazione", peso:4, meteo:{Temporale:2.5}, emoji:"🌩️", prio:[60,30,8,2], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Contatto elettrico, ustioni mani." },
+  { nome:"Soffocamento", peso:5, emoji:"🫁", prio:[70,20,8,2], mezzi:{MSA:1}, durata:[8,14], trasporto:true, desc:"Ostruzione vie aeree da corpo estraneo." },
+  // ---- ALBERI / VERDE ----
+  { nome:"Albero su auto occupata", peso:4, meteo:{Temporale:4,Vento:4,Pioggia:1.5}, emoji:"🌳", prio:[70,22,6,2], mezzi:{MSA:1,MSB:1}, durata:[12,22], trasporto:true, desc:"Albero caduto su auto con persona a bordo incastrata. Servono VVF." },
+  { nome:"Albero su auto vuota", peso:5, meteo:{Temporale:4,Vento:4,Pioggia:1.5}, emoji:"🌳", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[6,12], trasporto:false, desc:"Albero caduto su auto in sosta, nessuno a bordo. Solo VVF." },
+  { nome:"Ramo su marciapiede", peso:6, meteo:{Temporale:3.5,Vento:3.5,Pioggia:1.5}, emoji:"🌿", vvf:true, prio:[1,8,40,51], mezzi:{}, durata:[4,8], trasporto:false, desc:"Ramo caduto sul marciapiede, nessun ferito. Solo VVF." },
+  { nome:"Albero in carreggiata", peso:6, meteo:{Temporale:4,Vento:4,Pioggia:1.5}, emoji:"🌲", vvf:true, prio:[10,35,40,15], mezzi:{}, durata:[8,14], trasporto:false, desc:"Albero che invade la carreggiata, strada bloccata. VVF + polizia locale." },
+  // ---- STRADA / AUTOSTRADA ----
+  { nome:"Auto ribaltata in autostrada", peso:6, meteo:{Pioggia:2.5,Temporale:2}, emoji:"🛻", prio:[60,28,10,2], mezzi:{MSA:1,MSB:1}, durata:[12,22], trasporto:true, desc:"Auto ribaltata in autostrada, possibili incastrati. Servono VVF." },
+  { nome:"Auto ribaltata senza feriti", peso:4, meteo:{Pioggia:1.5}, emoji:"🛻", prio:[5,25,50,20], mezzi:{MSB:1}, durata:[8,14], trasporto:false, desc:"Auto ribaltata fuori strada, conducente illeso. VVF per rimozione." },
+  { nome:"Tamponamento in autostrada", peso:5, meteo:{Pioggia:2.5,Temporale:2,Vento:1.5}, emoji:"🚚", prio:[45,35,15,5], mezzi:{MSA:1,MSB:1}, durata:[10,20], trasporto:true, desc:"Tamponamento multiplo in autostrada, feriti e incastrati possibili." },
+  { nome:"Incendio autovettura", peso:5, emoji:"🚗", prio:[40,40,15,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Autovettura in fiamme, conducente ustionato/intossicato. VVF sul posto." },
+  // ---- CASA / GAS / ACQUA ----
+  { nome:"Fuga gas", peso:5, emoji:"🏠", vvf:true, prio:[45,35,15,5], mezzi:{}, durata:[10,18], trasporto:false, desc:"Forte odore di gas in casa, evacuazione. VVF + azienda gas." },
+  { nome:"Allagamento da tubo rotto", peso:4, meteo:{Pioggia:3,Temporale:2}, emoji:"💧", vvf:true, prio:[2,12,45,41], mezzi:{}, durata:[6,12], trasporto:false, desc:"Rottura rubinetto/tubo, casa allagata. Solo VVF." },
+  { nome:"Gatto nel cofano", peso:2, emoji:"🐱", vvf:true, prio:[1,5,30,64], mezzi:{}, durata:[4,8], trasporto:false, desc:"Gatto incastrato nel cofano dell'auto. Solo VVF." },
+  { nome:"Bloccato in ascensore", peso:3, meteo:{Temporale:2}, emoji:"🛗", vvf:true, prio:[3,20,50,27], mezzi:{}, durata:[6,12], trasporto:false, desc:"Persona bloccata in ascensore tra due piani. VVF." },
+  // ---- INFORTUNI SUL LAVORO ----
+  { nome:"Infortunio in fabbrica", peso:5, emoji:"🏭", prio:[55,30,12,3], mezzi:{MSA:1,MSB:1}, durata:[10,18], trasporto:true, desc:"Mano incastrata nel macchinario, emorragia in atto." },
+  { nome:"Caduta da impalcatura", peso:5, meteo:{Temporale:0.4,Vento:0.5}, emoji:"🏗️", prio:[60,28,10,2], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Operaio caduto da impalcatura, sospetto trauma bacino." },
+  { nome:"Schiacciamento da carico", peso:5, emoji:"📦", prio:[50,35,12,3], mezzi:{MSA:1}, durata:[10,18], trasporto:true, desc:"Bancale caduto addosso in magazzino, dispnea." },
+  { nome:"Infortunio agricolo", peso:5, meteo:{Pioggia:1.5}, emoji:"🚜", prio:[55,30,12,3], mezzi:{MSA:1}, durata:[10,20], trasporto:true, desc:"Trattore ribaltato / arto incastrato in campagna." },
+  // ---- ANIMALI / VARIE ----
+  { nome:"Sciame d'api", peso:3, meteo:{Sereno:2}, emoji:"🐝", prio:[10,30,40,20], mezzi:{MSB:1}, durata:[6,12], trasporto:false, desc:"Sciame d'api in piazza, passanti punti." },
+  { nome:"Cinghiale in strada", peso:3, emoji:"🐗", vvf:true, prio:[8,25,45,22], mezzi:{}, durata:[5,10], trasporto:false, desc:"Cinghiale in carreggiata, pericolo per chi guida." },
+  { nome:"Crisi ipertensiva", emoji:"❤️", peso:6, prio:[45,40,12,3], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Pressione altissima, cefalea violenta, confusione." },
+  { nome:"Palpitazioni", emoji:"💓", peso:8, prio:[15,45,32,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Cardiopalmo e ansia, paziente cosciente." },
+  { nome:"Crisi asmatica", emoji:"😮‍💨", peso:7, prio:[40,40,15,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Broncospasmo, parla a fatica." },
+  { nome:"Fame d'aria nell'anziano", emoji:"👴", peso:8, prio:[20,45,28,7], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Anziano con dispnea e febbre da giorni." },
+  { nome:"Emorragia digestiva", emoji:"🩸", peso:5, prio:[45,40,12,3], mezzi:{"MSA":1}, durata:[8,15], trasporto:true, desc:"Vomito sangue / melena, pallore." },
+  { nome:"Colica renale", emoji:"🤢", peso:8, prio:[10,40,42,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Dolore al fianco violentissimo." },
+  { nome:"Confusione acuta", emoji:"😕", peso:6, prio:[30,45,20,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Anziano improvvisamente disorientato." },
+  { nome:"Colpo di calore", emoji:"🌞", peso:5, meteo:{Sereno:2}, prio:[30,45,20,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Ipertermia dopo esposizione al sole." },
+  { nome:"Dolore oncologico", emoji:"🎗️", peso:6, prio:[8,35,47,10], mezzi:{"MSB":1}, durata:[8,14], trasporto:false, desc:"Dolore incoercibile a domicilio." },
+  { nome:"Ritenzione urinaria", emoji:"🚻", peso:5, prio:[5,30,50,15], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Impossibilità a urinare, dolore." },
+  { nome:"Attacco di panico", emoji:"😰", peso:7, prio:[5,35,48,12], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Iperventilazione, parestesie, paura di morire." },
+  { nome:"Perdite in gravidanza", emoji:"🤰", peso:6, prio:[30,45,20,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Perdite ematiche in gravidanza." },
+  { nome:"Blocco cervicale", emoji:"🧍", peso:6, prio:[2,20,58,20], mezzi:{"MSB":1}, durata:[5,10], trasporto:false, desc:"Collo bloccato, dolore acuto." },
+  { nome:"Frattura da caduta", emoji:"🦴", peso:8, prio:[15,45,33,7], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Deformità arto dopo caduta." },
+  { nome:"Distorsione caviglia", emoji:"🦶", peso:7, prio:[3,25,55,17], mezzi:{"MSB":1}, durata:[5,10], trasporto:false, desc:"Trauma distorsivo, impossibile carico." },
+  { nome:"Sangue dal naso", emoji:"👃", peso:6, prio:[5,30,50,15], mezzi:{"MSB":1}, durata:[5,10], trasporto:false, desc:"Epistassi incoercibile da 20 minuti." },
+  { nome:"Laringite del bambino", emoji:"👶", peso:4, prio:[25,45,25,5], mezzi:{"MSA":1}, durata:[7,13], trasporto:true, desc:"Tosse abbaiante e stridore." },
+  { nome:"Orticaria diffusa", emoji:"🔴", peso:6, prio:[5,30,50,15], mezzi:{"MSB":1}, durata:[5,10], trasporto:false, desc:"Pomfi diffusi pruriginosi, no dispnea." },
+  { nome:"Ferita da vetro", emoji:"🪟", peso:7, prio:[15,45,32,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:true, desc:"Caduta su vetro, ferita sanguinante." },
+  { nome:"Dito amputato", emoji:"✂️", peso:6, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Amputazione da attrezzo, arto conservato." },
+  { nome:"Impiccamento", emoji:"🪢", peso:5, prio:[70,20,8,2], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Persona trovata impiccata, calata a terra." },
+  { nome:"Morso di cane", emoji:"🐕", peso:7, prio:[8,32,48,12], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Morso a gamba/braccio, ferita lacera." },
+  { nome:"Morso di vipera", emoji:"🐍", peso:4, meteo:{Sereno:1.5}, prio:[35,40,20,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Morso a caviglia su sentiero di montagna." },
+  { nome:"Sospetta meningite", emoji:"🧠", peso:4, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Febbre alta, rigidità nucale, fotofobia." },
+  { nome:"Coma etilico", emoji:"🍺", peso:7, prio:[10,35,45,10], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Giovane incosciente dopo alcol." },
+  { nome:"Intossicazione alimentare", emoji:"🤮", peso:7, prio:[8,35,47,10], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Vomito e diarrea, più persone dopo stesso pasto." },
+  { nome:"Errore terapia", emoji:"💊", peso:6, prio:[10,40,42,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Doppia dose di farmaci nell'anziano." },
+  { nome:"Esposizione a solventi", emoji:"🧪", peso:4, prio:[30,45,20,5], mezzi:{"MSA":1}, durata:[8,14], trasporto:true, desc:"Vapori in ambiente chiuso, due operai sintomatici." },
+  { nome:"Mano nella ringhiera", emoji:"🤏", peso:6, vvf:true, prio:[10,35,45,10], mezzi:{}, durata:[6,12], trasporto:false, desc:"Bambino incastrato nella ringhiera. Servono VVF." },
+  { nome:"Paziente grande obeso", emoji:"🛏️", peso:5, prio:[5,25,55,15], mezzi:{"MSB":1}, durata:[8,16], trasporto:true, desc:"Caduto, impossibile da sollevare. Equipaggio rinforzato." },
+  { nome:"Caduta in strada", emoji:"🚶", peso:8, meteo:{Pioggia:1.5}, prio:[5,30,52,13], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Scivolata su marciapiede, trauma anca/polso." },
+  { nome:"Caduta dalle scale", emoji:"🪜", peso:8, prio:[15,40,38,7], mezzi:{"MSB":1}, durata:[6,12], trasporto:true, desc:"Ruzzolone dalle scale, non si alza." },
+  { nome:"Caduta in bici", emoji:"🚲", peso:7, prio:[10,40,42,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:true, desc:"Caduta da bicicletta, trauma spalla." },
+  { nome:"Caduta da cavallo", emoji:"🐎", peso:5, prio:[35,40,20,5], mezzi:{"MSA":1}, durata:[8,16], trasporto:true, desc:"Dismarcato, trauma schiena." },
+  { nome:"Caduta da camion", emoji:"🚛", peso:6, prio:[10,40,42,8], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Scivolato scendendo dal mezzo fermo." },
+  { nome:"Investimento ciclista", emoji:"🚴", peso:6, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Ciclista investito, trauma cranico possibile." },
+  { nome:"Scontro tra bici", emoji:"🚲", peso:6, prio:[8,35,47,10], mezzi:{"MSB":1}, durata:[6,12], trasporto:false, desc:"Frontale tra ciclisti in pista ciclabile." },
+  { nome:"Sbalzato dalla moto", emoji:"🏍️", peso:6, prio:[55,30,12,3], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Sbalzato oltre guardrail o in campo." },
+  { nome:"Fuori strada in scarpata", emoji:"🕳️", peso:6, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[10,20], trasporto:true, desc:"Auto in scarpata, conducente a bordo. VVF utili." },
+  { nome:"Auto contro palo", emoji:"💥", peso:6, prio:[45,40,12,3], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Auto contro palo/muro, airbag esplosi." },
+  { nome:"Scontro moto-moto", emoji:"🏍️", peso:6, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Due moto coinvolte, entrambi a terra." },
+  { nome:"Scontro auto-auto", emoji:"🚗", peso:7, prio:[35,40,20,5], mezzi:{"MSB":1,"MSA":1}, durata:[10,18], trasporto:true, desc:"Frontale/laterale tra due auto in strada urbana." },
+  { nome:"Scontro auto-moto", emoji:"🏍️", peso:7, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Auto ha tagliato strada alla moto." },
+  { nome:"Auto contro camion", emoji:"🚚", peso:6, prio:[60,28,10,2], mezzi:{"MSA":1,"MSB":1}, durata:[12,20], trasporto:true, desc:"Vettura contro mezzo pesante. VVF utili." },
+  { nome:"Moto contro camion", emoji:"🏍️", peso:5, prio:[65,25,8,2], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Motociclista contro mezzo pesante." },
+  { nome:"Scontro tra camion", emoji:"🚚", peso:5, prio:[55,30,12,3], mezzi:{"MSA":1}, durata:[12,20], trasporto:true, desc:"Due pesanti, cabina deformata. VVF utili." },
+  { nome:"Maxi tamponamento", emoji:"🚗", peso:6, meteo:{Pioggia:2.5,Temporale:2}, prio:[55,30,12,3], mezzi:{"MSA":1,"MSB":1}, durata:[12,22], trasporto:true, desc:"Più di due veicoli, feriti multipli." },
+  { nome:"Incidente misterioso", emoji:"❓", peso:7, prio:[25,45,25,5], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Auto incidentata, dinamica ignota, chiamante confuso." },
+  { nome:"Inca strato tra lamiere", emoji:"🪤", peso:6, prio:[65,25,8,2], mezzi:{"MSA":1}, durata:[12,22], trasporto:true, desc:"Conducente incastrato, gambe bloccate. Servono VVF." },
+  { nome:"Pedone sotto auto", emoji:"🚸", peso:5, prio:[60,30,8,2], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Pedone finito sotto veicolo in manovra." },
+  { nome:"Rissa in campo", emoji:"🥊", peso:6, prio:[15,40,37,8], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Scontro tra giocatori degenerato." },
+  { nome:"Appoggio alla polizia", emoji:"🚓", peso:3, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Supporto sanitario in operazione di polizia." },
+  { nome:"Rissa al bar", emoji:"🍺", peso:6, prio:[20,40,32,8], mezzi:{"MSB":1}, durata:[8,14], trasporto:true, desc:"Rissa fuori dal locale, più contusi." },
+  { nome:"Tentato suicidio", emoji:"🆘", peso:6, prio:[55,30,12,3], mezzi:{"MSA":1}, durata:[10,20], trasporto:true, desc:"Persona minaccia gesto estremo. FFOO + sanitari." },
+  { nome:"Colpo d'arma da fuoco", emoji:"🔫", peso:5, prio:[60,30,8,2], mezzi:{"MSA":1}, durata:[10,18], trasporto:true, desc:"Ferita da arma da fuoco, emorragia. FFOO sul posto." },
+  { nome:"Accoltellamento", emoji:"🔪", peso:6, prio:[50,35,12,3], mezzi:{"MSA":1}, durata:[8,16], trasporto:true, desc:"Aggressione con coltello. FFOO sul posto." },
+  { nome:"Appoggio ai VVF", emoji:"🚒", peso:3, prio:[5,25,50,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Stand-by sanitario durante intervento dei vigili del fuoco." },
+  { nome:"Incendio nel bosco", emoji:"🌲", peso:4, meteo:{Vento:2}, prio:[20,40,32,8], mezzi:{"MSA":1}, durata:[12,24], trasporto:false, desc:"Fronte di fiamma in bosco vicino alle case. VVF." },
+  { nome:"Incendio capannone", emoji:"🏭", peso:5, prio:[40,40,16,4], mezzi:{"MSA":1}, durata:[12,24], trasporto:true, desc:"Rogo industriale, fumo denso, possibili intossicati. VVF." },
+  { nome:"Anziana chiusa in casa", emoji:"🚪", peso:3, vvf:true, prio:[3,20,52,25], mezzi:{}, durata:[6,12], trasporto:false, desc:"Non apre e non risponde da ieri. VVF + FFOO per apertura." },
+  { nome:"Persona dispersa", emoji:"🔦", peso:3, vvf:true, prio:[10,30,45,15], mezzi:{}, durata:[15,30], trasporto:false, desc:"Escursionista/anziano disperso. VVF + soccorso alpino." },
+  { nome:"Aereo precipitato", emoji:"🛩️", peso:4, prio:[70,20,8,2], mezzi:{"MSA":1,"MSB":1}, durata:[15,30], trasporto:true, desc:"Ultraleggero caduto in campo. VVF + sanitari." },
+  { nome:"Esplosione in casa", emoji:"💥", peso:5, prio:[55,30,12,3], mezzi:{"MSA":1,"MSB":1}, durata:[12,24], trasporto:true, desc:"Deflagrazione, vetri divelti, possibili sepolti. VVF." },
+  { nome:"Crollo in casa vecchia", emoji:"🧱", peso:5, prio:[55,30,12,3], mezzi:{"MSA":1}, durata:[12,24], trasporto:true, desc:"Crollo parziale, possibile persona sotto. VVF." },
+  { nome:"Incidente al passaggio a livello", emoji:"🚂", peso:4, prio:[55,30,12,3], mezzi:{"MSA":1,"MSB":1}, durata:[12,24], trasporto:true, desc:"Treno contro auto al passaggio a livello. VVF." },
+  // ---- VVF (incendi, aperture, dissesti, acqua, animali, supporti: senza gravità, mezzi a scelta) ----
+  { nome:"Incendio sterpaglie", peso:5, meteo:{Sereno:1.8,Vento:2}, emoji:"🌾", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Sterpaglie e rovi in fiamme a bordo campo/strada. Solo VVF." },
+  { nome:"Incendio rifiuti", peso:4, emoji:"🗑️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Cassonetti e rifiuti in fiamme, fumo acre. Solo VVF." },
+  { nome:"Incendio cantina", peso:3, emoji:"🌫️", vvf:true, prio:[15,40,35,10], mezzi:{}, durata:[10,18], trasporto:false, desc:"Fumo denso da cantina/box, nessun ferito segnalato. Solo VVF." },
+  { nome:"Apertura porta", peso:4, emoji:"🔑", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Porta bloccata: chiavi perse o persona dentro. VVF + FFOO." },
+  { nome:"Soccorso a persona", peso:4, emoji:"🧗", vvf:true, prio:[20,40,32,8], mezzi:{}, durata:[10,20], trasporto:false, desc:"Persona caduta in scarpata/fosso da recuperare. Solo VVF." },
+  { nome:"Bonifica da insetti", peso:3, meteo:{Sereno:2}, emoji:"🐝", vvf:true, prio:[2,15,55,28], mezzi:{}, durata:[6,12], trasporto:false, desc:"Nidi di vespe/calabroni in casa o scuola. Solo VVF." },
+  { nome:"Albero pericolante", peso:4, meteo:{Temporale:3,Vento:3}, emoji:"🌳", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[6,12], trasporto:false, desc:"Albero inclinato che minaccia strada o casa. Solo VVF." },
+  { nome:"Rimozione parti pericolanti", peso:3, meteo:{Temporale:2.5,Vento:3}, emoji:"🧱", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[8,14], trasporto:false, desc:"Tegole, camino o cornicione pericolanti. Solo VVF." },
+  { nome:"Dissesto statico", peso:3, emoji:"🏛️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,14], trasporto:false, desc:"Crepe e cedimenti sospetti in edificio. VVF + tecnici." },
+  { nome:"Crollo parziale", peso:2, emoji:"🏚️", vvf:true, prio:[10,35,40,15], mezzi:{}, durata:[12,24], trasporto:false, desc:"Crollo parziale di solaio/tetto, nessun ferito segnalato. Solo VVF." },
+  { nome:"Crollo edificio", peso:1, emoji:"🏢", vvf:true, prio:[30,40,25,5], mezzi:{}, durata:[20,40], trasporto:false, desc:"Crollo generalizzato, possibili sepolti. Maxi intervento VVF." },
+  { nome:"Verifica stabilità", peso:3, emoji:"🔍", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Verifica stabilità di edificio/manufatto dopo frana o crollo. Solo VVF." },
+  { nome:"Frana", peso:3, meteo:{Pioggia:3,Temporale:3}, emoji:"⛰️", vvf:true, prio:[10,35,40,15], mezzi:{}, durata:[10,20], trasporto:false, desc:"Smottamento su strada o mulattiera. Solo VVF." },
+  { nome:"Voragine", peso:2, meteo:{Pioggia:2.5}, emoji:"🕳️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Cedimento della carreggiata, voragine. Solo VVF + tecnici." },
+  { nome:"Danni d'acqua da maltempo", peso:4, meteo:{Pioggia:3,Temporale:2.5}, emoji:"🌧️", vvf:true, prio:[2,12,45,41], mezzi:{}, durata:[8,16], trasporto:false, desc:"Infiltrazioni dal tetto e locali allagati per nubifragio. Solo VVF." },
+  { nome:"Lavaggio strada", peso:3, emoji:"🧽", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Olio o carburante in carreggiata, strada sdrucciolevole. Solo VVF." },
+  { nome:"Ostacolo in carreggiata", peso:3, emoji:"🚧", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Materiali caduti in strada (non da traffico), da rimuovere. Solo VVF." },
+  { nome:"Incidente senza feriti", peso:4, emoji:"🚗", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,14], trasporto:false, desc:"Sinistro senza feriti: messa in sicurezza e liquidi. Solo VVF." },
+  { nome:"Mezzo pesante ribaltato", peso:2, emoji:"🚛", vvf:true, prio:[15,40,35,10], mezzi:{}, durata:[12,24], trasporto:false, desc:"Camion/cisterna ribaltato, possibile sversamento. VVF + bonifica." },
+  { nome:"Guasto impianti", peso:3, emoji:"🔌", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Cabina o contatore in corto, palazzo al buio. VVF + tecnici." },
+  { nome:"Ostacolo alla navigazione", peso:2, emoji:"🛶", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Tronco o relitto pericoloso per le barche sul lago. VVF." },
+  { nome:"Animale in difficoltà", peso:3, emoji:"🐕", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Cane o selvatico in canale/recinzione da salvare vivo. Solo VVF." },
+  { nome:"Recupero carcassa", peso:2, emoji:"🦌", vvf:true, prio:[2,10,40,48], mezzi:{}, durata:[4,8], trasporto:false, desc:"Animale morto da rimuovere da strada o corso d'acqua. Solo VVF." },
+  { nome:"Recupero beni", peso:2, emoji:"📦", vvf:true, prio:[2,10,40,48], mezzi:{}, durata:[6,12], trasporto:false, desc:"Mobili e beni da salvare in locali allagati o pericolanti. Solo VVF." },
+  { nome:"Supporto polizia giudiziaria", peso:2, emoji:"🚓", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Aperture e rilievi per attività di polizia giudiziaria. VVF." },
+  { nome:"Supporto Protezione Civile", peso:2, emoji:"🦺", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Assistenza a Protezione Civile e ospedali in emergenza. VVF." },
+  { nome:"Servizio di assistenza", peso:3, emoji:"🎪", vvf:true, prio:[2,10,40,48], mezzi:{}, durata:[10,20], trasporto:false, desc:"Vigilanza antincendio a manifestazione o evento. Solo VVF." },
+  { nome:"Allarme aeromobile a Malpensa", peso:1, emoji:"🛬", vvf:true, prio:[30,40,25,5], mezzi:{}, durata:[12,24], trasporto:false, desc:"Velivolo in emergenza in atterraggio a Malpensa, stand-by VVF." },
+  { nome:"Falso allarme sul posto", peso:2, emoji:"🤷", vvf:true, prio:[1,5,30,64], mezzi:{}, durata:[4,6], trasporto:false, desc:"Sul posto nulla da fare: intervento non più necessario." },
+];
+
+const OSPEDALI = [
+  { nome:"Osp. di Circolo Varese", lat:45.8126, lng:8.8234, prov:"VA" },
+  { nome:"Osp. S.Antonio Abate Gallarate", lat:45.6517, lng:8.7917, prov:"VA" },
+  { nome:"Osp. di Busto Arsizio", lat:45.6100, lng:8.8400, prov:"VA" },
+  { nome:"Osp. di Saronno", lat:45.6300, lng:9.0400, prov:"VA" },
+  { nome:"Osp. di Luino", lat:46.0000, lng:8.7450, prov:"VA" },
+  { nome:"Osp. S.Anna Como", lat:45.7801, lng:9.0833, prov:"CO" },
+  { nome:"Osp. S.Antonio Cantù", lat:45.7370, lng:9.1270, prov:"CO" },
+  { nome:"Osp. di Erba", lat:45.8100, lng:9.2300, prov:"CO" },
+  { nome:"Osp. di Menaggio", lat:46.0200, lng:9.2400, prov:"CO" },
+  { nome:"Osp. Manzoni Lecco", lat:45.8523, lng:9.4340, prov:"LC" },
+  { nome:"Osp. di Merate", lat:45.7050, lng:9.4300, prov:"LC" },
+  { nome:"Osp. di Bellano", lat:46.0400, lng:9.3050, prov:"LC" },
+];
+
+const SEDI = [
+  // VARESE
+  { nome:"C.V.A. Angera", prov:"VA", lat:45.77526, lng:8.57796 },
+  { nome:"CRI Cislago", prov:"VA", lat:45.66092, lng:8.97448 },
+  { nome:"Croce Azzurra Caronno Pertusella", prov:"VA", lat:45.59376, lng:9.05117 },
+  { nome:"CRI Arcisate", prov:"VA", lat:45.86288, lng:8.86200 },
+  { nome:"CRI Busto Arsizio", prov:"VA", lat:45.62600, lng:8.84315 },
+  { nome:"CRI Borsano", prov:"VA", lat:45.58615, lng:8.85539 },
+  { nome:"CRI Cittiglio", prov:"VA", lat:45.89313, lng:8.66789 },
+  { nome:"CRI Gavirate", prov:"VA", lat:45.84276, lng:8.71246 },
+  { nome:"CRI Gallarate", prov:"VA", lat:45.66750, lng:8.80377 },
+  { nome:"CRI Saronno", prov:"VA", lat:45.62385, lng:9.03728 },
+  { nome:"CRI Somma Lombardo", prov:"VA", lat:45.68363, lng:8.71377 },
+  { nome:"CRI Tradate", prov:"VA", lat:45.70503, lng:8.90743 },
+  { nome:"CRI Varese", prov:"VA", lat:45.79653, lng:8.84642 },
+  { nome:"SOS Valbossa Azzate", prov:"VA", lat:45.77899, lng:8.79886 },
+  { nome:"SOS Seprio Carnago", prov:"VA", lat:45.71361, lng:8.84503 },
+  { nome:"SOS Laghi Besozzo", prov:"VA", lat:45.84231, lng:8.66341 },
+  { nome:"SOS Laghi Travedona Monate", prov:"VA", lat:45.80801, lng:8.67446 },
+  { nome:"SOS Tre Valli Cunardo", prov:"VA", lat:45.93367, lng:8.80287 },
+  { nome:"SOS Uboldo", prov:"VA", lat:45.61345, lng:9.00923 },
+  { nome:"SOS Valceresio Besano", prov:"VA", lat:45.88819, lng:8.88729 },
+  { nome:"SOS Malnate", prov:"VA", lat:45.80236, lng:8.88270 },
+  { nome:"SOS Mozzate", prov:"VA", lat:45.67180, lng:8.95714 },
+  { nome:"La Varesina Emergenza", prov:"VA", lat:45.74531, lng:8.77013 },
+  { nome:"AREU Busto Arsizio", prov:"VA", lat:45.62320, lng:8.84699 },
+  { nome:"AREU Gallarate", prov:"VA", lat:45.65586, lng:8.79252 },
+  { nome:"AREU Varese", prov:"VA", lat:45.80851, lng:8.83994 },
+  { nome:"AREU Luino", prov:"VA", lat:45.99723, lng:8.74620 },
+  { nome:"AREU Sesto Calende", prov:"VA", lat:45.72765, lng:8.65033 },
+  { nome:"AREU Tradate", prov:"VA", lat:45.72283, lng:8.90070 },
+  { nome:"CNSAS Luino", prov:"VA", lat:46.00289, lng:8.74779 },
+  { nome:"Padana Emergenza Luino", prov:"VA", lat:46.00439, lng:8.75425 },
+  // COMO
+  { nome:"Volontari Lanzo-Scaria", prov:"CO", lat:45.97905, lng:9.02237 },
+  { nome:"Volontari Soccorso Bellagio", prov:"CO", lat:45.98528, lng:9.26420 },
+  { nome:"Croce Azzurra Cadorago", prov:"CO", lat:45.72550, lng:9.03804 },
+  { nome:"Croce Azzurra Como", prov:"CO", lat:45.79151, lng:9.08935 },
+  { nome:"Croce Azzurra Porlezza", prov:"CO", lat:46.03647, lng:9.12905 },
+  { nome:"Croce Azzurra Rovellasca", prov:"CO", lat:45.66519, lng:9.05672 },
+  { nome:"Croce Azzurra Limido Comasco", prov:"CO", lat:45.68051, lng:8.98745 },
+  { nome:"Croce Bianca Mariano Comense", prov:"CO", lat:45.69433, lng:9.18271 },
+  { nome:"Due Stelle Mariano Comense", prov:"CO", lat:45.70260, lng:9.16580 },
+  { nome:"CRI Asso", prov:"CO", lat:45.86170, lng:9.26964 },
+  { nome:"CRI Cantù", prov:"CO", lat:45.73590, lng:9.12375 },
+  { nome:"CRI Cermenate", prov:"CO", lat:45.70125, lng:9.07784 },
+  { nome:"CRI Cernobbio", prov:"CO", lat:45.83913, lng:9.06508 },
+  { nome:"CRI Como", prov:"CO", lat:45.80422, lng:9.08364 },
+  { nome:"CRI Grandate", prov:"CO", lat:45.77305, lng:9.05618 },
+  { nome:"CRI Lipomo", prov:"CO", lat:45.79408, lng:9.11631 },
+  { nome:"CRI Lomazzo", prov:"CO", lat:45.68903, lng:9.04303 },
+  { nome:"CRI Lurate Caccivio", prov:"CO", lat:45.77127, lng:8.99788 },
+  { nome:"CRI Menaggio", prov:"CO", lat:46.02137, lng:9.24037 },
+  { nome:"CRI Montorfano", prov:"CO", lat:45.78383, lng:9.15012 },
+  { nome:"CRI San Fermo", prov:"CO", lat:45.80416, lng:9.03937 },
+  { nome:"CRI Uggiate Trevano", prov:"CO", lat:45.82375, lng:8.95293 },
+  { nome:"Croce Verde Fino Mornasco", prov:"CO", lat:45.74357, lng:9.05247 },
+  { nome:"Lariosoccorso Dongo", prov:"CO", lat:46.12295, lng:9.28060 },
+  { nome:"Lariosoccorso Erba", prov:"CO", lat:45.80353, lng:9.22876 },
+  { nome:"SOS Appiano Gentile", prov:"CO", lat:45.73521, lng:8.98393 },
+  { nome:"SOS Canzo", prov:"CO", lat:45.84558, lng:9.25597 },
+  { nome:"SOS Canzo Nesso", prov:"CO", lat:45.91303, lng:9.15857 },
+  { nome:"SOS Olgiate Comasco", prov:"CO", lat:45.78512, lng:8.96853 },
+  { nome:"SOS Lurago d'Erba", prov:"CO", lat:45.75079, lng:9.22132 },
+  { nome:"Croce Medica San Fedele Intelvi", prov:"CO", lat:45.97021, lng:9.07769 },
+  { nome:"CNSAS Como", prov:"CO", lat:45.81116, lng:9.09696 },
+  { nome:"CNSAS Erba", prov:"CO", lat:45.80966, lng:9.23109 },
+  { nome:"CNSAS Menaggio", prov:"CO", lat:46.01800, lng:9.22137 },
+  { nome:"AREU Cantù", prov:"CO", lat:45.73941, lng:9.13999 },
+  { nome:"AREU Dongo", prov:"CO", lat:46.12295, lng:9.28060 },
+  { nome:"AREU Erba", prov:"CO", lat:45.80239, lng:9.23071 },
+  { nome:"AREU Menaggio", prov:"CO", lat:46.01831, lng:9.22808 },
+  { nome:"EQUIPE ELI Villa Guardia", prov:"CO", lat:45.77073, lng:9.03980 },
+  // LECCO
+  { nome:"Volontari Calolziocorte", prov:"LC", lat:45.80339, lng:9.42245 },
+  { nome:"CRI Colico", prov:"LC", lat:46.13630, lng:9.37020 },
+  { nome:"CRI Lecco", prov:"LC", lat:45.86135, lng:9.40058 },
+  { nome:"CRI Galbiate", prov:"LC", lat:45.81646, lng:9.37769 },
+  { nome:"CRI Olgiate Molgora", prov:"LC", lat:45.71916, lng:9.39953 },
+  { nome:"CRI Premana", prov:"LC", lat:46.05424, lng:9.41721 },
+  { nome:"CRI Valmadrera", prov:"LC", lat:45.84691, lng:9.36026 },
+  { nome:"Croce San Nicolò Lecco", prov:"LC", lat:45.84109, lng:9.40804 },
+  { nome:"Croce Verde Bosisio Parini", prov:"LC", lat:45.80066, lng:9.28720 },
+  { nome:"Croce Bianca Merate", prov:"LC", lat:45.69322, lng:9.42685 },
+  { nome:"CRI Casatenovo", prov:"LC", lat:45.74202, lng:9.32131 },
+  { nome:"Soccorso Bellanese Bellano", prov:"LC", lat:46.04093, lng:9.30066 },
+  { nome:"Soccorso Valsassina Introbio", prov:"LC", lat:45.97589, lng:9.44722 },
+  { nome:"Soccorso Alpini Mandello", prov:"LC", lat:45.91803, lng:9.32289 },
+  { nome:"CRI Balisio", prov:"LC", lat:45.92065, lng:9.43918 },
+  { nome:"AREU Bellano", prov:"LC", lat:46.04465, lng:9.30658 },
+  { nome:"AREU Lecco", prov:"LC", lat:45.85318, lng:9.41553 },
+  { nome:"AREU Merate", prov:"LC", lat:45.69842, lng:9.42806 },
+  { nome:"Lecco Soccorso", prov:"LC", lat:45.84112, lng:9.40800 },
+  // MILANO (fuori area chiamate, ma base elisoccorso utilizzabile)
+  { nome:"Elisoccorso Bresso", prov:"MI", lat:45.54250, lng:9.18190 },
+];
+
+// ---------- MEZZI FITTIZI (sostituisci con lista vera) ----------
+// tipo: MSA = avanzato, MSB = base, AUTOMEDICA = auto medica
+// ---------- MEZZI 118 REALI (RTW=MSB, NEF=MSA; codice=nominativo radio) ----------
+const MEZZI = [
+  // VARESE
+  { codice:"VOLANG_102.03A1", tipo:"MSB", radio:"VOLANG_102.03A1", sede:"C.V.A. Angera" },
+  { codice:"VOLANG_103.03A2", tipo:"MSB", radio:"VOLANG_103.03A2", sede:"C.V.A. Angera" },
+  { codice:"CRISAR_197.22A1", tipo:"MSB", radio:"CRISAR_197.22A1", sede:"CRI Cislago" },
+  { codice:"CRSAR_196.22A1", tipo:"MSB", radio:"CRSAR_196.22A1", sede:"CRI Cislago" },
+  { codice:"AZZCAR_121_23A1", tipo:"MSB", radio:"AZZCAR_121_23A1", sede:"Croce Azzurra Caronno Pertusella" },
+  { codice:"AZZCAR_137.23A1", tipo:"MSB", radio:"AZZCAR_137.23A1", sede:"Croce Azzurra Caronno Pertusella" },
+  { codice:"CRIVLC_187.02C2", tipo:"MSB", radio:"CRIVLC_187.02C2", sede:"CRI Arcisate" },
+  { codice:"CRIBUS_152.06E1", tipo:"MSB", radio:"CRIBUS_152.06E1", sede:"CRI Busto Arsizio" },
+  { codice:"CRIBUS_153.06D1", tipo:"MSB", radio:"CRIBUS_153.06D1", sede:"CRI Busto Arsizio" },
+  { codice:"CRIBUS_267", tipo:"MSB", radio:"CRIBUS_267", sede:"CRI Busto Arsizio" },
+  { codice:"CRIBUS_268", tipo:"MSB", radio:"CRIBUS_268", sede:"CRI Busto Arsizio" },
+  { codice:"CRIBUS_151.06E2", tipo:"MSB", radio:"CRIBUS_151.06E2", sede:"CRI Borsano" },
+  { codice:"CRIBUS_265", tipo:"MSB", radio:"CRIBUS_265", sede:"CRI Borsano" },
+  { codice:"CRIGAV_101.01C1", tipo:"MSB", radio:"CRIGAV_101.01C1", sede:"CRI Cittiglio" },
+  { codice:"CRIGAV_102.02A2", tipo:"MSB", radio:"CRIGAV_102.02A2", sede:"CRI Gavirate" },
+  { codice:"CRIGAL_132_05C1", tipo:"MSB", radio:"CRIGAL_132_05C1", sede:"CRI Gallarate" },
+  { codice:"CRIGAL_148.05B1", tipo:"MSB", radio:"CRIGAL_148.05B1", sede:"CRI Gallarate" },
+  { codice:"CRIGAL_234", tipo:"MSB", radio:"CRIGAL_234", sede:"CRI Gallarate" },
+  { codice:"CRISAR_292", tipo:"MSB", radio:"CRISAR_292", sede:"CRI Saronno" },
+  { codice:"CRSAR_291", tipo:"MSB", radio:"CRSAR_291", sede:"CRI Saronno" },
+  { codice:"MSA1 AAT_MIL_012", tipo:"MSA", radio:"MSA1 AAT_MIL_012", sede:"CRI Saronno" },
+  { codice:"CRGAL_138.05A1", tipo:"MSB", radio:"CRGAL_138.05A1", sede:"CRI Somma Lombardo" },
+  { codice:"CR_VA_122.04A1", tipo:"MSB", radio:"CR_VA_122.04A1", sede:"CRI Tradate" },
+  { codice:"CR_VA_227", tipo:"MSB", radio:"CR_VA_227", sede:"CRI Tradate" },
+  { codice:"CRI_VA_225", tipo:"MSB", radio:"CRI_VA_225", sede:"CRI Varese" },
+  { codice:"CR_VA_128.02A1", tipo:"MSB", radio:"CR_VA_128.02A1", sede:"CRI Varese" },
+  { codice:"CR_VA_129.02B1", tipo:"MSB", radio:"CR_VA_129.02B1", sede:"CRI Varese" },
+  { codice:"SOSAZZ_110.04B2", tipo:"MSB", radio:"SOSAZZ_110.04B2", sede:"SOS Valbossa Azzate" },
+  { codice:"SOSAZZ_309", tipo:"MSB", radio:"SOSAZZ_309", sede:"SOS Valbossa Azzate" },
+  { codice:"SOSCAR_111.04B2", tipo:"MSB", radio:"SOSCAR_111.04B2", sede:"SOS Seprio Carnago" },
+  { codice:"SOSTRA_202", tipo:"MSB", radio:"SOSTRA_202", sede:"SOS Laghi Besozzo" },
+  { codice:"SOSTRA_108.03B1", tipo:"MSB", radio:"SOSTRA_108.03B1", sede:"SOS Laghi Travedona Monate" },
+  { codice:"SOSCUN_111.01D1", tipo:"MSB", radio:"SOSCUN_111.01D1", sede:"SOS Tre Valli Cunardo" },
+  { codice:"SOSUBO_136.23A2", tipo:"MSB", radio:"SOSUBO_136.23A2", sede:"SOS Uboldo" },
+  { codice:"SOSBES_106.02C1", tipo:"MSB", radio:"SOSBES_106.02C1", sede:"SOS Valceresio Besano" },
+  { codice:"SOSMAL_104.02D1", tipo:"MSB", radio:"SOSMAL_104.02D1", sede:"SOS Malnate" },
+  { codice:"SOSMOZ_183.034F1", tipo:"MSB", radio:"SOSMOZ_183.034F1", sede:"SOS Mozzate" },
+  { codice:"VARMOR_415", tipo:"MSB", radio:"VARMOR_415", sede:"La Varesina Emergenza" },
+  { codice:"MSA1 AAT_VA_006", tipo:"MSA", radio:"MSA1 AAT_VA_006", sede:"AREU Busto Arsizio" },
+  { codice:"MSA2 AAT_VA_004", tipo:"MSA", radio:"MSA2 AAT_VA_004", sede:"AREU Gallarate" },
+  { codice:"MSA2 AAT_VA_002", tipo:"MSA", radio:"MSA2 AAT_VA_002", sede:"AREU Varese" },
+  { codice:"MSA2 AAT_VA_001", tipo:"MSA", radio:"MSA2 AAT_VA_001", sede:"AREU Luino" },
+  { codice:"MSA1 AAT_VA_007", tipo:"MSA", radio:"MSA1 AAT_VA_007", sede:"AREU Sesto Calende" },
+  { codice:"MSA1_AAT_VA_003", tipo:"MSA", radio:"MSA1_AAT_VA_003", sede:"AREU Tradate" },
+  { codice:"CNSAS_02", tipo:"CNSAS", radio:"CNSAS_02", sede:"CNSAS Luino" },
+  { codice:"PEMLUI_210", tipo:"MSB", radio:"PEMLUI_210", sede:"Padana Emergenza Luino" },
+  // COMO
+  { codice:"VOLLAN_331", tipo:"MSB", radio:"VOLLAN_331", sede:"Volontari Lanzo-Scaria" },
+  { codice:"VOLBEL_201", tipo:"MSB", radio:"VOLBEL_201", sede:"Volontari Soccorso Bellagio" },
+  { codice:"AZZCAD_104.04C1", tipo:"MSB", radio:"AZZCAD_104.04C1", sede:"Croce Azzurra Cadorago" },
+  { codice:"AZZ_CO_128.05A1", tipo:"MSB", radio:"AZZ_CO_128.05A1", sede:"Croce Azzurra Como" },
+  { codice:"AZZ_CO_131.05B1", tipo:"MSB", radio:"AZZ_CO_131.05B1", sede:"Croce Azzurra Como" },
+  { codice:"AZZ_CO_224", tipo:"MSB", radio:"AZZ_CO_224", sede:"Croce Azzurra Como" },
+  { codice:"AZZ_CO_227", tipo:"MSB", radio:"AZZ_CO_227", sede:"Croce Azzurra Como" },
+  { codice:"AZZPOR_134.01A1", tipo:"MSB", radio:"AZZPOR_134.01A1", sede:"Croce Azzurra Porlezza" },
+  { codice:"AZZROV_115.04B1", tipo:"MSB", radio:"AZZROV_115.04B1", sede:"Croce Azzurra Rovellasca" },
+  { codice:"AZZROV_213", tipo:"MSB", radio:"AZZROV_213", sede:"Croce Azzurra Rovellasca" },
+  { codice:"AZZCAD_106.04F1", tipo:"MSB", radio:"AZZCAD_106.04F1", sede:"Croce Azzurra Limido Comasco" },
+  { codice:"BIAMAR_138.06D1", tipo:"MSB", radio:"BIAMAR_138.06D1", sede:"Croce Bianca Mariano Comense" },
+  { codice:"DSSMAR_301", tipo:"MSB", radio:"DSSMAR_301", sede:"Due Stelle Mariano Comense" },
+  { codice:"CRIASS_331", tipo:"MSB", radio:"CRIASS_331", sede:"CRI Asso" },
+  { codice:"CRCTU_258", tipo:"MSB", radio:"CRCTU_258", sede:"CRI Cantù" },
+  { codice:"CRICTU_159.06B1", tipo:"MSB", radio:"CRICTU_159.06B1", sede:"CRI Cantù" },
+  { codice:"CRICMN_377", tipo:"MSB", radio:"CRICMN_377", sede:"CRI Cermenate" },
+  { codice:"CRICRN_198.02B1", tipo:"MSB", radio:"CRICRN_198.02B1", sede:"CRI Cernobbio" },
+  { codice:"CRI_CO_120.05A1", tipo:"MSB", radio:"CRI_CO_120.05A1", sede:"CRI Como" },
+  { codice:"CRI_CO_219", tipo:"MSB", radio:"CRI_CO_219", sede:"CRI Como" },
+  { codice:"MSA1 AAT_CO_003", tipo:"MSA", radio:"MSA1 AAT_CO_003", sede:"CRI Como" },
+  { codice:"MSA2 AAT_CO_003", tipo:"MSA", radio:"MSA2 AAT_CO_003", sede:"CRI Como" },
+  { codice:"CRIGRA_195.05C1", tipo:"MSB", radio:"CRIGRA_195.05C1", sede:"CRI Grandate" },
+  { codice:"CRIGRA_293", tipo:"MSB", radio:"CRIGRA_293", sede:"CRI Grandate" },
+  { codice:"CRLIP_104.06C1", tipo:"MSB", radio:"CRLIP_104.06C1", sede:"CRI Lipomo" },
+  { codice:"CRILOM_175.04D1", tipo:"MSB", radio:"CRILOM_175.04D1", sede:"CRI Lomazzo" },
+  { codice:"CRLOM_277", tipo:"MSB", radio:"CRLOM_277", sede:"CRI Lomazzo" },
+  { codice:"CRLUR_115.04E1", tipo:"MSB", radio:"CRLUR_115.04E1", sede:"CRI Lurate Caccivio" },
+  { codice:"CRLUR_214", tipo:"MSB", radio:"CRLUR_214", sede:"CRI Lurate Caccivio" },
+  { codice:"MSA1 AAT_CO_004", tipo:"MSA", radio:"MSA1 AAT_CO_004", sede:"CRI Lurate Caccivio" },
+  { codice:"CRMEN_152.01B1", tipo:"MSB", radio:"CRMEN_152.01B1", sede:"CRI Menaggio" },
+  { codice:"CRMEN_253", tipo:"MSB", radio:"CRMEN_253", sede:"CRI Menaggio" },
+  { codice:"CRMNT_372", tipo:"MSB", radio:"CRMNT_372", sede:"CRI Montorfano" },
+  { codice:"CRMNT_377", tipo:"MSB", radio:"CRMNT_377", sede:"CRI Montorfano" },
+  { codice:"CRISFB_163.05C1", tipo:"MSB", radio:"CRISFB_163.05C1", sede:"CRI San Fermo" },
+  { codice:"CRUGG_157.04A1", tipo:"MSB", radio:"CRUGG_157.04A1", sede:"CRI Uggiate Trevano" },
+  { codice:"CRUGG_255", tipo:"MSB", radio:"CRUGG_255", sede:"CRI Uggiate Trevano" },
+  { codice:"VERFIN_151.04C1", tipo:"MSB", radio:"VERFIN_151.04C1", sede:"Croce Verde Fino Mornasco" },
+  { codice:"VERFIN_254", tipo:"MSB", radio:"VERFIN_254", sede:"Croce Verde Fino Mornasco" },
+  { codice:"LARDON_195.01C1", tipo:"MSB", radio:"LARDON_195.01C1", sede:"Lariosoccorso Dongo" },
+  { codice:"LARDON_794", tipo:"MSB", radio:"LARDON_794", sede:"Lariosoccorso Dongo" },
+  { codice:"LARERB_164.06A1", tipo:"MSB", radio:"LARERB_164.06A1", sede:"Lariosoccorso Erba" },
+  { codice:"LARERB_261", tipo:"MSB", radio:"LARERB_261", sede:"Lariosoccorso Erba" },
+  { codice:"SOSAPP_151.05B1", tipo:"MSB", radio:"SOSAPP_151.05B1", sede:"SOS Appiano Gentile" },
+  { codice:"SOSAPP_252", tipo:"MSB", radio:"SOSAPP_252", sede:"SOS Appiano Gentile" },
+  { codice:"SOSCNZ_166.03B1", tipo:"MSB", radio:"SOSCNZ_166.03B1", sede:"SOS Canzo" },
+  { codice:"SOSCNZ_141.03C1", tipo:"MSB", radio:"SOSCNZ_141.03C1", sede:"SOS Canzo Nesso" },
+  { codice:"SOSCNZ_242", tipo:"MSB", radio:"SOSCNZ_242", sede:"SOS Canzo Nesso" },
+  { codice:"SOSOLG_195_04A1", tipo:"MSB", radio:"SOSOLG_195_04A1", sede:"SOS Olgiate Comasco" },
+  { codice:"SOSOLG_294", tipo:"MSB", radio:"SOSOLG_294", sede:"SOS Olgiate Comasco" },
+  { codice:"SOSLRG_172.06E1", tipo:"MSB", radio:"SOSLRG_172.06E1", sede:"SOS Lurago d'Erba" },
+  { codice:"SOSLRG_271", tipo:"MSB", radio:"SOSLRG_271", sede:"SOS Lurago d'Erba" },
+  { codice:"MDCCST_135.02A1", tipo:"MSA", radio:"MDCCST_135.02A1", sede:"Croce Medica San Fedele Intelvi" },
+  { codice:"CNSAS_01", tipo:"CNSAS", radio:"CNSAS_01", sede:"CNSAS Como" },
+  { codice:"CNSAS_04", tipo:"CNSAS", radio:"CNSAS_04", sede:"CNSAS Erba" },
+  { codice:"CNSAS_03", tipo:"CNSAS", radio:"CNSAS_03", sede:"CNSAS Menaggio" },
+  { codice:"MSA1 AAT_CO_005", tipo:"MSA", radio:"MSA1 AAT_CO_005", sede:"AREU Cantù" },
+  { codice:"MSA2 AAT_CO_005", tipo:"MSA", radio:"MSA2 AAT_CO_005", sede:"AREU Cantù" },
+  { codice:"MSA1 AAT_CO_001", tipo:"MSA", radio:"MSA1 AAT_CO_001", sede:"AREU Dongo" },
+  { codice:"MSA2_AAT_CO_006", tipo:"MSA", radio:"MSA2_AAT_CO_006", sede:"AREU Erba" },
+  { codice:"MSA2 AAT_CO_002", tipo:"MSA", radio:"MSA2 AAT_CO_002", sede:"AREU Menaggio" },
+  { codice:"EQUIPE_ELICO", tipo:"ELI", radio:"EQUIPE_ELICO", sede:"EQUIPE ELI Villa Guardia" },
+  { codice:"ELI AAT_MI_118", tipo:"ELI", radio:"ELI BRESSO", sede:"Elisoccorso Bresso" },
+  // LECCO
+  { codice:"VOLCAL_107.05A1", tipo:"MSB", radio:"VOLCAL_107.05A1", sede:"Volontari Calolziocorte" },
+  { codice:"CRICOL_117_01B1", tipo:"MSB", radio:"CRICOL_117_01B1", sede:"CRI Colico" },
+  { codice:"MSA2 AAT_LC_006", tipo:"MSA", radio:"MSA2 AAT_LC_006", sede:"CRI Colico" },
+  { codice:"CR_LC_177.03A1", tipo:"MSB", radio:"CR_LC_177.03A1", sede:"CRI Lecco" },
+  { codice:"CR_LC_231", tipo:"MSB", radio:"CR_LC_231", sede:"CRI Lecco" },
+  { codice:"CRGLB_293", tipo:"MSB", radio:"CRGLB_293", sede:"CRI Galbiate" },
+  { codice:"CROLG_307", tipo:"MSB", radio:"CROLG_307", sede:"CRI Olgiate Molgora" },
+  { codice:"CRPRE_194.02B1", tipo:"MSB", radio:"CRPRE_194.02B1", sede:"CRI Premana" },
+  { codice:"MSA1_AAT_LC_005", tipo:"MSA", radio:"MSA1_AAT_LC_005", sede:"CRI Premana" },
+  { codice:"CRVMD_327", tipo:"MSB", radio:"CRVMD_327", sede:"CRI Valmadrera" },
+  { codice:"CRO_LC_136.03A2", tipo:"MSB", radio:"CRO_LC_136.03A2", sede:"Croce San Nicolò Lecco" },
+  { codice:"MSA1 AAT_LC_003", tipo:"MSA", radio:"MSA1 AAT_LC_003", sede:"Croce Verde Bosisio Parini" },
+  { codice:"VERBOS_112.04A1", tipo:"MSB", radio:"VERBOS_112.04A1", sede:"Croce Verde Bosisio Parini" },
+  { codice:"VERBOS_113", tipo:"MSB", radio:"VERBOS_113", sede:"Croce Verde Bosisio Parini" },
+  { codice:"BIAMER_112.06A1", tipo:"MSB", radio:"BIAMER_112.06A1", sede:"Croce Bianca Merate" },
+  { codice:"BIAMER_118.06B1", tipo:"MSB", radio:"BIAMER_118.06B1", sede:"Croce Bianca Merate" },
+  { codice:"CRICAN_311", tipo:"MSB", radio:"CRICAN_311", sede:"CRI Casatenovo" },
+  { codice:"SOCBEL_223", tipo:"MSB", radio:"SOCBEL_223", sede:"Soccorso Bellanese Bellano" },
+  { codice:"SOCINT_174.02A1", tipo:"MSB", radio:"SOCINT_174.02A1", sede:"Soccorso Valsassina Introbio" },
+  { codice:"SOCMAN_122.01C1", tipo:"MSB", radio:"SOCMAN_122.01C1", sede:"Soccorso Alpini Mandello" },
+  { codice:"CRBAL_384", tipo:"MSB", radio:"CRBAL_384", sede:"CRI Balisio" },
+  { codice:"MSA1 AAT_LC_001", tipo:"MSA", radio:"MSA1 AAT_LC_001", sede:"AREU Bellano" },
+  { codice:"MSA2 AAT_LC_002", tipo:"MSA", radio:"MSA2 AAT_LC_002", sede:"AREU Lecco" },
+  { codice:"MSA2_ AAT_LC_004", tipo:"MSA", radio:"MSA2_ AAT_LC_004", sede:"AREU Merate" },
+  { codice:"SOC_LC_242", tipo:"MSB", radio:"SOC_LC_242", sede:"Lecco Soccorso" },
+];
+
+// ---------- SEDI VIGILI DEL FUOCO (VA / CO / LC) ----------
+// Coordinate REALI rilevate dal database geografico (20 sedi).
+// Formato: { nome, comune, prov, lat, lng, addr }
+const VVF_SEDI = [
+  // VARESE (coordinate reali da elenco ufficiale)
+  { nome:"Comando Provinciale VV.F. Varese", comune:"Varese", prov:"VA", lat:45.83577, lng:8.81940, addr:"" },
+  { nome:"Distaccamento Busto - Gallarate", comune:"Cassano Magnago", prov:"VA", lat:45.63776, lng:8.82569, addr:"" },
+  { nome:"Distaccamento Provinciale di Saronno", comune:"Saronno", prov:"VA", lat:45.62419, lng:9.01758, addr:"" },
+  { nome:"Distaccamento Provinciale di Luino", comune:"Luino", prov:"VA", lat:45.99384, lng:8.73289, addr:"Via Don Piero Folli 2" },
+  { nome:"Distaccamento Provinciale di Somma Lombardo", comune:"Somma Lombardo", prov:"VA", lat:45.68148, lng:8.72008, addr:"Via Albania 17" },
+  { nome:"Distaccamento Aeroportuale Malpensa", comune:"Ferno", prov:"VA", lat:45.62735, lng:8.72805, addr:"" },
+  { nome:"Distaccamento Volontari di Laveno Mombello", comune:"Laveno Mombello", prov:"VA", lat:45.91736, lng:8.61865, addr:"Via Monteggia 16" },
+  { nome:"Distaccamento di Ispra", comune:"Ispra", prov:"VA", lat:45.80949, lng:8.62186, addr:"Via Enrico Fermi 1219" },
+  { nome:"Distaccamento Volontari di Tradate", comune:"Tradate", prov:"VA", lat:45.70922, lng:8.90843, addr:"" },
+  // COMO (coordinate reali da elenco ufficiale)
+  { nome:"Comando Provinciale VV.F. Como", comune:"Como", prov:"CO", lat:45.80072, lng:9.09565, addr:"Via Valleggio 15" },
+  { nome:"Distaccamento Provinciale di Cantù", comune:"Cantù", prov:"CO", lat:45.74775, lng:9.13260, addr:"" },
+  { nome:"Distaccamento VVF Erba (Caserma Mastellaro)", comune:"Erba", prov:"CO", lat:45.80370, lng:9.22924, addr:"" },
+  { nome:"Distaccamento Provinciale di Menaggio", comune:"Menaggio", prov:"CO", lat:46.01992, lng:9.22095, addr:"" },
+  { nome:"Distaccamento Volontari di Lomazzo", comune:"Lomazzo", prov:"CO", lat:45.69747, lng:9.04245, addr:"" },
+  { nome:"Distaccamento Volontari di Appiano Gentile", comune:"Appiano Gentile", prov:"CO", lat:45.73324, lng:8.98279, addr:"" },
+  { nome:"Distaccamento Volontari di Dongo", comune:"Dongo", prov:"CO", lat:46.12350, lng:9.28239, addr:"" },
+  { nome:"Distaccamento Volontari di Canzo", comune:"Canzo", prov:"CO", lat:45.84567, lng:9.25606, addr:"Via Monte Barzaghino 18" },
+  { nome:"Distaccamento di San Fedele Intelvi", comune:"Centro Valle Intelvi", prov:"CO", lat:45.96656, lng:9.07650, addr:"" },
+  // LECCO (coordinate reali da elenco ufficiale)
+  { nome:"Vigili del Fuoco Lecco", comune:"Lecco", prov:"LC", lat:45.84215, lng:9.40044, addr:"" },
+  { nome:"Distaccamento Volontari di Merate", comune:"Merate", prov:"LC", lat:45.69204, lng:9.41323, addr:"" },
+  { nome:"Distaccamento Volontari di Bellano", comune:"Bellano", prov:"LC", lat:46.03989, lng:9.30140, addr:"Via privata Denti" },
+  { nome:"Distaccamento Volontari di Valmadrera", comune:"Valmadrera", prov:"LC", lat:45.84816, lng:9.36320, addr:"Via Sabatelli 21" },
+];
+
+// ---------- MEZZI VVF ----------
+// Formato: { codice, tipo, radio:<nominativo radio reale>, sede:<nome esatto in VVF_SEDI> }
+// (APS=autopompa serbatoio, AS=autoscala, AB=autobotte/autobottiglia, ...)
+// COMO/VA/LC = dati reali; solo Malpensa resta fittizio in attesa dell'elenco.
+const MEZZI_VVF = [
+  // VARESE (reali; Malpensa resta fittizio in attesa dell'elenco)
+  { codice:"VA-APS", tipo:"APS", radio:"APS VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-APS2", tipo:"APS", radio:"APS2 VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-AFUCL", tipo:"AF/UCL", radio:"AF/UCL VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-AB", tipo:"AB", radio:"AUTOBOTTE VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-AB2", tipo:"AB", radio:"AUTOBOTTE 2 VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-AGRU", tipo:"AUTOGRU", radio:"AUTOGRU VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-AS", tipo:"AS", radio:"AUTOSCALA VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-CARIA", tipo:"CARRO ARIA", radio:"CARRO ARIA VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-CTELI", tipo:"CARRO TELI", radio:"CARRO TELI VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-NBCR", tipo:"NBCR", radio:"NBCR VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-SAFF", tipo:"SAF FLUVIALE", radio:"SAF FLUVIALE VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-SAF", tipo:"SAF", radio:"SAF VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"VA-VETT", tipo:"VETTURETTA", radio:"VETTURETTA VVF VARESE", sede:"Comando Provinciale VV.F. Varese" },
+  { codice:"BU-APS", tipo:"APS", radio:"APS VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-AB", tipo:"AB", radio:"AUTOBOTTE VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-AS", tipo:"AS", radio:"AUTOSCALA VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-CFIAMMA", tipo:"CARRO FIAMMA", radio:"CARRO FIAMMA VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-DUCATO", tipo:"DUCATO", radio:"DUCATO VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-GOMM", tipo:"GOMMONE", radio:"GOMMONE RAFTING VVF BUSTO", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"BU-RANGAIB", tipo:"RANGER AIB", radio:"RANGER MODULO AIB", sede:"Distaccamento Busto - Gallarate" },
+  { codice:"SA-APS", tipo:"APS", radio:"APS VVF SARONNO", sede:"Distaccamento Provinciale di Saronno" },
+  { codice:"SA-RANGER", tipo:"RANGER", radio:"RANGER VVF SARONNO", sede:"Distaccamento Provinciale di Saronno" },
+  { codice:"LU-APS", tipo:"APSS", radio:"APSS VVF LUINO", sede:"Distaccamento Provinciale di Luino" },
+  { codice:"LU-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF LUINO", sede:"Distaccamento Provinciale di Luino" },
+  { codice:"LU-GOMM", tipo:"GOMMONE", radio:"GOMMONE VVF LUINO", sede:"Distaccamento Provinciale di Luino" },
+  { codice:"SO-APS", tipo:"APS", radio:"APS VVF SOMMA LOMBARDO", sede:"Distaccamento Provinciale di Somma Lombardo" },
+  { codice:"SO-MOD", tipo:"MODULO", radio:"MODULO VVF SOMMA LOMBARDO", sede:"Distaccamento Provinciale di Somma Lombardo" },
+  { codice:"VA-APS06", tipo:"APS", sede:"Distaccamento Aeroportuale Malpensa" },
+  { codice:"LV-APS", tipo:"APS", radio:"APS VVF LAVENO MOMBELLO", sede:"Distaccamento Volontari di Laveno Mombello" },
+  { codice:"LV-COMBI", tipo:"COMBI", radio:"COMBI VVF LAVENO MOMBELLO", sede:"Distaccamento Volontari di Laveno Mombello" },
+  { codice:"LV-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF LAVENO MOMBELLO", sede:"Distaccamento Volontari di Laveno Mombello" },
+  { codice:"IS-APS", tipo:"APS", radio:"APS VVF ISPRA", sede:"Distaccamento di Ispra" },
+  { codice:"IS-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF ISPRA", sede:"Distaccamento di Ispra" },
+  { codice:"TR-APS", tipo:"APS", radio:"APS VVF TRADATE", sede:"Distaccamento Volontari di Tradate" },
+  { codice:"TR-AB", tipo:"AB", radio:"AUTOBOTTE VVF TRADATE", sede:"Distaccamento Volontari di Tradate" },
+  { codice:"TR-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF TRADATE", sede:"Distaccamento Volontari di Tradate" },
+  // COMO (reali)
+  { codice:"CO-APS", tipo:"APS", radio:"APS VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-APS2", tipo:"APS", radio:"APS2 VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-AFUCL", tipo:"AF/UCL", radio:"AF/UCL VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-AGRU", tipo:"AUTOGRU", radio:"AUTOGRU VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-AS", tipo:"AS", radio:"AUTOSCALA VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-CFIAMMA", tipo:"CARRO FIAMMA", radio:"CARRO FIAMMA VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-CSAF", tipo:"CARRO SAF", radio:"CARRO SAF VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-CVENT", tipo:"CARRO VENTILAZIONE", radio:"CARRO VENTILAZIONE VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CO-MASSIF", tipo:"MASSIF", radio:"MASSIF VVF COMO", sede:"Comando Provinciale VV.F. Como" },
+  { codice:"CA-APS", tipo:"APS", radio:"APS VVF CANTU", sede:"Distaccamento Provinciale di Cantù" },
+  { codice:"CA-APS2", tipo:"APS", radio:"APS2 VVF CANTU", sede:"Distaccamento Provinciale di Cantù" },
+  { codice:"CA-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF CANTU", sede:"Distaccamento Provinciale di Cantù" },
+  { codice:"CA-POLIC", tipo:"POLISOCCORSO", radio:"POLISOCCORSO CANTU", sede:"Distaccamento Provinciale di Cantù" },
+  { codice:"CA-RANGER", tipo:"RANGER", radio:"RANGER VVF CANTU", sede:"Distaccamento Provinciale di Cantù" },
+  { codice:"ER-APS", tipo:"APS", radio:"APS VVF ERBA", sede:"Distaccamento VVF Erba (Caserma Mastellaro)" },
+  { codice:"ER-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF ERBA", sede:"Distaccamento VVF Erba (Caserma Mastellaro)" },
+  { codice:"ER-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF ERBA", sede:"Distaccamento VVF Erba (Caserma Mastellaro)" },
+  { codice:"ER-MBOSCH", tipo:"MODULO BOSCHIVO", radio:"MODULO BOSCHIVO VVF ERBA", sede:"Distaccamento VVF Erba (Caserma Mastellaro)" },
+  { codice:"ER-TRIDIM", tipo:"TRIDIMENSIONALE", radio:"TRIDIMENSIONALE VVF ERBA", sede:"Distaccamento VVF Erba (Caserma Mastellaro)" },
+  { codice:"ME-APS", tipo:"APS", radio:"APS VVF MENAGGIO", sede:"Distaccamento Provinciale di Menaggio" },
+  { codice:"ME-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF MENAGGIO", sede:"Distaccamento Provinciale di Menaggio" },
+  { codice:"ME-MBOSCH", tipo:"MODULO BOSCHIVO", radio:"MODULO BOSCHIVO VVF MENAGGIO", sede:"Distaccamento Provinciale di Menaggio" },
+  { codice:"LO-APS", tipo:"APS", radio:"APS VVF LOMAZZO", sede:"Distaccamento Volontari di Lomazzo" },
+  { codice:"LO-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF LOMAZZO", sede:"Distaccamento Volontari di Lomazzo" },
+  { codice:"LO-POLIC", tipo:"POLISOCCORSO", radio:"POLISOCCORSO VVF LOMAZZO", sede:"Distaccamento Volontari di Lomazzo" },
+  { codice:"AP-APS", tipo:"APS", radio:"APS VVF APPIANO GENTILE", sede:"Distaccamento Volontari di Appiano Gentile" },
+  { codice:"AP-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF APPIANO GENTILE", sede:"Distaccamento Volontari di Appiano Gentile" },
+  { codice:"AP-CFIAMMA", tipo:"CARRO FIAMMA", radio:"CARRO FIAMMA APPIANO", sede:"Distaccamento Volontari di Appiano Gentile" },
+  { codice:"AP-RANGER", tipo:"RANGER", radio:"RANGER APPIANO GENTILE", sede:"Distaccamento Volontari di Appiano Gentile" },
+  { codice:"DO-APS", tipo:"APS", radio:"APS VVF DONGO", sede:"Distaccamento Volontari di Dongo" },
+  { codice:"DO-AB", tipo:"AB", radio:"AUTOBOTTIGLIA VVF DONGO", sede:"Distaccamento Volontari di Dongo" },
+  { codice:"DO-MBOSCH", tipo:"MODULO BOSCHIVO", radio:"MODULO BOSCHIVO VVF DONGO", sede:"Distaccamento Volontari di Dongo" },
+  { codice:"DO-ATRID", tipo:"A-TRID", radio:"A-TRID VVF DONGO", sede:"Distaccamento Volontari di Dongo" },
+  { codice:"CZ-APS", tipo:"APS", radio:"APS VVF CANZO", sede:"Distaccamento Volontari di Canzo" },
+  { codice:"CZ-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF CANZO", sede:"Distaccamento Volontari di Canzo" },
+  { codice:"CZ-DEF2", tipo:"DEFENDER", radio:"DEFENDER2 VVF CANZO", sede:"Distaccamento Volontari di Canzo" },
+  { codice:"SF-APS", tipo:"APS", radio:"APS VVF SAN FEDELE INTELVI", sede:"Distaccamento di San Fedele Intelvi" },
+  { codice:"SF-AB", tipo:"AB", radio:"AUTOBOTTE VVF SAN FEDELE INTELVI", sede:"Distaccamento di San Fedele Intelvi" },
+  { codice:"SF-DEF", tipo:"DEFENDER", radio:"DIFENSORE VVF SAN FEDELE INTELVI", sede:"Distaccamento di San Fedele Intelvi" },
+  { codice:"SF-MOD", tipo:"MODULO", radio:"MODULO VVF SAN FEDELE INTELVI", sede:"Distaccamento di San Fedele Intelvi" },
+  // LECCO (reali)
+  { codice:"LC-APS", tipo:"APS", radio:"APS VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-APS2", tipo:"APS", radio:"APS2 VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-AB", tipo:"AB", radio:"AUTOBOTTE VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-AGRU", tipo:"AUTOGRU", radio:"AUTOGRU VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-AS", tipo:"AS", radio:"AUTOSCALA VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-CARIA", tipo:"CARRO ARIA", radio:"CARRO ARIA VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-DEF2", tipo:"DEFENDER", radio:"DEFENDER 2 VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-GOM1", tipo:"GOMMONE", radio:"GOMMONE 1 VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-GOM2", tipo:"GOMMONE", radio:"GOMMONE 2 VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"LC-SAF", tipo:"SAF", radio:"SAF VVF LECCO", sede:"Vigili del Fuoco Lecco" },
+  { codice:"MT-APS", tipo:"APS", radio:"APS VVF MERATE", sede:"Distaccamento Volontari di Merate" },
+  { codice:"MT-AB", tipo:"AB", radio:"AUTOBOTTE VVF MERATE", sede:"Distaccamento Volontari di Merate" },
+  { codice:"MT-AS", tipo:"AS", radio:"AUTOSCALA VVF MERATE", sede:"Distaccamento Volontari di Merate" },
+  { codice:"MT-MASSIF", tipo:"MASSIF", radio:"MASSIF VVF MERATE", sede:"Distaccamento Volontari di Merate" },
+  { codice:"MT-MBOSCH", tipo:"MODULO BOSCHIVO", radio:"MODULO BOSCHIVO VVF MERATE", sede:"Distaccamento Volontari di Merate" },
+  { codice:"BL-APSCANTER", tipo:"APS", radio:"APS CANTER VVF BELLANO", sede:"Distaccamento Volontari di Bellano" },
+  { codice:"BL-APS", tipo:"APS", radio:"APS VVF BELLANO", sede:"Distaccamento Volontari di Bellano" },
+  { codice:"BL-AB", tipo:"AB", radio:"AUTOBOTTE VVF BELLANO", sede:"Distaccamento Volontari di Bellano" },
+  { codice:"BL-BOSCH", tipo:"BOSCHIVO", radio:"BOSCHIVO VVF BELLANO", sede:"Distaccamento Volontari di Bellano" },
+  { codice:"BL-DEF", tipo:"DEFENDER", radio:"DEFENDER VVF BELLANO", sede:"Distaccamento Volontari di Bellano" },
+  { codice:"VM-APS", tipo:"APS", radio:"APS VVF VALMADRERA", sede:"Distaccamento Volontari di Valmadrera" },
+  { codice:"VM-AB", tipo:"AB", radio:"AUTOBOTTE VVF VALMADRERA", sede:"Distaccamento Volontari di Valmadrera" },
+  { codice:"VM-COLIBRI", tipo:"COLIBRI", radio:"COLIBRI VVF VALMADRERA", sede:"Distaccamento Volontari di Valmadrera" },
+  { codice:"VM-RANGER", tipo:"RANGER", radio:"RANGER VVF VALMADRERA", sede:"Distaccamento Volontari di Valmadrera" },
+];
+
+// ---------- COSA DICE IL CHIAMANTE (il tipo vero resta nascosto) ----------
+// Il centralinista sente solo queste parole e deve classificare il colore.
+const CHIAMATE = {
+  "Arresto cardiaco": "«Pronto, presto! Mio marito è crollato a terra, non risponde... non so se respira!»",
+  "Dolore toracico": "«Ho un dolore fortissimo al petto, mi stringe tutto... ho tanta paura»",
+  "Ictus sospetto": "«Mia madre parla strano, dice parole senza senso e ha la bocca storta!»",
+  "Dispnea grave": "«Non riesco... a respirare... (ansima) mi manca l'aria!»",
+  "Incidente stradale": "«C'è stato uno scontro tra due macchine all'incrocio, c'è gente ferita!»",
+  "Incidente moto": "«Un motociclista è volato per terra, è a bordo strada e non si alza!»",
+  "Investimento pedone": "«Una macchina ha preso un pedone sulle strisce! È a terra immobile!»",
+  "Caduta dall'alto": "«Un operaio è caduto dal ponteggio, da tre metri! Non si muove!»",
+  "Caduta in casa": "«Mia nonna è scivolata in bagno, si lamenta per l'anca»",
+  "Malore": "«Mi sento svenire, mi gira tutto...»",
+  "Sincope": "«Mio figlio è svenuto all'improvviso, ora si è ripreso ma è pallidissimo»",
+  "Crisi convulsiva": "«Mio fratello trema tutto, ha le convulsioni! Cosa devo fare?!»",
+  "Trauma sportivo": "«Durante la partita si è fatto male al ginocchio, non riesce a camminare»",
+  "Ferita da taglio": "«Mi sono tagliato con la sega circolare, perde molto sangue dal braccio!»",
+  "Ustione": "«Ha rovesciato l'acqua bollente addosso al bambino, ha la pelle tutta rossa!»",
+  "Intossicazione": "«Ha preso un sacco di pastiglie... non so quante, ora piange e vomita»",
+  "Overdose": "«C'è un ragazzo a terra in stazione, non risponde... forse si è fatto qualcosa»",
+  "Aggressione": "«L'hanno picchiato fuori dal bar, è a terra pieno di sangue!»",
+  "Crisi diabetica": "«Mio padre è diabetico, è tutto sudato e confuso, non ragiona»",
+  "Reazione allergica": "«L'ha punto una vespa e ora gli si gonfia tutta la faccia, respira male!»",
+  "Parto": "«Mia moglie ha le doglie fortissime, si sono rotte le acque!»",
+  "Urgenza psichiatrica": "«Mio figlio urla e spacca tutto in casa, ho paura che si faccia male!»",
+  "Dolore addominale": "«Ho un dolore lancinante alla pancia da stamattina, non passa»",
+  "Febbre alta": "«Ha 39 e mezzo di febbre da due giorni, è debolissimo»",
+  "Lombalgia": "«Mi sono bloccato con la schiena, non riesco ad alzarmi dal letto»",
+  "Trasporto urgente": "«Qui ospedale, serve un trasporto urgente per trasferire un paziente»",
+  "Incendio con feriti": "«C'è fumo nell'appartamento, stiamo evacuando... uno tossisce fortissimo!»",
+  "Annegamento": "«Hanno tirato fuori un uomo dal lago, non respira!»",
+  "Folgorazione": "«Ha preso la scossa dal quadro elettrico, ha le mani bruciate!»",
+  "Soffocamento": "«Sta soffocando! Ha qualcosa in gola, sta diventando blu!»",
+  "Albero su auto occupata": "«Un albero è caduto sulla macchina... c'è mio marito dentro, non riesce a uscire!»",
+  "Albero su auto vuota": "«È caduto un albero sulla mia auto parcheggiata, l'ha schiacciata!»",
+  "Ramo su marciapiede": "«C'è un ramo grosso caduto sul marciapiede, quasi mi prendeva!»",
+  "Albero in carreggiata": "«Un albero è caduto in mezzo alla strada, non si passa più!»",
+  "Auto ribaltata in autostrada": "«Una macchina si è ribaltata in autostrada! C'è gente dentro, venite presto!»",
+  "Auto ribaltata senza feriti": "«Sono uscito di strada e mi sono ribaltato... sto bene, ma l'auto è a ruote all'aria»",
+  "Tamponamento in autostrada": "«Tamponamento in autostrada, tre macchine coinvolte, c'è gente ferita!»",
+  "Incendio autovettura": "«La macchina ha preso fuoco! Il conducente è uscito ma si è bruciato!»",
+  "Fuga gas": "«Sento un forte odore di gas in casa, ho paura... cosa devo fare?!»",
+  "Allagamento da tubo rotto": "«Si è rotto un tubo in bagno, l'acqua esce ovunque, sta allagando tutto!»",
+  "Gatto nel cofano": "«C'è un gattino incastrato nel motore della macchina, miagola disperato!»",
+  "Bloccato in ascensore": "«Sono bloccato in ascensore tra due piani, ho il cuore a mille!»",
+  "Infortunio in fabbrica": "«Un collega si è incastrato la mano nella pressa, perde molto sangue!»",
+  "Caduta da impalcatura": "«Un operaio è caduto dall'impalcatura! È a terra e si lamenta!»",
+  "Schiacciamento da carico": "«Un bancale gli è caduto addosso in magazzino, fa fatica a respirare!»",
+  "Infortunio agricolo": "«Il trattore si è ribaltato nel campo, mio padre è sotto!»",
+  "Sciame d'api": "«C'è uno sciame d'api in piazza, hanno punto due persone!»",
+  "Cinghiale in strada": "«C'è un cinghiale in mezzo alla strada, le macchine inchiodano!»",
+  "Crisi ipertensiva": "«Mio marito ha la pressione alle stelle, non capisce più niente!»",
+  "Palpitazioni": "«Ho il cuore che va a mille e mi manca il fiato!»",
+  "Crisi asmatica": "«Mio figlio ha l'asma, il ventolin non basta, respira malissimo!»",
+  "Fame d'aria nell'anziano": "«Mio padre respira male da giorni e ora peggiora, ha la febbre!»",
+  "Emorragia digestiva": "«Mio marito vomita sangue, è pallidissimo!»",
+  "Colica renale": "«Ho un dolore al fianco che mi ammazza, non sto fermo!»",
+  "Confusione acuta": "«Mia madre da stamattina non riconosce nessuno, dice cose strane!»",
+  "Colpo di calore": "«È svenuto sotto il sole, scotta tutto!»",
+  "Dolore oncologico": "«Mio padre ha un tumore, il dolore non passa con niente!»",
+  "Ritenzione urinaria": "«Non riesco più a fare pipì da ieri, ho un dolore qui sotto!»",
+  "Attacco di panico": "«Ho il cuore a mille, mi formicolano le mani, sto morendo?!»",
+  "Perdite in gravidanza": "«Sono incinta e sto perdendo sangue, ho paura di perderlo!»",
+  "Blocco cervicale": "«Mi sono svegliato col collo bloccato, non giro la testa!»",
+  "Frattura da caduta": "«Sono caduto e il polso è tutto storto, fa malissimo!»",
+  "Distorsione caviglia": "«Ho preso una storta, la caviglia si è gonfiata subito!»",
+  "Sangue dal naso": "«Mi esce sangue dal naso da venti minuti, non si ferma!»",
+  "Laringite del bambino": "«Il bambino respira fischiando e ha una tosse strana!»",
+  "Orticaria diffusa": "«Mi sono riempito di macchie rosse che prudono da morire!»",
+  "Ferita da vetro": "«Sono caduto contro la vetrata, ho un taglio profondo alla gamba!»",
+  "Dito amputato": "«Mi sono tranciato un dito con la troncatrice!»",
+  "Impiccamento": "«L'ho trovato appeso... l'abbiamo tirato giù, non respira!»",
+  "Morso di cane": "«Un cane mi ha morso alla gamba, sanguina!»",
+  "Morso di vipera": "«Mi ha morso una vipera sul sentiero, la caviglia si gonfia!»",
+  "Sospetta meningite": "«Ha la febbre altissima e non riesce a piegare il collo!»",
+  "Coma etilico": "«Il mio amico ha bevuto troppo, ora non risponde!»",
+  "Intossicazione alimentare": "«Abbiamo mangiato al ristorante e ora stiamo tutti male!»",
+  "Errore terapia": "«La nonna ha preso due volte le pastiglie, ora è tutta rintronata!»",
+  "Esposizione a solventi": "«In ditta si è rotta una tanica, due operai tossiscono e vomitano!»",
+  "Mano nella ringhiera": "«Il bambino ha infilato la mano nella ringhiera e non esce più!»",
+  "Paziente grande obeso": "«Mio marito è caduto e pesa 180 chili, non riusciamo ad alzarlo!»",
+  "Caduta in strada": "«Sono scivolata sul marciapiede, ho battuto il fianco!»",
+  "Caduta dalle scale": "«Mia madre è caduta dalle scale, è a metà rampa e non si alza!»",
+  "Caduta in bici": "«Sono caduto in bici, la spalla fa malissimo!»",
+  "Caduta da cavallo": "«Sono caduta da cavallo, ho battuto la schiena!»",
+  "Caduta da camion": "«Scendendo dal camion sono scivolato, caviglia andata!»",
+  "Investimento ciclista": "«Una macchina ha preso un ciclista, è volato per terra!»",
+  "Scontro tra bici": "«Ci siamo scontrati in bici, l'altro sanguina dal naso!»",
+  "Sbalzato dalla moto": "«È volato oltre il guardrail con la moto!»",
+  "Fuori strada in scarpata": "«Sono finito nella scarpata, la macchina è inclinata e non esco!»",
+  "Auto contro palo": "«Ho preso in pieno un palo, la macchina è distrutta!»",
+  "Scontro moto-moto": "«Due moto si sono scontrate, sono tutti e due a terra!»",
+  "Scontro auto-auto": "«Due macchine si sono scontrate all'incrocio!»",
+  "Scontro auto-moto": "«Una macchina mi ha tagliato la strada, sono volato!»",
+  "Auto contro camion": "«Mi sono infilato sotto un camion in coda!»",
+  "Moto contro camion": "«Un camion ha preso un motociclista!»",
+  "Scontro tra camion": "«Due camion si sono scontrati, l'autista è incastrato!»",
+  "Maxi tamponamento": "«Tamponamento con cinque-sei macchine, è un disastro!»",
+  "Incidente misterioso": "«C'è una macchina distrutta a bordo strada... non so cos'è successo!»",
+  "Inca strato tra lamiere": "«Sono incastrato in macchina, non riesco a muovere le gambe!»",
+  "Pedone sotto auto": "«La macchina in retromarcia ha preso un passante, è sotto!»",
+  "Rissa in campo": "«Durante la partita è scoppiata una rissa, ce n'è uno a terra!»",
+  "Appoggio alla polizia": "«Qui polizia, serve un'ambulanza sul posto per un fermato che sta male»",
+  "Rissa al bar": "«Fuori dal bar si stanno picchiando in dieci!»",
+  "Tentato suicidio": "«Mio fratello dice che si butta dal balcone, venite subito!»",
+  "Colpo d'arma da fuoco": "«Hanno sparato a un uomo, è a terra e perde sangue!»",
+  "Accoltellamento": "«L'hanno accoltellato, ha un taglio alla pancia!»",
+  "Appoggio ai VVF": "«Qui vigili del fuoco, serve ambulanza in appoggio sul rogo»",
+  "Incendio nel bosco": "«Il bosco dietro casa ha preso fuoco, le fiamme si avvicinano!»",
+  "Incendio capannone": "«Il capannone di fronte è in fiamme, esce un fumo nero!»",
+  "Anziana chiusa in casa": "«La nonna non apre e non risponde al telefono da ieri!»",
+  "Persona dispersa": "«Mio padre è andato per funghi stamattina e non è tornato!»",
+  "Aereo precipitato": "«Un aereo piccolo è caduto nel campo dietro casa!»",
+  "Esplosione in casa": "«C'è stata un'esplosione, ha buttato giù le finestre!»",
+  "Crollo in casa vecchia": "«È crollato un pezzo di casa, c'è polvere ovunque!»",
+  "Incidente al passaggio a livello": "«Un treno ha preso una macchina al passaggio a livello!»",
+  "Incendio sterpaglie": "«A bordo campo bruciano le sterpaglie, il fumo copre la strada!»",
+  "Incendio rifiuti": "«Hanno dato fuoco ai cassonetti, c'è un fumo nero acre!»",
+  "Incendio cantina": "«Esce un fumo denso dalla cantina del palazzo, non vedo fiamme!»",
+  "Apertura porta": "«Il vicino non apre da due giorni e si sente il cane guaire, aprite la porta!»",
+  "Soccorso a persona": "«Un uomo è caduto nella scarpata dietro casa, lo sento chiamare ma non lo vedo!»",
+  "Bonifica da insetti": "«C'è un nido di vespe grosso così nel cassonetto, i bambini non escono!»",
+  "Albero pericolante": "«L'albero dopo il temporale pende tutto sulla strada, se cade fa un disastro!»",
+  "Rimozione parti pericolanti": "«Dal tetto volano tegole in strada, una ha quasi preso una macchina!»",
+  "Dissesto statico": "«Nel muro di casa si è aperta una crepa enorme stanotte, ho paura che crolli!»",
+  "Crollo parziale": "«È crollato un pezzo di solaio nella casa vecchia, c'è polvere dappertutto!»",
+  "Crollo edificio": "«È crollato un palazzo intero! C'è una nuvola di polvere, forse c'è gente dentro!»",
+  "Verifica stabilità": "«Qui tecnico comunale: serve verifica di stabilità dopo la frana, mandate i vigili del fuoco»",
+  "Frana": "«La collina è scesa sulla strada provinciale, non si passa più!»",
+  "Voragine": "«Si è aperta una buca enorme in mezzo alla strada, una ruota ci è finita dentro!»",
+  "Danni d'acqua da maltempo": "«Con questo nubifragio piove dentro casa dal tetto, si allaga tutto!»",
+  "Lavaggio strada": "«C'è una chiazza d'olio lunga venti metri in curva, le moto scivolano!»",
+  "Ostacolo in carreggiata": "«In mezzo alla strada c'è materiale caduto da un camion, è buio e pericoloso!»",
+  "Incidente senza feriti": "«Ci siamo toccati in rotonda, stiamo tutti bene ma perdiamo olio e non si passa!»",
+  "Mezzo pesante ribaltato": "«Un camion si è ribaltato in uscita, il gasolio cola... l'autista è fuori e sta bene»",
+  "Guasto impianti": "«Il contatore ha fatto un botto e mezzo palazzo è al buio, puzza di bruciato!»",
+  "Ostacolo alla navigazione": "«C'è un tronco enorme a pelo d'acqua davanti al porto, le barche rischiano!»",
+  "Animale in difficoltà": "«Il mio cane è caduto nel canale e non riesce a risalire, annega!»",
+  "Recupero carcassa": "«C'è un cinghiale morto a bordo strada da due giorni, con questo caldo...»",
+  "Recupero beni": "«La cantina è allagata, devo tirare fuori i mobili prima che marciscano!»",
+  "Supporto polizia giudiziaria": "«Qui carabinieri: serve apertura porta per un'attività giudiziaria»",
+  "Supporto Protezione Civile": "«Qui protezione civile: serve supporto per l'emergenza in corso»",
+  "Servizio di assistenza": "«Qui festa patronale: serve presidio antincendio per i fuochi d'artificio»",
+  "Allarme aeromobile a Malpensa": "«Qui torre Malpensa: velivolo in emergenza in atterraggio, mezzi in stand-by»",
+  "Falso allarme sul posto": "«Pronto? ...ah no, hanno già risolto tutto, non serve più niente, scusate!»",
+};
+
+// Laghi (sagome OSM semplificate per Como/Maggiore, Lugano generoso): niente interventi in acqua
+const LAGHI = [[[46.03235,9.29445],[46.02645,9.28383],[46.02221,9.2864],[46.01797,9.28721],[46.01668,9.28681],[46.01495,9.28248],[46.01324,9.28364],[46.01239,9.28272],[46.01086,9.28294],[46.01002,9.28159],[46.0086,9.28693],[46.00479,9.29105],[46.00282,9.2919],[45.9975,9.29211],[45.99409,9.29074],[45.9868,9.29212],[45.98111,9.29692],[45.97854,9.2971],[45.97681,9.29586],[45.96721,9.30324],[45.9659,9.30053],[45.96466,9.30174],[45.96242,9.30066],[45.95916,9.30055],[45.95696,9.30175],[45.95363,9.30081],[45.94937,9.30099],[45.94438,9.30876],[45.94022,9.31255],[45.93527,9.31272],[45.93263,9.31206],[45.93162,9.31082],[45.92968,9.31223],[45.92472,9.31007],[45.91822,9.31173],[45.91692,9.31309],[45.91435,9.31261],[45.91381,9.31365],[45.91304,9.31296],[45.91296,9.31575],[45.91143,9.31923],[45.91181,9.32424],[45.91075,9.32577],[45.90532,9.32874],[45.90409,9.33031],[45.89964,9.33147],[45.89751,9.3303],[45.89368,9.33346],[45.89416,9.3396],[45.89588,9.34519],[45.89324,9.35255],[45.88974,9.35787],[45.88447,9.36099],[45.87517,9.37663],[45.86806,9.37837],[45.86596,9.38163],[45.86039,9.38312],[45.85865,9.38515],[45.857,9.38376],[45.85501,9.38893],[45.85318,9.38709],[45.85263,9.3875],[45.85258,9.38648],[45.85196,9.38654],[45.8525,9.38721],[45.84833,9.38722],[45.85265,9.37544],[45.85398,9.37458],[45.85611,9.3748],[45.85813,9.37174],[45.8591,9.36645],[45.85862,9.36709],[45.85836,9.36623],[45.8647,9.36557],[45.87205,9.35826],[45.87481,9.35682],[45.87996,9.34647],[45.88103,9.3409],[45.88464,9.33202],[45.88518,9.32435],[45.89079,9.31772],[45.89151,9.31527],[45.89839,9.31075],[45.90264,9.30163],[45.9061,9.29964],[45.91001,9.29467],[45.91493,9.29338],[45.91861,9.28987],[45.92551,9.28571],[45.92779,9.28614],[45.93119,9.28461],[45.93318,9.28478],[45.93517,9.28261],[45.94072,9.28228],[45.944,9.27921],[45.95412,9.27584],[45.96167,9.26626],[45.96345,9.26638],[45.96468,9.26795],[45.96804,9.26822],[45.97045,9.26988],[45.97174,9.26829],[45.97439,9.26769],[45.97495,9.26623],[45.98002,9.26553],[45.98253,9.26363],[45.98387,9.26621],[45.98671,9.26728],[45.99049,9.26677],[45.99132,9.26405],[45.98918,9.26058],[45.98577,9.26041],[45.98128,9.25426],[45.97783,9.25135],[45.97757,9.25204],[45.97724,9.24712],[45.97267,9.24145],[45.97042,9.23472],[45.96206,9.22665],[45.9616,9.22229],[45.95978,9.22081],[45.95799,9.22074],[45.95058,9.2107],[45.94993,9.20592],[45.94672,9.20103],[45.94687,9.19419],[45.94556,9.18712],[45.94601,9.18315],[45.94206,9.17053],[45.94107,9.16966],[45.93912,9.16062],[45.9351,9.15209],[45.93373,9.15077],[45.92921,9.14959],[45.92577,9.15104],[45.91299,9.15349],[45.91038,9.15501],[45.91066,9.15427],[45.90898,9.15271],[45.90554,9.15405],[45.90033,9.15225],[45.88067,9.15655],[45.87632,9.15509],[45.87327,9.15641],[45.86965,9.15587],[45.8659,9.15256],[45.86537,9.14955],[45.86311,9.14851],[45.86267,9.14635],[45.85793,9.13995],[45.85747,9.13605],[45.8594,9.11899],[45.85846,9.11268],[45.85444,9.11366],[45.84704,9.10544],[45.84585,9.10564],[45.84254,9.10311],[45.84055,9.10313],[45.83772,9.09955],[45.83623,9.09899],[45.83434,9.09527],[45.83189,9.09426],[45.8294,9.09101],[45.82711,9.08648],[45.82567,9.08021],[45.82336,9.07656],[45.8174,9.08263],[45.81516,9.08215],[45.8162,9.08267],[45.81512,9.08299],[45.81338,9.08011],[45.81316,9.07762],[45.81372,9.07649],[45.8154,9.08032],[45.81375,9.07647],[45.81523,9.07463],[45.81434,9.06984],[45.81602,9.06731],[45.82117,9.06696],[45.82587,9.06859],[45.83118,9.07262],[45.8318,9.07195],[45.83355,9.07625],[45.83571,9.07585],[45.83878,9.07875],[45.84022,9.07802],[45.84348,9.07867],[45.84514,9.08108],[45.84631,9.08094],[45.84547,9.0871],[45.84602,9.0893],[45.85254,9.09028],[45.85335,9.09185],[45.85758,9.09447],[45.85927,9.09723],[45.85962,9.10145],[45.86132,9.10275],[45.86189,9.10538],[45.86426,9.10734],[45.86695,9.11219],[45.87106,9.12408],[45.87775,9.13668],[45.87892,9.13841],[45.88016,9.139],[45.88061,9.13824],[45.88523,9.14218],[45.89243,9.14509],[45.89911,9.1374],[45.9071,9.1316],[45.90919,9.13114],[45.91782,9.13247],[45.92195,9.13135],[45.92337,9.1318],[45.93194,9.12839],[45.93688,9.12878],[45.93939,9.12802],[45.94542,9.12909],[45.95418,9.14625],[45.95898,9.1594],[45.96463,9.16913],[45.96601,9.16962],[45.9664,9.1728],[45.96776,9.17283],[45.96882,9.17498],[45.9665,9.18511],[45.9676,9.19078],[45.9648,9.20253],[45.96935,9.20178],[45.97092,9.19998],[45.97066,9.1966],[45.97184,9.19593],[45.97364,9.1972],[45.97427,9.19991],[45.97619,9.20034],[45.98047,9.20702],[45.98038,9.21266],[45.98249,9.21588],[45.98145,9.22238],[45.98802,9.23531],[45.99078,9.23768],[45.99455,9.23955],[46.00061,9.23691],[46.00262,9.23476],[46.00649,9.23436],[46.01455,9.23731],[46.0164,9.23651],[46.0187,9.23717],[46.02048,9.24205],[46.02174,9.24293],[46.02428,9.24176],[46.0268,9.23785],[46.03313,9.23717],[46.03601,9.23806],[46.03828,9.24124],[46.03829,9.24363],[46.03954,9.2445],[46.03983,9.25104],[46.04908,9.25591],[46.0526,9.26074],[46.05591,9.26007],[46.05744,9.26074],[46.06121,9.26558],[46.06254,9.26901],[46.0653,9.26972],[46.06679,9.2724],[46.06798,9.27271],[46.07088,9.27908],[46.07204,9.27836],[46.07378,9.27975],[46.0751,9.27827],[46.08097,9.277],[46.08464,9.27827],[46.08777,9.27777],[46.08882,9.28003],[46.09192,9.27947],[46.09358,9.28064],[46.09963,9.27754],[46.10138,9.27863],[46.10575,9.27778],[46.10993,9.27867],[46.1141,9.27705],[46.11906,9.28077],[46.1221,9.27937],[46.12332,9.28545],[46.1238,9.28431],[46.12436,9.28644],[46.12542,9.28578],[46.12756,9.28637],[46.13047,9.29068],[46.13407,9.29098],[46.13542,9.3002],[46.13701,9.30455],[46.14095,9.30619],[46.14319,9.30602],[46.1444,9.30489],[46.14721,9.30615],[46.14834,9.31158],[46.14857,9.32039],[46.15061,9.3253],[46.14861,9.32937],[46.14949,9.3358],[46.15261,9.33946],[46.15705,9.3385],[46.16395,9.34794],[46.16955,9.36181],[46.16785,9.36581],[46.16768,9.37047],[46.16816,9.36983],[46.16882,9.37206],[46.16769,9.37109],[46.17023,9.37777],[46.16749,9.37886],[46.16601,9.37727],[46.16267,9.38012],[46.15989,9.38019],[46.15875,9.38117],[46.15832,9.37974],[46.15307,9.37517],[46.15019,9.37477],[46.14879,9.37704],[46.14455,9.37734],[46.14242,9.37239],[46.13971,9.37255],[46.13878,9.37112],[46.13849,9.37232],[46.13762,9.37005],[46.13739,9.37087],[46.136,9.36268],[46.13699,9.35692],[46.13595,9.35093],[46.12998,9.33962],[46.12819,9.33885],[46.12764,9.3416],[46.12503,9.34388],[46.1252,9.34515],[46.12418,9.34615],[46.12159,9.34662],[46.11891,9.34533],[46.11666,9.34547],[46.1171,9.33752],[46.1142,9.32722],[46.11535,9.32374],[46.11926,9.32791],[46.12264,9.33492],[46.1243,9.33576],[46.12568,9.33463],[46.12117,9.32175],[46.12,9.31396],[46.11594,9.31045],[46.11371,9.3113],[46.1133,9.31345],[46.11068,9.31533],[46.10931,9.31874],[46.10608,9.32031],[46.10429,9.32004],[46.09947,9.31605],[46.0985,9.31648],[46.09504,9.3152],[46.08973,9.30971],[46.086,9.3095],[46.08335,9.3109],[46.08157,9.3103],[46.08008,9.30489],[46.07692,9.30013],[46.07678,9.29838],[46.07661,9.29929],[46.07648,9.29826],[46.07265,9.2974],[46.07089,9.29972],[46.07123,9.30181],[46.07056,9.30159],[46.06858,9.30554],[46.06885,9.30704],[46.06801,9.30705],[46.06806,9.30545],[46.06756,9.30955],[46.06608,9.30954],[46.06399,9.31154],[46.05593,9.3129],[46.05122,9.31043],[46.04767,9.30513],[46.04572,9.30526],[46.04248,9.29785],[46.04027,9.29896],[46.03818,9.30207],[46.03235,9.29445]],[[46.17061,8.80157],[46.17143,8.80291],[46.17081,8.80757],[46.1728,8.81884],[46.17528,8.82414],[46.17489,8.82633],[46.17983,8.8327],[46.179,8.83996],[46.17551,8.84157],[46.17093,8.84659],[46.17102,8.84822],[46.17039,8.84765],[46.16511,8.85237],[46.16685,8.8565],[46.17215,8.85914],[46.17012,8.85935],[46.16582,8.85773],[46.16512,8.85547],[46.16449,8.85756],[46.16552,8.85829],[46.1646,8.8581],[46.16291,8.85549],[46.16386,8.85425],[46.16347,8.85312],[46.16181,8.85498],[46.16303,8.8584],[46.16519,8.86045],[46.16309,8.85885],[46.16432,8.86176],[46.16412,8.86433],[46.16349,8.86096],[46.16034,8.85592],[46.1601,8.85396],[46.16109,8.85989],[46.16041,8.86339],[46.16007,8.86145],[46.15777,8.86292],[46.15861,8.86236],[46.15777,8.86191],[46.15894,8.86211],[46.16091,8.86052],[46.16039,8.85923],[46.15971,8.86053],[46.16029,8.85903],[46.15707,8.85965],[46.16015,8.85834],[46.15947,8.85443],[46.158,8.85597],[46.15784,8.85411],[46.15718,8.85431],[46.15706,8.86098],[46.15657,8.86174],[46.15667,8.85684],[46.15598,8.86237],[46.15402,8.85488],[46.151,8.85654],[46.15045,8.85951],[46.15164,8.86197],[46.15523,8.86398],[46.15127,8.863],[46.15166,8.86537],[46.1498,8.86571],[46.14876,8.85856],[46.14952,8.85571],[46.14703,8.85385],[46.14474,8.84565],[46.14472,8.84094],[46.14108,8.83513],[46.13934,8.81987],[46.13592,8.80755],[46.13308,8.80412],[46.13099,8.79865],[46.12916,8.79797],[46.12655,8.7906],[46.12347,8.78655],[46.1235,8.78332],[46.121,8.78219],[46.11623,8.77349],[46.11159,8.76897],[46.10494,8.75889],[46.10489,8.75592],[46.1032,8.75131],[46.1028,8.73763],[46.10117,8.73641],[46.09516,8.73525],[46.08869,8.72737],[46.08589,8.72228],[46.08191,8.7205],[46.07967,8.72131],[46.0798,8.7227],[46.0763,8.72419],[46.07221,8.72927],[46.06854,8.73184],[46.06544,8.73157],[46.06121,8.72944],[46.05216,8.73404],[46.04879,8.73184],[46.04671,8.73215],[46.04588,8.73397],[46.04353,8.73216],[46.03964,8.73176],[46.03703,8.73596],[46.03654,8.742],[46.03512,8.74259],[46.03312,8.74653],[46.03144,8.74642],[46.03122,8.74747],[46.02945,8.74834],[46.02833,8.7477],[46.02699,8.74899],[46.02615,8.74856],[46.02525,8.751],[46.02202,8.75182],[46.02175,8.75087],[46.02014,8.75066],[46.01799,8.7522],[46.00947,8.74817],[46.00401,8.74227],[46.0036,8.74272],[46.00362,8.7417],[46.00249,8.74146],[45.99977,8.73462],[45.99891,8.73396],[45.99955,8.7354],[45.99798,8.73297],[45.99736,8.73344],[45.99724,8.72403],[45.9964,8.72213],[45.99586,8.72255],[45.99045,8.71804],[45.98893,8.71128],[45.98327,8.71201],[45.97923,8.71015],[45.9752,8.70505],[45.96654,8.69034],[45.96383,8.68128],[45.96122,8.67985],[45.96074,8.67509],[45.95894,8.67308],[45.95408,8.66236],[45.95075,8.66055],[45.94879,8.66123],[45.94706,8.66029],[45.94599,8.66146],[45.94268,8.66063],[45.93958,8.65486],[45.94018,8.65213],[45.93939,8.64878],[45.93589,8.64252],[45.93209,8.63903],[45.92682,8.63195],[45.92215,8.61694],[45.91706,8.61143],[45.91504,8.61069],[45.91279,8.61666],[45.90986,8.61925],[45.90747,8.61642],[45.90766,8.61455],[45.90658,8.61288],[45.90738,8.60535],[45.90679,8.60029],[45.90058,8.59625],[45.89812,8.59628],[45.89519,8.59372],[45.89193,8.59324],[45.88878,8.59817],[45.88432,8.60018],[45.88102,8.59919],[45.87973,8.59658],[45.87657,8.59695],[45.87307,8.6014],[45.86965,8.60388],[45.86602,8.60556],[45.86211,8.60597],[45.85757,8.61074],[45.85436,8.6101],[45.85477,8.61153],[45.85318,8.61418],[45.85404,8.61885],[45.85262,8.62006],[45.85177,8.61883],[45.84993,8.61921],[45.84845,8.61811],[45.84823,8.61971],[45.84765,8.61898],[45.84673,8.61991],[45.84551,8.61949],[45.84227,8.62198],[45.84102,8.62131],[45.83866,8.62276],[45.83766,8.62175],[45.83854,8.62277],[45.83771,8.62273],[45.83802,8.62359],[45.83741,8.62303],[45.83786,8.624],[45.83698,8.62308],[45.83558,8.62392],[45.83335,8.62285],[45.833,8.62433],[45.83042,8.62675],[45.82885,8.62679],[45.82677,8.62458],[45.82473,8.62572],[45.82686,8.62408],[45.82629,8.62301],[45.82519,8.62325],[45.82349,8.61826],[45.82568,8.61222],[45.82177,8.61141],[45.81812,8.60624],[45.81563,8.6074],[45.81274,8.60698],[45.81059,8.60789],[45.80671,8.60686],[45.80479,8.60292],[45.80192,8.60104],[45.80007,8.59665],[45.79897,8.59596],[45.79894,8.59323],[45.80013,8.59175],[45.79843,8.58969],[45.79894,8.58753],[45.79763,8.58503],[45.80092,8.57787],[45.8011,8.57544],[45.80081,8.57217],[45.79822,8.56782],[45.79465,8.56881],[45.79202,8.56677],[45.78573,8.56423],[45.7833,8.5646],[45.77933,8.56326],[45.7744,8.56756],[45.77056,8.56878],[45.77127,8.57905],[45.77054,8.57829],[45.77142,8.57971],[45.77024,8.58185],[45.77085,8.58456],[45.76928,8.58309],[45.76936,8.58151],[45.76764,8.5788],[45.76561,8.57908],[45.7643,8.57783],[45.76256,8.57947],[45.76267,8.58093],[45.7607,8.5814],[45.76085,8.58254],[45.75965,8.58208],[45.7575,8.58432],[45.75434,8.58431],[45.75486,8.58856],[45.75256,8.59293],[45.7452,8.59608],[45.74499,8.59499],[45.74503,8.596],[45.74213,8.59712],[45.738,8.59656],[45.73328,8.598],[45.7342,8.60179],[45.73583,8.60411],[45.73481,8.60587],[45.73329,8.60692],[45.72994,8.60462],[45.72693,8.60568],[45.72661,8.61229],[45.7297,8.6168],[45.72921,8.61931],[45.72812,8.61996],[45.72385,8.61748],[45.72537,8.60143],[45.72501,8.59709],[45.72609,8.59731],[45.72381,8.59404],[45.7234,8.58655],[45.72243,8.58514],[45.72368,8.58626],[45.72378,8.58467],[45.72654,8.58305],[45.72835,8.58406],[45.72788,8.58198],[45.72847,8.58411],[45.73181,8.5813],[45.73211,8.57983],[45.73234,8.58089],[45.73513,8.58072],[45.73655,8.57954],[45.73816,8.58022],[45.74127,8.57609],[45.7421,8.57219],[45.74459,8.57026],[45.74628,8.56609],[45.7548,8.56879],[45.75445,8.56631],[45.75594,8.56095],[45.76031,8.56264],[45.76169,8.56205],[45.76931,8.5489],[45.77225,8.54563],[45.77465,8.54508],[45.77564,8.5434],[45.79141,8.53986],[45.79333,8.54173],[45.79654,8.538],[45.79902,8.53787],[45.80076,8.54158],[45.8064,8.54109],[45.80776,8.54366],[45.80911,8.54442],[45.81116,8.54371],[45.81547,8.54649],[45.81598,8.54834],[45.8137,8.55131],[45.81427,8.55817],[45.82132,8.56629],[45.82677,8.567],[45.83069,8.56518],[45.83681,8.5716],[45.84045,8.57396],[45.84538,8.57282],[45.85073,8.5701],[45.86412,8.56761],[45.87133,8.56445],[45.87741,8.5582],[45.88097,8.55265],[45.88381,8.54204],[45.88537,8.54043],[45.88605,8.53598],[45.89113,8.52538],[45.89002,8.52244],[45.89086,8.52011],[45.893,8.51895],[45.89353,8.51666],[45.89639,8.51497],[45.90051,8.51013],[45.90364,8.50891],[45.90486,8.50636],[45.90818,8.50573],[45.9095,8.50709],[45.91067,8.50693],[45.91408,8.50501],[45.91729,8.49897],[45.92462,8.48903],[45.92854,8.48056],[45.93147,8.4824],[45.93573,8.48844],[45.93509,8.49292],[45.93713,8.49521],[45.93846,8.49884],[45.93675,8.50726],[45.9389,8.50936],[45.9382,8.51026],[45.93974,8.51309],[45.9376,8.5166],[45.93085,8.53992],[45.92531,8.54651],[45.92168,8.54883],[45.92073,8.55377],[45.91698,8.55688],[45.91564,8.56076],[45.91901,8.56169],[45.92511,8.56642],[45.92715,8.56639],[45.92843,8.56767],[45.93015,8.5732],[45.93258,8.57054],[45.93122,8.5742],[45.93298,8.57469],[45.93143,8.57434],[45.93217,8.5728],[45.93425,8.57517],[45.93434,8.57357],[45.93584,8.57569],[45.93733,8.58029],[45.938,8.58023],[45.93765,8.58113],[45.93913,8.58196],[45.93992,8.58953],[45.94187,8.59147],[45.94588,8.60066],[45.951,8.60753],[45.95852,8.62069],[45.96485,8.62346],[45.97186,8.62842],[45.98268,8.64077],[45.98537,8.64136],[45.98844,8.64431],[45.99091,8.6482],[45.99132,8.65092],[45.9976,8.65582],[46.00543,8.65962],[46.01358,8.67006],[46.01893,8.67339],[46.02065,8.67602],[46.01844,8.68003],[46.01892,8.68234],[46.02281,8.68625],[46.0247,8.70009],[46.03045,8.7106],[46.03606,8.71114],[46.03887,8.70739],[46.04316,8.70699],[46.04769,8.70486],[46.05367,8.70673],[46.05656,8.70399],[46.05761,8.70426],[46.05961,8.70087],[46.06287,8.70018],[46.06232,8.70068],[46.06462,8.70094],[46.06657,8.6997],[46.06705,8.70079],[46.06731,8.69945],[46.06731,8.70089],[46.0681,8.70036],[46.06906,8.69885],[46.0679,8.69507],[46.07021,8.69819],[46.07239,8.693],[46.07646,8.69538],[46.07745,8.69386],[46.08298,8.69322],[46.086,8.69122],[46.09116,8.69183],[46.09175,8.6908],[46.09636,8.69419],[46.09896,8.69378],[46.1013,8.69716],[46.10452,8.69778],[46.11137,8.70409],[46.1119,8.70688],[46.11696,8.70892],[46.12028,8.71403],[46.12263,8.71331],[46.12367,8.7151],[46.12992,8.71697],[46.13489,8.72001],[46.14164,8.72865],[46.14578,8.73159],[46.14786,8.73467],[46.15102,8.74757],[46.15137,8.75262],[46.15416,8.76008],[46.15279,8.76322],[46.15475,8.76677],[46.15283,8.77057],[46.15117,8.77108],[46.14906,8.77403],[46.14548,8.78467],[46.14568,8.79203],[46.14787,8.79231],[46.14746,8.79445],[46.14843,8.794],[46.14806,8.79484],[46.14959,8.797],[46.15025,8.80285],[46.15329,8.80497],[46.15463,8.80073],[46.15488,8.80395],[46.1577,8.80358],[46.15857,8.80474],[46.15841,8.8022],[46.15929,8.8035],[46.15869,8.80474],[46.16319,8.80465],[46.16448,8.80347],[46.16486,8.8045],[46.16949,8.8011],[46.17061,8.80157]],[[46.038,9.142],[46.024,9.142],[46.022,9.1],[46.028,9.065],[46.022,9.042],[46.015,9.008],[46.009,8.985],[46.002,8.955],[46.007,8.928],[45.985,8.9],[45.972,8.878],[45.963,8.854],[45.956,8.868],[45.94,8.88],[45.92,8.89],[45.906,8.898],[45.899,8.92],[45.899,8.95],[45.902,8.975],[45.905,8.99],[45.918,8.985],[45.932,8.978],[45.945,8.972],[45.956,8.978],[45.966,8.99],[45.968,9.0],[45.958,9.002],[45.948,8.992],[45.942,8.978],[45.948,8.962],[45.96,8.952],[45.975,8.948],[45.988,8.948],[46.0,8.94],[46.012,8.96],[46.02,8.99],[46.026,9.02],[46.03,9.06],[46.033,9.1]]];
+return { COMUNI, VIE, TIPI, OSPEDALI, SEDI, MEZZI, VVF_SEDI, MEZZI_VVF, CHIAMATE, LAGHI };
+
+})();
+
+</script>
+<script>/* ===== src/app.js ===== */
+// COEU SIM - engine VA/CO/LC - mappa NON-OSM (CARTO + ESRI)
+window.COEUSIM = (() => {
+  const D = () => window.GAME_DATA;
+  let map, layerInterventi, layerMezzi, layerSedi, layerVVF, layerChiamate, layerRoutes;
+  let vvfOn = true;
+  let interventi = [];
+  let mezzi = [];
+  let chiamate = []; // chiamate in arrivo da accettare (una a una)
+  let highlightCall = null;
+  let idCounter = 1;
+  let callCounter = 1;
+  let selectedId = null;
+  let clockMin = 8*60; // 08:00
+  let speed = 4; // game-min per real-sec
+  let paused = false;
+  let autoInflow = false; // spento: le chiamate arrivano su richiesta (una a una)
+  let inflowTimer = 0;
+  let score = 0;
+  let chiusi = 0;
+  let contaColori = {1:0,2:0,3:0,4:0}; // codici classificati finora
+  let filters = { VA:true, CO:true, LC:true, P1:true, P2:true, P3:true, P4:true, soloAttesa:false, search:"" };
+  let markersInt = new Map();
+  let markersMz = new Map();
+  let sedeMarkers = []; // {marker, sede} 118 — tooltip con mezzi in sede
+  let vvfMarkers = []; // {marker, sede} VVF — tooltip con mezzi in sede
+  const PENALITA_MISSIONI_GROSSE = 0.5; // ogni mezzo richiesto oltre il primo dimezza la probabilità del tipo
+  let ultimiTipi = []; // nomi degli ultimi tipi generati (anti-ripetizione)
+  const STORICO_TIPI = 8; // quanti tipi recenti penalizzare
+  const PENALITA_RIPETIZIONE = 0.1; // peso ×0.1 se il tipo è uscito da poco
+
+  const $ = (id) => document.getElementById(id);
+  const rnd = (a,b) => a + Math.random()*(b-a);
+  const rndi = (a,b) => Math.floor(rnd(a,b+1));
+  const pickWeighted = (arr, wkey) => {
+    let tot = 0;
+    for (const o of arr) tot += (o[wkey] ?? o.peso ?? 1);
+    let r = Math.random()*tot;
+    for (const o of arr) { r -= (o[wkey] ?? o.peso ?? 1); if (r<=0) return o; }
+    return arr[arr.length-1];
+  };
+
+  function haversineKm(a,b,c,d){
+    const R=6371, toR=x=>x*Math.PI/180;
+    const dLat=toR(c-a), dLon=toR(d-b);
+    const s=Math.sin(dLat/2)**2 + Math.cos(toR(a))*Math.cos(toR(c))*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(s));
+  }
+
+  // punto in acqua? (laghi Como/Maggiore/Lugano) — niente interventi nel lago
+  function inAcqua(lat, lng){
+    const laghi = D().LAGHI || [];
+    for(const ring of laghi){
+      let dentro = false;
+      for(let i=0, j=ring.length-1; i<ring.length; j=i++){
+        const xi=ring[i][1], yi=ring[i][0], xj=ring[j][1], yj=ring[j][0];
+        if(((yi>lat)!==(yj>lat)) && (lng < (xj-xi)*(lat-yi)/(yj-yi)+xi)) dentro = !dentro;
+      }
+      if(dentro) return true;
+    }
+    return false;
+  }
+
+  function comuneRandom(provFilter=null){
+    const list = D().COMUNI.filter(c => !provFilter || c.p===provFilter);
+    return pickWeighted(list, "peso");
+  }
+
+  function nMezziRichiesti(t){
+    let n = 0; const m = t.mezzi || {};
+    for(const k in m) n += Math.max(0, m[k] || 0);
+    return n;
+  }
+
+  function tipoRandom(){
+    // pesata: peso base × modificatore meteo × penalità missioni grosse × anti-ripetizione
+    // (il meteo sposta le probabilità, non impone nulla; i tipi da tanti mezzi e quelli appena usciti escono più di rado)
+    const arr = D().TIPI;
+    let tot = 0;
+    const ws = arr.map(t=>{
+      const n = nMezziRichiesti(t);
+      const recent = ultimiTipi.includes(t.nome) ? PENALITA_RIPETIZIONE : 1;
+      const w = (t.peso||10)*((t.meteo&&t.meteo[meteo.cond])||1)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
+      tot+=w; return w;
+    });
+    let r = Math.random()*tot, t = arr[arr.length-1];
+    for(let i=0;i<arr.length;i++){ r-=ws[i]; if(r<=0){ t=arr[i]; break; } }
+    // memorizza per anti-ripetizione
+    ultimiTipi.push(t.nome);
+    if(ultimiTipi.length>STORICO_TIPI) ultimiTipi.shift();
+    // priorità secondo distribuzione del tipo
+    const [w1,w2,w3,w4] = t.prio;
+    const rp = Math.random()*100;
+    let p = 4;
+    if (rp < w1) p=1; else if (rp < w1+w2) p=2; else if (rp < w1+w2+w3) p=3;
+    return { tipo:t, prio:p };
+  }
+
+  function creaBozza(forceProv=null){
+    const provs = ["VA","CO","LC"].filter(p=>filters[p] || forceProv);
+    const prov = forceProv || provs[rndi(0,provs.length-1)] || "VA";
+    const c = comuneRandom(prov);
+    const { tipo, prio } = tipoRandom();
+    const via = D().VIE[rndi(0,D().VIE.length-1)];
+    const civ = rndi(1,180);
+    // jitter ~1.2km intorno al comune, ma mai in acqua (ricampiona fino a 12 volte)
+    let iLat = c.lat, iLng = c.lng;
+    for(let k=0;k<12;k++){
+      const tLat = c.lat + rnd(-0.011,0.011), tLng = c.lng + rnd(-0.014,0.014);
+      if(!inAcqua(tLat,tLng)){ iLat=tLat; iLng=tLng; break; }
+    }
+    // jitter ~1.2km intorno al comune
+    return {
+      tipoNome: tipo.nome, // VERO tipo: resta nascosto, si scopre a fine intervento
+      truePrio: prio,      // VERA priorità (nascosta: il tipo vero si rivela alla chiusura)
+      emoji: tipo.emoji,
+      dialogo: (D().CHIAMATE||{})[tipo.nome] || "«Aiuto, venite subito!»",
+      lat: iLat, lng: iLng,
+      indirizzo: `${via} ${civ}`,
+      comune: c.n, prov,
+      vvf: !!tipo.vvf, // VVF: senza gravità, mezzi a scelta libera dell'operatore
+      richiesti: { ...tipo.mezzi },
+      durata: rndi(tipo.durata[0], tipo.durata[1]),
+      trasporto: tipo.trasporto,
+      desc: tipo.desc,
+      t0: clockMin,
+      paziente: randomPaziente(),
+    };
+  }
+
+  // --- NUOVA CHIAMATA in arrivo (una a una): da accettare manualmente ---
+  function makeChiamata(forceProv=null){
+    if (chiamate.length >= 3){ toast("C'è già una coda di chiamate: accettane prima una"); return null; }
+    const b = creaBozza(forceProv);
+    const call = { ...b, callId: callCounter++ };
+    chiamate.unshift(call);
+    log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
+    blip();
+    toast("🔔 Nuova chiamata in arrivo!");
+    refreshCallMarkers();
+    renderCalls();
+    updateStats();
+    return call;
+  }
+  function nuovaChiamata(prov=null){ return makeChiamata(prov); }
+
+  // --- CLASSIFICA: scegli il codice colore -> diventa intervento attivo ---
+  // R = rosso(P1), G = giallo(P2), V = verde(P3), B = bianco(P4)
+  const COLORI = { R:{prio:1, nome:"ROSSO", col:"#d00000"}, G:{prio:2, nome:"GIALLO", col:"#e6a100"}, V:{prio:3, nome:"VERDE", col:"#35a835"}, B:{prio:4, nome:"BIANCO", col:"#888888"} };
+  function accettaChiamata(callId, colore){
+    const idx = chiamate.findIndex(c=>c.callId===callId);
+    if (idx<0) return false;
+    const call = chiamate.splice(idx,1)[0];
+    const isVVF = (colore==="VVF") || !!call.vvf;
+    const col = COLORI[colore] || COLORI.G;
+    const iv = {
+      id: idCounter++,
+      tipoNome: call.tipoNome, // vero tipo: nascosto fino a chiusura
+      truePrio: call.truePrio,
+      prio: isVVF ? 0 : col.prio, // 0 = senza codice (VVF)
+      vvf: isVVF,
+      lat: call.lat, lng: call.lng,
+      indirizzo: call.indirizzo, comune: call.comune, prov: call.prov,
+      stato: "attesa",
+      mezziIds: [],
+      richiesti: call.richiesti,
+      durata: call.durata,
+      tempoSulPosto: 0,
+      trasporto: call.trasporto,
+      dialogo: call.dialogo,
+      t0: clockMin, attesa: 0,
+      paziente: call.paziente,
+      emoji: call.emoji, desc: call.desc,
+      ospedale: null,
+    };
+    // classifica con il colore scelto (niente punti: il codice serve solo a gestire l'intervento)
+    // VVF: nessun codice, nessun conteggio nei codici classificati
+    if(!isVVF) contaColori[col.prio]=(contaColori[col.prio]||0)+1;
+    interventi.unshift(iv);
+    selectedId = iv.id;
+    highlightCall = null;
+    log(isVVF ? `🚒 Intervento VVF preso in carico a <b>${iv.comune}</b> (${iv.prov})` : `📞 Chiamata accettata <span class="prioDot" style="background:${col.col}"></span> a ${iv.comune} (${iv.prov})`);
+    refreshCallMarkers();
+    refreshMarkers();
+    renderCalls();
+    renderListe();
+    updateStats();
+    return true;
+  }
+  function COLORI_NOME(p){ return p===1?"ROSSO":p===2?"GIALLO":p===3?"VERDE":"BIANCO"; }
+
+  function rifiutaChiamata(callId){
+    const idx = chiamate.findIndex(c=>c.callId===callId);
+    if (idx<0) return;
+    const call = chiamate.splice(idx,1)[0];
+    log(`☎️ Chiamata da ${call.comune} (${call.prov}) annullata — falso allarme`);
+    refreshCallMarkers();
+    renderCalls();
+    updateStats();
+  }
+
+  function renderCalls(){
+    const box = $("callQueue");
+    if (box){
+      box.innerHTML = "";
+      if (chiamate.length===0){
+        box.innerHTML = `<div class="small" style="padding:6px">Nessuna chiamata in attesa.<br>Premi <b>📞 Nuova chiamata</b> oppure attiva l'<b>Afflusso</b>.</div>`;
+      } else {
+        const frag = document.createDocumentFragment();
+        for(const call of chiamate){
+          const div = document.createElement("div");
+          div.className = "callCard" + (call.callId===highlightCall ? " flash" : "");
+          div.id = "call-" + call.callId;
+          if (!call.answered){
+            // squilla: solo luogo e ora, il motivo NON si vede
+            div.innerHTML = `
+              <div class="intTop"><b>🔔 Chiamata in arrivo</b><span class="cod">${hhmm(call.t0)}</span></div>
+              <div class="intAddr">📍 ${call.indirizzo}, <b>${call.comune}</b> (${call.prov})</div>
+              <div class="callBtns"><button class="lstBtn small primary">Rispondi</button><button class="lstBtn small">Rifiuta</button></div>`;
+            const [ansBtn, refBtn] = div.querySelectorAll(".callBtns button");
+            ansBtn.onclick = ()=>{ call.answered = true; log(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); };
+            refBtn.onclick = ()=>rifiutaChiamata(call.callId);
+          } else {
+            // il richiedente parla: ora classifica il colore
+            div.innerHTML = `
+              <div class="intTop"><b>☎️ In linea</b><span class="cod">${hhmm(call.t0)}</span></div>
+              <div class="intAddr">📍 ${call.indirizzo}, <b>${call.comune}</b> (${call.prov})</div>
+              <div class="dialogo">${call.dialogo}</div>
+              ${call.vvf
+                ? '<div class="small" style="margin:4px 0">🚒 Vigili del Fuoco — senza codice gravità:</div><div class="colorBtns"><button class="lstBtn small primary" data-c="VVF">🚒 Prendi in carico</button></div>'
+                : '<div class="small" style="margin:4px 0">Classifica il codice:</div><div class="colorBtns"><button class="lstBtn small" data-c="R" style="border-left:6px solid #d00000">🔴 Rosso</button> <button class="lstBtn small" data-c="G" style="border-left:6px solid #e6a100">🟡 Giallo</button> <button class="lstBtn small" data-c="V" style="border-left:6px solid #35a835">🟢 Verde</button> <button class="lstBtn small" data-c="B" style="border-left:6px solid #888">⚪ Bianco</button></div>'}`;
+            div.querySelectorAll(".colorBtns button").forEach(b=>{
+              b.onclick = ()=>accettaChiamata(call.callId, b.dataset.c);
+            });
+          }
+          frag.appendChild(div);
+        }
+        box.innerHTML = "";
+        box.appendChild(frag);
+        if (highlightCall){
+          const el = box.querySelector("#call-"+highlightCall);
+          if (el) el.scrollIntoView({block:"nearest"});
+        }
+      }
+    }
+    if ($("callCount")) $("callCount").textContent = chiamate.length;
+  }
+
+  function refreshCallMarkers(){
+    if (!map || !layerChiamate) return;
+    layerChiamate.clearLayers();
+    for(const call of chiamate){
+      const mk = L.marker([call.lat,call.lng],{
+        icon: L.divIcon({className:'callIcon',
+          html:`<div class="callDot pulse">📞</div>`,
+          iconSize:[22,22], iconAnchor:[11,11]})
+      });
+      mk.bindTooltip(`🔔 Chiamata in arrivo<br>${call.indirizzo}, ${call.comune} (${call.prov})`);
+      mk.on('click', ()=>{ highlightCall = call.callId; renderCalls(); });
+      mk.addTo(layerChiamate);
+    }
+  }
+
+  function hhmm(t){ return `${String(Math.floor(t/60)).padStart(2,"0")}:${String(Math.floor(t%60)).padStart(2,"0")}`; }
+
+  function randomPaziente(){
+    const e = rndi(4,92);
+    const s = Math.random()<0.5?"M":"F";
+    const cosc = ["cosciente","cosciente, collaborante","incosciente","soporooso","agitato"][rndi(0,4)];
+    return `${e}a ${s}, ${cosc}`;
+  }
+
+  function generaN(n, prov=null){
+    for(let i=0;i<n;i++) makeChiamata(prov);
+  }
+
+  // ---------- MEZZI ----------
+  function initMezzi(){
+    mezzi = D().MEZZI.map((m,i)=>{
+      const sede = D().SEDI.find(s=>s.nome===m.sede) || D().SEDI[0];
+      return {
+        idx:i, codice:m.codice, tipo:m.tipo, sede:m.sede, prov:sede.prov, corpo:"118",
+        baseLat:sede.lat, baseLng:sede.lng,
+        lat:sede.lat+rnd(-0.004,0.004), lng:sede.lng+rnd(-0.004,0.004),
+        stato:"disponibile", interventoId:null,
+        targetLat:null, targetLng:null,
+        sulPostoTimer:0, ospedale:null,
+      };
+    });
+    // mezzi VVF: stanno nello stesso array (stesso routing/movimento), con corpo "VVF"
+    for(const m of (D().MEZZI_VVF||[])){
+      const sede = D().VVF_SEDI.find(s=>s.nome===m.sede) || D().VVF_SEDI[0];
+      mezzi.push({
+        idx:mezzi.length, codice:m.codice, tipo:m.tipo, radio:m.radio||null, sede:m.sede, prov:sede.prov, corpo:"VVF",
+        baseLat:sede.lat, baseLng:sede.lng,
+        lat:sede.lat+rnd(-0.004,0.004), lng:sede.lng+rnd(-0.004,0.004),
+        stato:"disponibile", interventoId:null,
+        targetLat:null, targetLng:null,
+        sulPostoTimer:0, ospedale:null,
+      });
+    }
+  }
+
+  function mezziDisponibili(tipoWanted=null, corpoWanted=null){
+    return mezzi.filter(m=>m.stato==="disponibile" && (!tipoWanted || m.tipo===tipoWanted) && (!corpoWanted || m.corpo===corpoWanted));
+  }
+
+  function nearestMezzo(lat,lng,tipoWanted=null,corpoWanted=null){
+    let best=null,bd=1e9;
+    for(const m of mezziDisponibili(tipoWanted,corpoWanted)){
+      const d=haversineKm(lat,lng,m.lat,m.lng);
+      if(d<bd){bd=d;best=m;}
+    }
+    // fallback: qualunque disponibile se tipo non trovato
+    if(!best && tipoWanted){
+      for(const m of mezziDisponibili(null,corpoWanted)){
+        const d=haversineKm(lat,lng,m.lat,m.lng);
+        if(d<bd){bd=d;best=m;}
+      }
+    }
+    return best;
+  }
+
+  function assegnaMezzo(mezzoCodice, interventoId){
+    const mz = mezzi.find(m=>m.codice===mezzoCodice);
+    const iv = interventi.find(x=>x.id===interventoId);
+    if(!mz||!iv) return false;
+    // con paziente a bordo non si dirotta
+    if(mz.stato==="trasporto"||mz.stato==="ospedale"){ toast(`${mz.codice} ha il paziente a bordo: non dirottabile`); return false; }
+    if(!["disponibile","viaggio","rientro","sul_posto"].includes(mz.stato)){ toast(`${mz.codice} non disponibile`); return false; }
+    if(iv.stato==="chiuso") return false;
+    // dirottamento: stacca dal vecchio intervento, riparte da dove si trova (nessun teletrasporto)
+    const dirottato = mz.interventoId!=null && mz.interventoId!==iv.id;
+    if(dirottato){
+      const old = interventi.find(x=>x.id===mz.interventoId);
+      if(old){
+        old.mezziIds = old.mezziIds.filter(c=>c!==mz.codice);
+        if(old.mezziIds.length===0 && old.stato!=="chiuso") old.stato="attesa";
+        checkChiusura(old);
+      }
+    }
+    mz.interventoId=iv.id; mz._t0=clockMin; mz.sulPostoTimer=0; mz.atteseFollow=0; mz.ospedale=null;
+    vaiA(mz, iv.lat, iv.lng, "viaggio");
+    if(!iv.mezziIds.includes(mz.codice)) iv.mezziIds.push(mz.codice);
+    if(iv.stato==="attesa") iv.stato="viaggio";
+    log(`${mz.corpo==="VVF"?"🚒":"🚑"} ${mz.codice} ${dirottato?"dirottato":"→"} #${iv.id}`);
+    refreshMarkers(); renderListe(); updateStats();
+    return true;
+  }
+
+  // ---------- ROUTING SU STRADE REALI (niente linea d'aria) ----------
+  const routeCache = new Map();
+  function cacheKey(a,b,c,d){ return [a,b,c,d].map(v=>v.toFixed(4)).join(","); }
+  async function fetchRoute(lat1,lng1,lat2,lng2){
+    const key = cacheKey(lat1,lng1,lat2,lng2);
+    if (routeCache.has(key)) return routeCache.get(key);
+    try{
+      const ctl = new AbortController();
+      const to = setTimeout(()=>ctl.abort(), 9000);
+      const url = `https://router.project-osrm.org/route/v1/driving/${lng1},${lat1};${lng2},${lat2}?overview=full&geometries=geojson&alternatives=false&steps=false`;
+      const r = await fetch(url, {signal: ctl.signal});
+      clearTimeout(to);
+      const j = await r.json();
+      if (j && j.code==="Ok" && j.routes && j.routes[0]){
+        const coords = j.routes[0].geometry.coordinates.map(p=>[p[1],p[0]]);
+        const res = {coords};
+        if (routeCache.size>400) routeCache.clear();
+        routeCache.set(key, res);
+        return res;
+      }
+    }catch(e){}
+    return null;
+  }
+  function setPath(mz, coords){
+    mz.path = coords;
+    mz.segLens = [];
+    for(let i=0;i<coords.length-1;i++) mz.segLens.push(haversineKm(coords[i][0],coords[i][1],coords[i+1][0],coords[i+1][1]));
+    mz.segIdx = 0; mz.segProg = 0;
+  }
+  // imposta destinazione: subito dritto (fallback), poi percorso stradale appena arriva (gli eli restano in linea d'aria)
+  function vaiA(mz, lat, lng, stato){
+    mz.stato = stato;
+    if(stato==="viaggio") mz.atteseFollow = 0; // nuova missione: azzera attese
+    mz.targetLat = lat; mz.targetLng = lng;
+    setPath(mz, [[mz.lat,mz.lng],[lat,lng]]);
+    if(isEli(mz)) { refreshRoutes(); return; } // elisoccorso: niente strade, dritto per dritto
+    const fromLat = mz.lat, fromLng = mz.lng;
+    const stillThere = () => mz.targetLat===lat && mz.targetLng===lng &&
+      (mz.stato==="viaggio"||mz.stato==="trasporto"||mz.stato==="rientro");
+    const apply = (res) => {
+      if (!res || !stillThere()) return false;
+      const full = [[mz.lat,mz.lng], ...res.coords.slice(1)];
+      setPath(mz, full);
+      refreshRoutes();
+      return true;
+    };
+    fetchRoute(fromLat, fromLng, lat, lng).then(res=>{
+      if (apply(res)) return;
+      // un solo retry dopo 5s (es. rate-limit temporaneo del servizio)
+      setTimeout(()=>{ fetchRoute(mz.lat, mz.lng, lat, lng).then(apply); }, 5000);
+    });
+  }
+  function advanceAlongPath(mz, stepKm){
+    if(!mz.path || mz.path.length<2 || !mz.segLens){
+      setPath(mz, [[mz.lat,mz.lng],[mz.targetLat,mz.targetLng]]);
+    }
+    let remaining = stepKm;
+    let guard = 0;
+    while(remaining>0 && mz.segIdx < mz.segLens.length && guard++<5000){
+      const segLen = mz.segLens[mz.segIdx];
+      if (segLen < 1e-9){ mz.segIdx++; mz.segProg=0; continue; }
+      const left = segLen - mz.segProg;
+      if(remaining < left){ mz.segProg += remaining; remaining=0; }
+      else { remaining -= left; mz.segIdx++; mz.segProg=0; }
+    }
+    if(mz.segIdx >= mz.segLens.length){ mz.lat=mz.targetLat; mz.lng=mz.targetLng; return true; }
+    const a=mz.path[mz.segIdx], b=mz.path[mz.segIdx+1];
+    const f=mz.segLens[mz.segIdx]>0?mz.segProg/mz.segLens[mz.segIdx]:1;
+    mz.lat=a[0]+(b[0]-a[0])*f; mz.lng=a[1]+(b[1]-a[1])*f;
+    if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.08) return true;
+    return false;
+  }
+
+  function autoAssegna(interventoId){
+    const iv = interventi.find(x=>x.id===interventoId);
+    if(!iv) return;
+    if(iv.vvf){ toast("🚒 Intervento VVF: scegli i mezzi a mano"); return; }
+    // prova a soddisfare richiesti: MSA, AUTOMEDICA, MSB in ordine
+    const ordine = ["AUTOMEDICA","MSA","MSB"];
+    let assegnati=0;
+    // conta già assegnati per tipo
+    const countByType = {};
+    for(const c of iv.mezziIds){
+      const m = mezzi.find(x=>x.codice===c);
+      if(m) countByType[m.tipo]=(countByType[m.tipo]||0)+1;
+    }
+    for(const t of ordine){
+      const need = (iv.richiesti[t]||0) - (countByType[t]||0);
+      for(let k=0;k<need;k++){
+        const mz = nearestMezzo(iv.lat,iv.lng,t,"118");
+        if(mz && assegnaMezzo(mz.codice, iv.id)){ assegnati++; countByType[t]=(countByType[t]||0)+1; }
+      }
+    }
+    // se ancora nessun mezzo e serve assistenza sanitaria, manda il più vicino qualsiasi (solo 118: i VVF si scelgono a mano)
+    const needTot = Object.values(iv.richiesti||{}).reduce((a,b)=>a+(b||0),0);
+    if(iv.mezziIds.length===0 && needTot>0){
+      const mz = nearestMezzo(iv.lat,iv.lng,null,"118");
+      if(mz){ assegnaMezzo(mz.codice, iv.id); assegnati++; }
+    }
+    if(assegnati===0) toast(needTot>0 ? "Nessun mezzo disponibile!" : "🚒 Nessun sanitario richiesto — apri i Vigili del Fuoco");
+    else{ toast(`Assegnati ${assegnati} mezzi all'intervento #${iv.id}`); iv.detailOpen=false; renderListe(); }
+  }
+
+  function rientraMezzo(codice){
+    const mz = mezzi.find(m=>m.codice===codice);
+    if(!mz) return;
+    const iv = interventi.find(x=>x.id===mz.interventoId);
+    if(iv){
+      iv.mezziIds = iv.mezziIds.filter(c=>c!==mz.codice);
+      // se era l'ultimo mezzo e intervento non chiuso, rimanda in attesa
+      if(iv.mezziIds.length===0 && iv.stato!=="chiuso"){
+        iv.stato="attesa";
+      }
+    checkChiusura(iv);
+    }
+    mz.ospedale=null; // interventoId resta finché arriva in sede (marker visibile durante il rientro)
+    vaiA(mz, mz.baseLat, mz.baseLng, "rientro");
+    log(`↩️ ${mz.codice} rientra in sede`);
+    refreshMarkers(); renderListe();
+  }
+
+  // MSA1/MSA2 = automediche: non trasportano il paziente (solo le ambulanze), al massimo seguono in ospedale
+  function isMedica(mz){ return /^MSA[12][\s_]/.test(mz.codice||""); }
+  // ELI = elisoccorso: vola in linea d'aria, fa da automedica E da ambulanza (trasporta)
+  function isEli(mz){ return mz.tipo==="ELI"; }
+  // ambulanza disegnata (SVG) per marker e tooltip; gli altri restano emoji
+  const AMB_SVG = `<svg viewBox="0 0 36 24" width="40" height="27" aria-hidden="true"><rect x="13" y="1.5" width="4" height="2.6" rx="1" fill="#2255ff"/><rect x="18" y="1.5" width="4" height="2.6" rx="1" fill="#d00000"/><rect x="2" y="4" width="21" height="12" rx="2" fill="#ffffff" stroke="#333" stroke-width="1.2"/><path d="M23 7 h4.5 l4.5 4.5 V16 h-9 z" fill="#ffffff" stroke="#333" stroke-width="1.2"/><path d="M24.2 8.2 h3.2 l3.4 3.4 h-6.6 z" fill="#8ec9ff"/><rect x="2" y="10.5" width="29.5" height="2.6" fill="#d00000"/><rect x="9" y="5.2" width="2.6" height="6" fill="#d00000"/><rect x="6.5" y="7" width="7.6" height="2.4" fill="#d00000"/><circle cx="9" cy="17.5" r="3" fill="#222"/><circle cx="9" cy="17.5" r="1.2" fill="#999"/><circle cx="26" cy="17.5" r="3" fill="#222"/><circle cx="26" cy="17.5" r="1.2" fill="#999"/></svg>`;
+  function iconFor(mz){
+    if(!mz) return "🚑";
+    if(mz.corpo==="VVF") return "🚒";
+    if(isEli(mz)) return "🚁";
+    if(mz.tipo==="AUTOMEDICA"||isMedica(mz)) return "🚓";
+    return AMB_SVG;
+  }
+
+  function mandaOspedale(codice){
+    const mz = mezzi.find(m=>m.codice===codice);
+    if(!mz) return;
+    if(mz.corpo==="VVF"){ toast("🚒 I VVF non fanno trasporti sanitari"); return; }
+    if(mz.tipo==="AUTOMEDICA"||isMedica(mz)){ toast("🚓 L'automedica non può trasportare: serve un'ambulanza"); return; }
+    const iv = interventi.find(x=>x.id===mz.interventoId);
+    // trova ospedale più vicino al mezzo
+    let best=D().OSPEDALI[0],bd=1e9;
+    for(const o of D().OSPEDALI){
+      const d=haversineKm(mz.lat,mz.lng,o.lat,o.lng);
+      if(d<bd){bd=d;best=o;}
+    }
+    mz.ospedale=best.nome;
+    vaiA(mz, best.lat, best.lng, "trasporto");
+    if(iv){ iv.stato="trasporto"; iv.ospedale=best.nome; }
+    log(`🏥 ${mz.codice} → ${best.nome}`);
+    // nei casi gravi (rosso/giallo) le automediche sul posto seguono l'ambulanza in PS
+    if(iv && iv.prio>=1 && iv.prio<=2){
+      for(const c of [...iv.mezziIds]){
+        const f = mezzi.find(m=>m.codice===c);
+        if(f && f!==mz && isMedica(f) && f.stato==="sul_posto") mandaFollowMedica(f, best.nome, mz.codice);
+      }
+    }
+    refreshMarkers(); renderListe();
+  }
+
+  // automedica al seguito dell'ambulanza in ospedale (senza paziente a bordo)
+  function mandaFollowMedica(mz, ospNome, ambCodice){
+    const o = (D().OSPEDALI||[]).find(x=>x.nome===ospNome) || D().OSPEDALI[0];
+    mz.ospedale = o.nome;
+    vaiA(mz, o.lat, o.lng, "trasporto");
+    log(`🚓 ${mz.codice} segue ${ambCodice} in PS (${o.nome})`);
+    refreshMarkers(); renderListe();
+  }
+
+  function checkChiusura(iv){
+    // chiudi se: nessun mezzo assegnato E (è stato gestito almeno una volta) oppure tutti i mezzi rientrati dopo sul_posto?
+    // Semplice: se nessun mezzo e iv.gestito => chiuso
+    if(iv.mezziIds.length===0 && iv.gestito){
+      iv.stato="chiuso";
+      chiusi++;
+      const attesaMin = Math.max(0, clockMin - iv.t0);
+      let pts = 100;
+      if(iv.prio===1 && attesaMin<6) pts+=50;
+      if(attesaMin>20) pts-=40;
+      if(attesaMin>40) pts-=60;
+      score+=pts;
+      log(`✅ Intervento #${iv.id} chiuso (+${pts}pt, attesa ${Math.round(attesaMin)}') — era: <b>${iv.tipoNome}</b>`);
+      interventi = interventi.filter(x=>x.id!==iv.id);
+      if(selectedId===iv.id) selectedId=null;
+      refreshMarkers(); renderListe(); updateStats();
+    }
+  }
+
+  // ---------- METEO: evolve col tempo, sposta le probabilità di ogni tipo ----------
+  let meteo = {cond:"Nuvoloso", temp:14};
+  let meteoTimer = 0;
+  const METEO_NEXT = {
+    Sereno:{temp:[18,28], next:{Sereno:65,Nuvoloso:25,Vento:10}},
+    Nuvoloso:{temp:[13,20], next:{Nuvoloso:50,Sereno:20,Pioggia:22,Vento:8}},
+    Pioggia:{temp:[9,16], next:{Pioggia:50,Nuvoloso:22,Temporale:16,Vento:12}},
+    Temporale:{temp:[11,18], next:{Temporale:30,Pioggia:42,Nuvoloso:18,Vento:10}},
+    Vento:{temp:[11,19], next:{Vento:38,Nuvoloso:30,Sereno:14,Temporale:18}},
+  };
+  const METEO_EMOJI = {Sereno:"☀️",Nuvoloso:"☁️",Pioggia:"🌧️",Temporale:"⛈️",Vento:"💨"};
+  function meteoUpdate(){
+    const el=$("wetter");
+    if(el) el.textContent=`${meteo.cond}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
+  }
+  function meteoTick(dtGameMin){
+    meteoTimer += dtGameMin;
+    meteo.temp += rnd(-0.15,0.15)*dtGameMin*0.2;
+    if(meteoTimer < 40+rnd(0,30)) return;
+    meteoTimer = 0;
+    const cfg = METEO_NEXT[meteo.cond] || METEO_NEXT.Nuvoloso;
+    let r = Math.random()*100, nc = meteo.cond;
+    for(const k of Object.keys(cfg.next)){ r-=cfg.next[k]; if(r<=0){ nc=k; break; } }
+    if(nc!==meteo.cond){ meteo.cond=nc; log(`🌦️ Meteo: ora <b>${nc}</b> — cambia il tipo di chiamate in arrivo`); }
+    const lim = cfg.temp; meteo.temp += (rnd(lim[0],lim[1])-meteo.temp)*0.4;
+    meteoUpdate();
+  }
+
+  // ---------- SIM TICK ----------
+  // libera il mezzo dalla scena e lo rimanda in sede (resta legato all'intervento finché arriva: marker visibile, niente sparizioni)
+  function rientraDaScena(mz, iv2){
+    if(iv2){ iv2.gestito=true; }
+    const ivId = mz.interventoId;
+    vaiA(mz, mz.baseLat, mz.baseLng, "rientro");
+    const ivv = interventi.find(x=>x.id===ivId);
+    if(ivv){
+      ivv.mezziIds=ivv.mezziIds.filter(c=>c!==mz.codice);
+      if(ivv.mezziIds.length===0){ ivv.gestito=true; checkChiusura(ivv); }
+    }
+  }
+  function tick(dtRealSec){
+    if(paused) return;
+    const dtGameMin = dtRealSec/60*speed*4; // speed 4 => ~16 game-sec per real-sec? tarato sotto
+    // Avanza orologio: speed = game-min per real-sec
+    clockMin += dtRealSec*speed/60;
+    if(clockMin>=24*60) clockMin-=24*60;
+    meteoTick(dtRealSec*speed/60);
+
+    // inflow automatico LENTO: le chiamate arrivano una a una nella coda,
+    // mai più di 2 in attesa — vanno accettate manualmente
+    if(autoInflow){
+      inflowTimer += dtRealSec*speed/60; // game-min trascorsi
+      const interval = 3; // game-min tra una chiamata e l'altra
+      if(inflowTimer>interval){
+        inflowTimer=0;
+        if(chiamate.length<2) makeChiamata();
+      }
+    }
+
+    // muovi mezzi
+    for(const mz of mezzi){
+      if(mz.stato==="viaggio"||mz.stato==="trasporto"||mz.stato==="rientro"){
+        // avanza lungo il percorso stradale (fallback dritto se manca); gli eli volano dritti e più veloci
+        const velKmh = isEli(mz) ? 180 : 55; // velocità media simulata
+        const gameHours = (dtRealSec*speed/60)/60;
+        const stepKm = velKmh*gameHours;
+        if (advanceAlongPath(mz, stepKm)){
+          // arrivato
+          mz.lat=mz.targetLat; mz.lng=mz.targetLng;
+          onArrivo(mz);
+        } else {
+          moveMarkerMz(mz);
+        }
+      } else if(mz.stato==="sul_posto"){
+        mz.sulPostoTimer -= dtRealSec*speed/60;
+        const iv = interventi.find(x=>x.id===mz.interventoId);
+        if(iv) iv.tempoSulPosto += dtRealSec*speed/60;
+        if(mz.sulPostoTimer<=0){
+          // fine sul posto: il paziente viaggia solo in ambulanza;
+          // MSA1/MSA2 non trasportano: nei casi gravi seguono l'ambulanza in PS, altrimenti rientrano (come VVF)
+          const iv2 = interventi.find(x=>x.id===mz.interventoId);
+          if(iv2 && iv2.trasporto && mz.corpo!=="VVF" && mz.tipo!=="AUTOMEDICA" && !isMedica(mz)){
+            mandaOspedale(mz.codice);
+          } else if(iv2 && isMedica(mz)){
+            const amb = mezzi.find(m=>m.interventoId===iv2.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="trasporto"||m.stato==="ospedale") && m.ospedale);
+            const ambInArrivo = !amb && iv2.trasporto && iv2.prio<=2 && mezzi.some(m=>m.interventoId===iv2.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"));
+            if(amb && iv2.prio<=2){
+              mandaFollowMedica(mz, amb.ospedale, amb.codice);
+            } else if(ambInArrivo && (mz.atteseFollow||0)<6){
+              mz.atteseFollow=(mz.atteseFollow||0)+1;
+              mz.sulPostoTimer = rnd(4,7); // aspetta che l'ambulanza parta per seguirla
+            } else {
+              mz.atteseFollow=0;
+              rientraDaScena(mz, iv2);
+            }
+          } else {
+            rientraDaScena(mz, iv2);
+          }
+          renderListe();
+        }
+      } else if(mz.stato==="ospedale"){
+        mz.sulPostoTimer -= dtRealSec*speed/60;
+        if(mz.sulPostoTimer<=0){
+          const ivId=mz.interventoId;
+          const ivv=interventi.find(x=>x.id===ivId);
+          if(ivv){ ivv.gestito=true; ivv.mezziIds=ivv.mezziIds.filter(c=>c!==mz.codice); if(ivv.mezziIds.length===0) checkChiusura(ivv); }
+          mz.ospedale=null; // interventoId resta finché arriva in sede
+          vaiA(mz, mz.baseLat, mz.baseLng, "rientro");
+          log(`↩️ ${mz.codice} libero da PS, rientra`);
+          renderListe();
+        }
+      }
+    }
+
+    // attesa interventi
+    for(const iv of interventi){
+      if(iv.stato==="attesa") iv.attesa = clockMin-iv.t0;
+    }
+
+    // refresh UI leggera ogni tick
+    updateClock();
+    // aggiorna posizioni marker mezzi ogni tick (già fatto per movimento) + clock stats ogni 2s
+    if(Math.floor(performance.now()/1000)%2===0){ updateStats(); }
+  }
+
+  function onArrivo(mz){
+    if(mz.stato==="rientro"){
+      mz.stato="disponibile"; mz.interventoId=null; mz.targetLat=null; mz._t0=null;
+      log(`🟢 ${mz.codice} disponibile in sede`);
+      refreshMarkers(); renderListe(); updateStats();
+      return;
+    }
+    if(mz.stato==="trasporto"){
+      mz.stato="ospedale"; mz.sulPostoTimer=rnd(4,9); // handover PS in game-min
+      log(`🏥 ${mz.codice} in PS (${mz.ospedale})`);
+      refreshMarkers(); renderListe();
+      return;
+    }
+    if(mz.stato==="viaggio"){
+      mz.stato="sul_posto";
+      const iv = interventi.find(x=>x.id===mz.interventoId);
+      if(iv){
+        iv.stato="sul_posto"; iv.gestito=true;
+        // durata sul posto = durata intervento (se più mezzi, usa max)
+        mz.sulPostoTimer = iv.durata * rnd(0.8,1.2);
+        if(!iv.reportFatto){ iv.reportFatto = true; reportScena(iv, mz); }
+        else log(`📍 ${mz.codice} sul posto (#${iv.id})`);
+      } else {
+        mz.sulPostoTimer=5;
+      }
+      refreshMarkers(); renderListe(); updateStats();
+    }
+  }
+
+  // --- REPORT DI SCENA: il primo mezzo arrivato descrive cosa ha trovato e chiede rinforzi se servono ---
+  // condizione del paziente senza età ("21a F, incosciente" -> "incosciente")
+  function condPaziente(iv){
+    if(!iv.paziente) return "";
+    const i = iv.paziente.indexOf(",");
+    return (i>=0 ? iv.paziente.slice(i+1) : iv.paziente).trim();
+  }
+  function reportScena(iv, mz){
+    // VVF: niente mezzi richiesti, l'operatore ha scelto liberamente — nessuna richiesta rinforzi
+    if(iv.vvf){
+      log(`🚒 ${mz.codice} sul posto a <b>${iv.comune}</b> — ${iv.emoji||""} <b>${iv.tipoNome}</b>: ${iv.desc||""}`);
+      log(`✅ ${mz.codice}: intervento in gestione, nessun altro mezzo richiesto`);
+      return;
+    }
+    const dot = `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>`;
+    log(`📍 ${dot} ${mz.codice} sul posto a <b>${iv.comune}</b> — ${iv.emoji||""} <b>${iv.tipoNome}</b>: ${iv.desc||""}${condPaziente(iv)?` (👤 ${condPaziente(iv)})`:""}`);
+    // confronta mezzi richiesti dal tipo con quelli effettivamente assegnati
+    const ass = mezzi.filter(m=>iv.mezziIds.includes(m.codice));
+    const conta = {};
+    for(const m of ass){
+      if(m.corpo==="VVF"){ conta.VVF=(conta.VVF||0)+1; continue; }
+      if(m.tipo==="ELI"){ conta.MSA=(conta.MSA||0)+1; conta.MSB=(conta.MSB||0)+1; conta.AUTOMEDICA=(conta.AUTOMEDICA||0)+1; continue; } // l'eli fa da ambulanza e automedica
+      conta[m.tipo]=(conta[m.tipo]||0)+1;
+    }
+    const mancano = [];
+    for(const k in (iv.richiesti||{})){
+      const need = Math.max(0, (iv.richiesti[k]||0)) - (conta[k]||0);
+      if(need>0) mancano.push(`${need}× ${k}`);
+    }
+    if(Object.keys(iv.richiesti||{}).length===0 && !(conta.VVF>0)) mancano.push("VVF");
+    if(mancano.length) log(`⚠️ ${mz.codice} chiede rinforzi a <b>${iv.comune}</b>: servono ${mancano.join(", ")}`);
+    else if(isMedica(mz) && iv.trasporto && iv.prio<=2 && mezzi.some(m=>m.interventoId===iv.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"))) log(`🚓 ${mz.codice}: aspetta l'ambulanza per seguirla in PS`);
+    else if(isMedica(mz) && iv.trasporto) log(`🚓 ${mz.codice}: l'ambulanza porterà il paziente in PS`);
+    else if(iv.trasporto) log(`🚑 ${mz.codice}: paziente da portare in PS a fine intervento, nessun altro mezzo necessario`);
+    else log(`✅ ${mz.codice}: situazione sotto controllo a <b>${iv.comune}</b>, nessun altro mezzo necessario`);
+  }
+
+ // ---------- MAPPA (NON OSM!) ----------
+ function initMap(){
+    // TUTTO ESRI, niente OSM standard, niente API key. Default: Karte (street) come LSTSim.
+    const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution:'Tiles © Esri', maxZoom:19 });
+    const esriSatBase = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution:'Imagery © Esri, Maxar, Earthstar Geographics', maxZoom:19 });
+    const esriSatRef = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom:19 });
+    const satGroup = L.layerGroup([esriSatBase, esriSatRef]);
+    map = L.map('mapEl', { center:[45.83,9.08], zoom:10, layers:[esriStreet] });
+    map._karte = esriStreet; map._sat = satGroup;
+    // niente selettore layer standard: si usano i bottoni Karte/Satellit in stile LSTSim
+
+    if (L.markerClusterGroup) {
+      layerInterventi = L.markerClusterGroup({ maxClusterRadius: 45, showCoverageOnHover: false });
+    } else {
+      layerInterventi = L.layerGroup();
+    }
+    layerInterventi.addTo(map);
+    layerMezzi = L.layerGroup().addTo(map);
+    layerSedi = L.layerGroup().addTo(map);
+
+    // sedi + ospedali statici
+    for(const s of D().SEDI){
+      const mk = L.marker([s.lat,s.lng],{
+        icon: L.divIcon({className:'sedeIcon', html:`<div class="sedeDot" title="${s.nome}">🏠</div>`, iconSize:[16,16], iconAnchor:[8,8]})
+      }).bindTooltip(sedeTooltipHTML(s.nome,false)).addTo(layerSedi);
+      sedeMarkers.push({marker:mk, sede:s});
+    }
+    for(const o of D().OSPEDALI){
+      L.marker([o.lat,o.lng],{
+        icon: L.divIcon({className:'ospIcon', html:`<div class="ospDot">H</div>`, iconSize:[14,14], iconAnchor:[7,7]})
+      }).bindTooltip(o.nome).addTo(layerSedi);
+    }
+    // sedi Vigili del Fuoco (marker rossi con popup indirizzo, posizioni reali)
+    layerVVF = L.layerGroup().addTo(map);
+    for(const v of (D().VVF_SEDI||[])){
+      const mk = L.marker([v.lat,v.lng],{
+        icon: L.divIcon({className:'vvfIcon', html:`<div class="vvfDot" title="${v.nome}">🚒</div>`, iconSize:[18,18], iconAnchor:[9,9]})
+      }).bindTooltip(sedeTooltipHTML(v.nome,true))
+        .bindPopup(`<div style="min-width:180px"><b>🚒 ${v.nome}</b><br>${v.addr ? v.addr + "<br>" : ""}${v.comune} (${v.prov})</div>`)
+        .addTo(layerVVF);
+      vvfMarkers.push({marker:mk, sede:v});
+    }
+    // chiamate in arrivo (marker gialli squillanti, una a una)
+    layerChiamate = L.layerGroup().addTo(map);
+    // percorsi stradali dei mezzi dell'intervento selezionato
+    layerRoutes = L.layerGroup().addTo(map);
+    map.fitBounds([[45.55,8.55],[46.18,9.50]]);
+  }
+
+  function toggleVVF(show){
+    vvfOn = !!show;
+    if(!map || !layerVVF) return vvfOn;
+    try{
+      if(vvfOn){ if(!map.hasLayer(layerVVF)) layerVVF.addTo(map); }
+      else { if(map.hasLayer(layerVVF)) map.removeLayer(layerVVF); }
+    }catch(e){}
+    return vvfOn;
+  }
+
+  function prioColor(p){ return p===1?"#d00000":p===2?"#e6a100":p===3?"#35a835":"#888888"; }
+  function _touchMz(mz){ mz._t0 = clockMin; }
+  function _clearMz(mz){ mz._t0 = null; }
+
+  // tooltip sede: nome + mezzi presenti in sede in questo momento (solo disponibili)
+  function sedeTooltipHTML(nome, isVVF){
+    const inSede = mezzi.filter(m=>m.stato==="disponibile"&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
+    let h = `<b>${isVVF?"🚒":"🏠"} ${nome}</b>`;
+    if(!inSede.length) h += `<br><span class="small">nessun mezzo in sede</span>`;
+    else for(const m of inSede.slice(0,12))
+      h += `<br>${iconFor(m)} ${m.radio||m.codice} (${m.tipo})`;
+    if(inSede.length>12) h += `<br><span class="small">+ altri ${inSede.length-12}</span>`;
+    return h;
+  }
+
+  function refreshMarkers(){
+    if(!map) return;
+    layerInterventi.clearLayers(); markersInt.clear();
+    const vis = filteredInterventi().slice(0,250); // max 250 marker per performance
+    for(const iv of vis){
+      if(iv.stato==="chiuso") continue;
+      const col = prioColor(iv.prio);
+      const pulse = iv.stato==="attesa" ? " pulse" : "";
+      const mk = L.marker([iv.lat,iv.lng],{
+        icon: L.divIcon({className:'intIcon',
+          html:`<div class="intDot${pulse}" style="border-color:${col};background:${col}22"></div>`,
+          iconSize:[30,30], iconAnchor:[15,15]})
+      });
+      mk.bindTooltip(`${iv.indirizzo}, ${iv.comune} (${iv.prov})<br>Stato: ${iv.stato}`);
+      mk.on('click', ()=>{ selectIntervento(iv.id); });
+      mk.addTo(layerInterventi);
+      markersInt.set(iv.id, mk);
+    }
+    // mezzi assegnati + in rientro (viaggiano visibili, niente sparizioni/teletrasporti)
+    layerMezzi.clearLayers(); markersMz.clear();
+    for(const mz of mezzi){
+      if(mz.interventoId==null) continue;
+      const isBusy = mz.stato!=="disponibile";
+      const mk = L.marker([mz.lat,mz.lng],{
+       icon: L.divIcon({className:'mzIcon',
+          html:`<div class="mzDot ${mz.stato}" title="${mz.codice} ${mz.stato}">${iconFor(mz)}</div>`,
+          iconSize:[52,52], iconAnchor:[26,26]})
+      });
+      mk.bindTooltip(`${mz.codice} (${mz.tipo})<br>${mz.sede} - ${mz.stato}${mz.interventoId?" → #"+mz.interventoId:""}`);
+      mk.addTo(layerMezzi);
+      markersMz.set(mz.codice, mk);
+    }
+    // tooltip sedi: mezzi presenti in sede in questo momento
+    for(const e of sedeMarkers){ try{ e.marker.setTooltipContent(sedeTooltipHTML(e.sede.nome,false)); }catch(_){} }
+    for(const e of vvfMarkers){ try{ e.marker.setTooltipContent(sedeTooltipHTML(e.sede.nome,true)); }catch(_){} }
+    refreshRoutes();
+  }
+
+  // linee blu: percorsi stradali dei mezzi sul caso selezionato
+  function refreshRoutes(){
+    if(!map || !layerRoutes) return;
+    layerRoutes.clearLayers();
+    if(selectedId==null) return;
+    for(const mz of mezzi){
+      if(mz.interventoId!==selectedId || !mz.path || mz.path.length<2) continue;
+      try{
+        L.polyline(mz.path, {color:"#0645ad", weight:3, opacity:0.75}).addTo(layerRoutes);
+      }catch(e){}
+    }
+  }
+
+  function moveMarkerMz(mz){
+    const mk = markersMz.get(mz.codice);
+    if(mk) mk.setLatLng([mz.lat,mz.lng]);
+  }
+
+  // ---------- FILTRI / LISTE ----------
+  function filteredInterventi(){
+    return interventi.filter(iv=>{
+      if(!filters[iv.prov]) return false;
+      if(iv.prio>0 && !filters["P"+iv.prio]) return false; // prio 0 = VVF senza codice: sempre visibile
+      if(filters.soloAttesa && iv.stato==="chiuso") return false;
+      if(filters.soloAttesa && !(iv.stato==="attesa"||iv.stato==="viaggio")) return false;
+      if(filters.search){
+        const s=filters.search.toLowerCase();
+        const hay=`${iv.comune} ${iv.indirizzo} ${iv.dialogo||""}`.toLowerCase();
+        if(!hay.includes(s)) return false;
+      }
+      return true;
+    }).sort((a,b)=>{
+      // attesa prima, poi priorità (rosso→bianco), poi recenti
+      const rank = s=> s==="attesa"?0 : s==="viaggio"?1 : s==="sul_posto"?2 : s==="trasporto"?3 : 4;
+      if(rank(a.stato)!==rank(b.stato)) return rank(a.stato)-rank(b.stato);
+      const pa=a.prio||4, pb=b.prio||4; if(pa!==pb) return pa-pb; // VVF senza codice in fondo
+      return b.id-a.id;
+    });
+  }
+
+  function statoLabel(s){
+    return {attesa:"IN ATTESA", viaggio:"IN VIAGGIO", sul_posto:"SUL POSTO", trasporto:"TRASPORTO", chiuso:"CHIUSO", disponibile:"LIBERO", rientro:"RIENTRO", ospedale:"IN PS"}[s]||s;
+  }
+
+  function stNum(s){
+    // numerino stile LSTSim (S1..S8) per la casellina colorata
+    return {disponibile:"1", viaggio:"3", sul_posto:"4", trasporto:"7", ospedale:"8", rientro:"2", attesa:"0", chiuso:"6"}[s] ?? "?";
+  }
+
+  function renderListe(){
+    // interventi in corso (solo indirizzi, in alto a destra)
+    const list = filteredInterventi();
+    const aperti = list.filter(i=>i.stato!=="chiuso");
+    const el = $("intTopList");
+    if(el){
+      el.innerHTML = "";
+      const frag = document.createDocumentFragment();
+      for(const iv of list.slice(0,200)){
+        const div = document.createElement("div");
+        div.className = "intRow" + (iv.id===selectedId?" sel":"");
+        const badge = iv.vvf ? `<span title="Senza codice — VVF">🚒</span>` : `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>`;
+        div.innerHTML = badge + `<span>📍 ${iv.indirizzo}, <b>${iv.comune}</b> (${iv.prov})</span>`;
+        div.title=`#${iv.id} — ${statoLabel(iv.stato)} — ${iv.mezziIds.join(", ")||"nessun mezzo"}`;
+        div.onclick = ()=>selectIntervento(iv.id);
+        frag.appendChild(div);
+      }
+      if(aperti.length===0){
+        const d=document.createElement("div");
+        d.className="small"; d.style.padding="4px 6px"; d.style.color="#555";
+        d.textContent="Nessun intervento in corso.";
+        frag.appendChild(d);
+      }
+      el.appendChild(frag);
+    }
+    if($("intCount")) $("intCount").textContent = `${aperti.length} aperti / ${list.length}`;
+
+    // mezzi (solo 118: i VVF si scelgono dal dettaglio intervento)
+    const mzEl = $("mzList");
+    if(mzEl){
+      mzEl.innerHTML="";
+      const f2 = document.createDocumentFragment();
+      const mezzi118 = mezzi.filter(m=>m.corpo!=="VVF");
+      for(const mz of mezzi118){
+        const d=document.createElement("div");
+        d.className="mzCard "+mz.stato + (mz.codice===selMz?" selMz":"");
+        d.innerHTML=`<span class="code">${mz.codice}</span><span class="stBox st-${mz.stato}">${stNum(mz.stato)}</span>`;
+        d.title=`${mz.codice} (${mz.tipo}) — ${mz.sede} — ${statoLabel(mz.stato)}${mz.interventoId?" → #"+mz.interventoId:""}`;
+        d.onclick=()=>{ selMz=mz.codice; showMzDetail(mz.codice); renderListe(); };
+        f2.appendChild(d);
+      }
+      mzEl.appendChild(f2);
+      const disp = mezzi118.filter(m=>m.stato==="disponibile").length;
+      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}`;
+    }
+    if(selMz) showMzDetail(selMz);
+    renderDetail();
+  }
+
+  function selectIntervento(id){
+    selectedId=id;
+    const _iv = interventi.find(x=>x.id===id);
+    if(_iv) _iv.detailOpen=true;
+    renderListe();
+    const iv = interventi.find(x=>x.id===id);
+    if(iv && map){ try{ map.panTo([iv.lat,iv.lng], {animate:true}); }catch(e){} }
+  }
+
+  let selMz = null;
+  function showMzDetail(codice){
+    const box = $("mzDetail");
+    const mz = mezzi.find(m=>m.codice===codice);
+    if(!box) return;
+    if(!mz){ box.innerHTML = `<span class="small">Seleziona un mezzo.</span>`; return; }
+    const iv = interventi.find(x=>x.id===mz.interventoId);
+    box.innerHTML = `
+      <div><b class="code" style="color:#0645ad">${mz.codice}</b> <span class="stBox st-${mz.stato}">${stNum(mz.stato)}</span>
+      <span class="small"> ${mz._t0!=null?Math.max(0,Math.round((clockMin-mz._t0)*60))+"s":""} · ${mz.tipo}</span></div>
+      <div class="kv"><b>Posizione:</b> ${mz.sede} ${mz.stato!=="disponibile"&&iv?"→ #"+iv.id:""}</div>
+      <div class="kv"><b>Ospedale:</b> ${mz.ospedale||"—"}</div>
+      <div style="margin-top:4px; display:flex; gap:4px;">
+        <button class="lstBtn small" id="mzPsBtn">🏥 PS</button>
+        <button class="lstBtn small" id="mzReBtn">↩️ Rientra</button>
+      </div>`;
+    const pb = $("mzPsBtn"), rb = $("mzReBtn");
+    if(pb) pb.onclick=()=>mandaOspedale(mz.codice);
+    if(rb) rb.onclick=()=>rientraMezzo(mz.codice);
+  }
+
+  function renderDetail(){
+    const box = $("detailBox");
+    if(!box) return;
+    const iv = interventi.find(x=>x.id===selectedId);
+    if(!iv){ box.innerHTML = `<div class="hint">👈 Clicca un indirizzo qui sopra oppure un marker sulla mappa per aprire l'intervento.<br><br>Le nuove chiamate arrivano in <b>Chiamate</b>: premi <b>Allarma</b> per inviare i mezzi più vicini.</div>`; if($("incTimer")) $("incTimer").textContent=""; return; }
+    // dettaglio ridotto: solo comune (click per riaprire)
+    if(iv.detailOpen===false){
+      box.innerHTML = `
+        <div class="detTitle addrLink" id="addrLink" title="Clicca per aprire i dettagli">${iv.comune} ${iv.vvf ? '<span class="small">🚒</span>' : '<span class="prioDot" style="background:' + prioColor(iv.prio) + '"></span>'}</div>
+      `;
+      if($("incTimer")) $("incTimer").textContent="";
+      const al=$("addrLink");
+      if(al) al.onclick=()=>{ iv.detailOpen=true; renderListe(); };
+      return;
+    }
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF");
+    const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF");
+    const waitS = Math.max(0, Math.round((clockMin-iv.t0)*60));
+    box.innerHTML = `
+      <div class="detTitle">📍 ${iv.indirizzo}, ${iv.comune} (${iv.prov}) ${iv.vvf ? '<span class="small">🚒 senza codice</span>' : '<span class="prioDot" style="background:' + prioColor(iv.prio) + '"></span>'}</div>
+      <div class="detBtns">
+        ${iv.vvf ? "" : '<button class="lstBtn primary" id="autoBtn">Allarma (' + iv.mezziIds.length + ')</button>'}
+        <button class="lstBtn" id="editBtn">Chiudi intervento</button>
+        <button class="lstBtn" id="mapBtn">Mostra su mappa</button>
+        <button class="lstBtn" id="foldBtn">🔼 Riduci</button>
+      </div>
+      <div class="kv"><b>Stato:</b> ${statoLabel(iv.stato)}</div>
+      <div class="dialogo">☎️ Richiedente: ${iv.dialogo}</div>
+      <div class="kv"><b>Mezzi assegnati:</b> ${iv.mezziIds.map(c=>'<span class="prioDot" style="background:' + prioColor(iv.prio) + '" title="Codice ' + (iv.vvf ? "VVF senza codice" : COLORI_NOME(iv.prio)) + '"></span> ' + c).join(" · ")||"—"}</div>
+      <div id="onScene"></div>
+      <div class="small" style="margin:4px 0">${iv.vvf ? "Scegli liberamente i mezzi da inviare (118 e/o VVF, senza vincoli):" : "Spunta i mezzi da inviare (ordinati per distanza):"}</div>
+      <div class="selGrid" id="selGrid"></div>
+      <button class="lstBtn primary" id="sendSelBtn">🚀 Invia selezionati (0)</button>
+      <details class="vvfSec" id="vvfSec">
+        <summary>🚒 Vigili del Fuoco <span class="small">— distaccamenti in ordine di distanza</span></summary>
+        <div id="vvfGrid"></div>
+        <button class="lstBtn primary" id="sendVvfBtn">🚀 Invia VVF selezionati (0)</button>
+      </details>
+    `;
+    if($("incTimer")) $("incTimer").textContent = waitS+"s";
+    const ab=$("autoBtn"), eb=$("editBtn"), mb=$("mapBtn"), fb=$("foldBtn");
+    if(ab) ab.onclick=()=>autoAssegna(iv.id);
+    if(eb) eb.onclick=()=>{
+      iv.stato="chiuso"; iv.gestito=true; chiusi++; score+=50;
+      for(const c of [...iv.mezziIds]){ const m=mezzi.find(x=>x.codice===c); if(m){ vaiA(m, m.baseLat, m.baseLng, "rientro"); } }
+      iv.mezziIds=[];
+      log(`✅ Intervento #${iv.id} chiuso manualmente — era: <b>${iv.tipoNome}</b>`);
+      interventi = interventi.filter(x=>x.id!==iv.id);
+      selectedId=null;
+      refreshMarkers(); renderListe(); updateStats();
+    };
+    if(mb) mb.onclick=()=>{ if(map) map.panTo([iv.lat,iv.lng]); };
+    if(fb) fb.onclick=()=>{ iv.detailOpen=false; renderListe(); };
+    const sg=$("selGrid"), sendBtn=$("sendSelBtn");
+    const byDist = disp.map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
+      .sort((a,b)=>a.d-b.d).slice(0,40);
+    const updCount = ()=>{
+      const n = sg.querySelectorAll("input:checked").length;
+      sendBtn.textContent = `🚀 Invia selezionati (${n})`;
+    };
+    for(const {mz, d} of byDist){
+      const lab=document.createElement("label");
+      const cb=document.createElement("input");
+      cb.type="checkbox"; cb.value=mz.codice;
+      cb.onchange=updCount;
+      lab.appendChild(cb);
+      const sp=document.createElement("span");
+      sp.innerHTML=` <b>${mz.codice}</b> (${mz.tipo}) ${mz.sede} — ${d.toFixed(1)} km`;
+      lab.appendChild(sp);
+      lab.title=`${mz.codice} — ${mz.tipo} — ${mz.sede}`;
+      sg.appendChild(lab);
+    }
+    if(disp.length===0) sg.innerHTML=`<div class="small">Nessun mezzo libero.</div>`;
+    // già impegnati ma dirottabili: ripartono da dove si trovano
+    const busy = mezzi.filter(m=>m.corpo!=="VVF"&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto"))
+      .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
+      .sort((a,b)=>a.d-b.d).slice(0,10);
+    if(busy.length){
+      const sep=document.createElement("div");
+      sep.className="small"; sep.style.margin="4px 0";
+      sep.textContent="↩️ Già impegnati — spunta per dirottarli (ripartono da dove sono):";
+      sg.appendChild(sep);
+      for(const {mz, d} of busy){
+        const lab=document.createElement("label");
+        const cb=document.createElement("input");
+        cb.type="checkbox"; cb.value=mz.codice;
+        cb.onchange=updCount;
+        lab.appendChild(cb);
+        const sp=document.createElement("span");
+        const stTxt = mz.stato==="viaggio"?"in viaggio":mz.stato==="rientro"?"in rientro":"sul posto";
+        sp.innerHTML=` <b>${mz.codice}</b> (${mz.tipo}) 🟠 ${stTxt} — ${d.toFixed(1)} km`;
+        lab.appendChild(sp);
+        lab.title=`${mz.codice} — ${stTxt} — dirottabile, riparte da dove si trova`;
+        sg.appendChild(lab);
+      }
+    }
+    sendBtn.onclick=()=>{
+      const checked=[...sg.querySelectorAll("input:checked")].map(i=>i.value);
+      if(checked.length===0){ toast("Spunta almeno un mezzo!"); return; }
+      let ok=0;
+      for(const cod of checked){ if(assegnaMezzo(cod, iv.id)) ok++; }
+      if(ok>0){ iv.detailOpen=false; renderListe(); }
+      toast(ok>0 ? `🚀 Inviati ${ok} mezzi all'intervento #${iv.id}` : "Nessun mezzo inviato");
+    };
+    // ---- sezione VVF: distaccamenti ordinati per distanza, con i loro mezzi ----
+    const vg=$("vvfGrid"), sendVvfBtn=$("sendVvfBtn");
+    if(vg && sendVvfBtn){
+      vg.innerHTML="";
+      const gruppi = new Map(); // sede -> {sede, d, mezzi[]}
+      for(const mz of dispVVF){
+        const s = D().VVF_SEDI.find(x=>x.nome===mz.sede);
+        const d = s ? haversineKm(iv.lat,iv.lng,s.lat,s.lng) : haversineKm(iv.lat,iv.lng,mz.lat,mz.lng);
+        if(!gruppi.has(mz.sede)) gruppi.set(mz.sede, {sede:mz.sede, prov:mz.prov, d, mezzi:[]});
+        gruppi.get(mz.sede).mezzi.push(mz);
+      }
+      const ordinati=[...gruppi.values()].sort((a,b)=>a.d-b.d);
+      const updVvfCount = ()=>{
+        const n = vg.querySelectorAll("input:checked").length;
+        sendVvfBtn.textContent = `🚀 Invia VVF selezionati (${n})`;
+      };
+      for(const g of ordinati){
+        const gh=document.createElement("div");
+        gh.className="vvfGroup";
+        gh.innerHTML=`🚒 <b>${g.sede}</b> <span class="small">(${g.prov}) — ${g.d.toFixed(1)} km</span>`;
+        vg.appendChild(gh);
+        for(const mz of g.mezzi){
+          const lab=document.createElement("label");
+          const cb=document.createElement("input");
+          cb.type="checkbox"; cb.value=mz.codice;
+          cb.onchange=updVvfCount;
+          lab.appendChild(cb);
+          const sp=document.createElement("span");
+          sp.innerHTML=` <b>${mz.radio||mz.codice}</b> (${mz.tipo})`;
+          lab.appendChild(sp);
+          lab.title=`${mz.radio||mz.codice} — ${mz.tipo} — ${mz.sede}`;
+          vg.appendChild(lab);
+        }
+      }
+      if(ordinati.length===0) vg.innerHTML=`<div class="small">Nessun mezzo VVF libero.</div>`;
+      // VVF impegnati ma dirottabili
+      const busyVVF = mezzi.filter(m=>m.corpo==="VVF"&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto"))
+        .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
+        .sort((a,b)=>a.d-b.d).slice(0,10);
+      if(busyVVF.length){
+        const sep=document.createElement("div");
+        sep.className="small"; sep.style.margin="4px 0";
+        sep.textContent="↩️ VVF impegnati — spunta per dirottarli (ripartono da dove sono):";
+        vg.appendChild(sep);
+        for(const {mz, d} of busyVVF){
+          const lab=document.createElement("label");
+          const cb=document.createElement("input");
+          cb.type="checkbox"; cb.value=mz.codice;
+          cb.onchange=updVvfCount;
+          lab.appendChild(cb);
+          const sp=document.createElement("span");
+          const stTxt = mz.stato==="viaggio"?"in viaggio":mz.stato==="rientro"?"in rientro":"sul posto";
+          sp.innerHTML=` <b>${mz.radio||mz.codice}</b> (${mz.tipo}) 🟠 ${stTxt} — ${d.toFixed(1)} km`;
+          lab.appendChild(sp);
+          lab.title=`${mz.radio||mz.codice} — ${stTxt} — dirottabile`;
+          vg.appendChild(lab);
+        }
+      }
+      sendVvfBtn.onclick=()=>{
+        const checked=[...vg.querySelectorAll("input:checked")].map(i=>i.value);
+        if(checked.length===0){ toast("Spunta almeno un mezzo VVF!"); return; }
+        let ok=0;
+        for(const cod of checked){ if(assegnaMezzo(cod, iv.id)) ok++; }
+        if(ok>0){ iv.detailOpen=false; renderListe(); }
+        toast(ok>0 ? `🚒 Inviati ${ok} mezzi VVF all'intervento #${iv.id}` : "Nessun mezzo inviato");
+      };
+    }
+    const os=$("onScene");
+    os.innerHTML="";
+    for(const c of iv.mezziIds){
+      const mz=mezzi.find(x=>x.codice===c);
+      if(!mz) continue;
+      const row=document.createElement("div"); row.className="onSceneRow";
+      row.innerHTML=`<span>${iconFor(mz)} <b>${mz.codice}</b> <span class="stBox st-${mz.stato}">${stNum(mz.stato)}</span></span>`;
+      if(mz.corpo!=="VVF" && mz.tipo!=="AUTOMEDICA" && !isMedica(mz)){ const b1=document.createElement("button"); b1.className="lstBtn small"; b1.textContent="🏥";
+        b1.onclick=()=>mandaOspedale(mz.codice); row.appendChild(b1); }
+      const b2=document.createElement("button"); b2.className="lstBtn small"; b2.textContent="↩️";
+      b2.onclick=()=>rientraMezzo(mz.codice);
+      row.appendChild(b2); os.appendChild(row);
+    }
+  }
+
+  // ---------- UI helpers ----------
+  function log(msg){
+    const el=$("logBox"); if(!el) return;
+    const hh=String(Math.floor(clockMin/60)).padStart(2,"0"), mm=String(Math.floor(clockMin%60)).padStart(2,"0"), ss=String(Math.floor((clockMin%1)*60)).padStart(2,"0");
+    const div=document.createElement("div");
+    if(msg.includes("chiede rinforzi")) div.className="crit"; // richieste di supporto: rosso nel Radio
+    div.innerHTML=`<span class="lt">${hh}:${mm}:${ss}</span> ${msg}`;
+    el.prepend(div);
+    while(el.children.length>120) el.lastChild.remove();
+  }
+  function toast(msg){
+    const el=$("toast"); if(!el) return;
+    el.textContent=msg; el.hidden=false;
+    clearTimeout(el._t); el._t=setTimeout(()=>el.hidden=true,2200);
+  }
+  function blip(){
+    try{
+      const ctx = window._ac || (window._ac = new (window.AudioContext||window.webkitAudioContext)());
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=880; g.gain.value=0.06;
+      o.start(); o.stop(ctx.currentTime+0.18);
+    }catch(e){}
+  }
+  function updateClock(){
+    const t=`${String(Math.floor(clockMin/60)).padStart(2,"0")}:${String(Math.floor(clockMin%60)).padStart(2,"0")}`;
+    const tS=`${String(Math.floor(clockMin/60)).padStart(2,"0")}:${String(Math.floor(clockMin%60)).padStart(2,"0")}:${String(Math.floor((clockMin%1)*60)).padStart(2,"0")}`;
+    if($("clockEl")) $("clockEl").textContent=t;
+    if($("icoClock")) $("icoClock").textContent=t;
+    if($("funkClock")) $("funkClock").textContent=tS;
+  }
+  function updateStats(){
+    const aperti = interventi.filter(i=>i.stato!=="chiuso").length;
+    const attesa = interventi.filter(i=>i.stato==="attesa").length;
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF").length;
+    const tot118 = mezzi.filter(m=>m.corpo!=="VVF").length;
+    if($("statAperti")) $("statAperti").textContent=aperti;
+    if($("statAttesa")) $("statAttesa").textContent=attesa;
+    if($("statMezzi")) $("statMezzi").textContent=`${disp}/${tot118}`;
+    if($("statScore")) $("statScore").textContent=score;
+    if($("statChiusi")) $("statChiusi").textContent=chiusi;
+    if($("statC1")) $("statC1").textContent=contaColori[1]||0;
+    if($("statC2")) $("statC2").textContent=contaColori[2]||0;
+    if($("statC3")) $("statC3").textContent=contaColori[3]||0;
+    if($("statC4")) $("statC4").textContent=contaColori[4]||0;
+    if($("icoMz")) $("icoMz").textContent=disp;
+    if($("icoInt")) $("icoInt").textContent=attesa;
+    updateClock(); meteoUpdate();
+  }
+
+  // ---------- BOOT ----------
+  function boot(){
+    initMezzi();
+    initMap();
+    renderCalls(); renderListe(); updateStats(); updateClock();
+    log("Centrale COEU SIM VA/CO/LC — inizio turno. Mezzi pronti.");
+    log("📞 Premi 'Nuova chiamata' per far squillare il telefono (o attiva l'Afflusso).");
+    let last=performance.now();
+    setInterval(()=>{
+      const now=performance.now();
+      const dt=(now-last)/1000; last=now;
+      tick(Math.min(2,dt));
+      // refresh marker mezzi ogni ~1s (posizioni già aggiornate in tick)
+      if(!paused) refreshMezziOnly();
+    },1000);
+    // refresh completo marker interventi ogni 5s (nuovi/priorità)
+    setInterval(()=>{ if(!paused) refreshMarkers(); },5000);
+  }
+
+  function refreshMezziOnly(){
+    if(!map) return;
+    // aggiorna solo posizioni per fluidità senza ricreare tutto
+    for(const mz of mezzi) moveMarkerMz(mz);
+  }
+
+  function switchBase(which){
+    if(!map) return;
+    try{
+      if(which==="sat"){ map.removeLayer(map._karte); map._sat.addTo(map); }
+      else { map.removeLayer(map._sat); map._karte.addTo(map); }
+      setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },200);
+    }catch(e){}
+  }
+
+  return {
+    boot, generaN, nuovaChiamata, accettaChiamata, rifiutaChiamata,
+    autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
+    switchBase, toggleVVF,
+    get filters(){return filters;},
+    setFilter(k,v){filters[k]=v; refreshMarkers(); renderListe();},
+    setSearch(s){filters.search=s; renderListe(); refreshMarkers();},
+    togglePause(){paused=!paused; return paused;},
+    isPaused(){return paused;},
+    setSpeed(v){speed=v;},
+    getSpeed(){return speed;},
+    toggleInflow(){autoInflow=!autoInflow; return autoInflow;},
+    isInflow(){return autoInflow;},
+    setMeteo(c){ if(METEO_NEXT[c]){ meteo.cond=c; meteoTimer=0; meteoUpdate(); return true; } return false; },
+    getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
+    chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
+    reset(){ interventi=[]; chiamate=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
+    listMezziCodici(){ return mezzi.map(m=>m.codice); },
+    __dbg(){ return {cache: routeCache.size, roadPaths: mezzi.filter(m=>m.path&&m.path.length>2).map(m=>m.codice+":"+m.path.length)}; },
+  };
+})();
+
+</script>
+<script>
+  function setSpeedX(v, btn){
+    COEUSIM.setSpeed(v);
+    document.querySelectorAll(".spdBtn").forEach(b=>b.classList.toggle("on", b===btn));
+  }
+  function togglePause(btn){
+    const p = COEUSIM.togglePause();
+    btn.textContent = p ? "Riprendi" : "Pausa";
+    btn.classList.toggle("active", p);
+  }
+  function toggleInflow(btn){
+    const on = COEUSIM.toggleInflow();
+    btn.textContent = on ? "Afflusso: ON" : "Afflusso: OFF";
+  }
+  function switchBase(which){
+    if(window.COEUSIM && COEUSIM.switchBase) COEUSIM.switchBase(which);
+    document.getElementById("karteBtn").classList.toggle("on", which==="karte");
+    document.getElementById("satBtn").classList.toggle("on", which==="sat");
+  }
+  window.addEventListener("load", ()=>{ COEUSIM.setSpeed(1); COEUSIM.boot(); });
+</script>
+
+</body>
+</html>
