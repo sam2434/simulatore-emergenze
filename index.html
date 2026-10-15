@@ -1,4 +1,3 @@
-<meta name="google-site-verification" content="PICTgxcHf9N_fN3erREchtgUf2RvFgv3HFdqCCLb9Yk" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -130,8 +129,20 @@
     <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span id="clockEl">08:00</span></div>
     <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
     <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
+    <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
     <button class="lstBtn" onclick="if(confirm('Reset totale?'))COEUSIM.reset()">Reset</button>
     <button class="lstBtn" onclick="document.getElementById('helpDlg').showModal()">Aiuto</button>
+  </div>
+
+  <div id="fascePanel" class="lstPanel" hidden style="margin-top:6px; padding:6px 8px;">
+    <b>⏰ Fasce orarie</b> <span class="small">— cosa esce di più in ogni fascia (ora di gioco in alto nella Radio). Ambulanza, Maxiemergenza e MANV: numero da <b>0,5</b> a <b>10</b> (<b>1</b> rarissima, <b>10</b> molto frequente); le automediche restano a probabilità base</span>
+    <table style="font-size:11px; margin-top:4px; border-collapse:collapse;" cellpadding="3">
+      <tr style="text-align:left;"><th style="padding:2px 10px 2px 0;"></th><th style="padding:2px 10px 2px 0;">Ambulanza</th><th style="padding:2px 10px 2px 0;">Maxiemergenza</th><th style="padding:2px 10px 2px 0;">MANV</th></tr>
+      <tr><td><b>00–06 notte</b></td><td><input type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti" onchange="COEUSIM.setFascia(0,'amb',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(0,'maxi',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(0,'manv',this.value)"></td></tr>
+      <tr><td><b>06–12 mattina</b></td><td><input type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti" onchange="COEUSIM.setFascia(1,'amb',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(1,'maxi',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(1,'manv',this.value)"></td></tr>
+      <tr><td><b>12–18 pomeriggio</b></td><td><input type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti" onchange="COEUSIM.setFascia(2,'amb',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(2,'maxi',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(2,'manv',this.value)"></td></tr>
+      <tr><td><b>18–24 sera</b></td><td><input type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti" onchange="COEUSIM.setFascia(3,'amb',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(3,'maxi',this.value)"></td><td><input type="number" min="0.5" max="10" step="0.5" value="1" style="width:44px" title="1 rarissima – 10 molto frequente" onchange="COEUSIM.setFascia(3,'manv',this.value)"></td></tr>
+    </table>
   </div>
 
   <div id="lstGridTop">
@@ -173,8 +184,8 @@
   <div style="font-size:12px; line-height:1.6">
     1. Premi <b>📞 Nuova chiamata</b>: squilla il telefono nel pannello Chiamate — si vede solo il luogo, NON il motivo.<br>
     2. Premi <b>Rispondi</b>: il richiedente racconta e <b>spunti i mezzi</b> da inviare (i più vicini, 118 e/o VVF) — puoi spuntare anche mezzi già impegnati o in rientro: vengono <b>dirottati subito</b>, ripartono da dove sono. Poi dai il codice con un click: <b>🚒 Prendi in carico</b> se VVF (senza codice), oppure 🔴🟡🟢⚪ (alla chiusura scopri cos'era davvero) — i mezzi spuntati partono subito. Se è un falso allarme puoi premere <b>✖ Rifiuta</b> anche dopo aver risposto. Occhio: le <b>📵 mute</b> non parlano affatto, solo rumori di fondo. Chi chiama non sempre dice la verità (c'è chi minimizza: "sarà la digestione"...), arrivano anche <b>trasporti programmati</b> (dialisi, visite, terapie) e chiamate dal <b>112/113</b>.<br>
-    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); a fine intervento sul posto il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS.<br>
-    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto; <b>click su un mezzo</b> = i suoi dettagli. Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e sposta le probabilità: col temporale più alberi caduti e allagamenti, ma può arrivare di tutto.<br>
+    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (MSA ed elisoccorso sono più veloci, l'automedica aiuta) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS.<br>
+    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto; <b>click su un mezzo</b> = i suoi dettagli. Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e <b>picchia davvero</b>: col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, col <b>vento</b> volano antenne, ponteggi e gonfiabili. Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). Numero e salute dei pazienti (solo %, niente età né diagnosi) si vedono quando il primo mezzo arriva sul posto. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, <b>🏥 Scegli ospedale</b> (compare sul mezzo quando è PRONTO, paziente a bordo) e poi <b>click sull'ospedale</b> = destinazione (doppio click = più vicino). <b>🆘 Richiedi assistenza</b> = riapre la lista per mandare altri mezzi.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
@@ -1214,6 +1225,66 @@ const TIPI = [
   { nome:"Vernice sversata nel torrente", pz:0, peso:1, zona:"natura", emoji:"🎨", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[8,16], trasporto:false, desc:"Vernice sversata nel torrente dal furgone. VVF + bonifica." },
   { nome:"Sversamento olio in officina", pz:0, peso:2, zona:"misto", emoji:"🛢️", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[6,12], trasporto:false, desc:"Cisterna dell'olio rovesciata in officina, pavimento scivoloso. Solo VVF." },
   { nome:"Cavi penzolanti sulla strada", pz:0, peso:2, zona:"strada", emoji:"🔌", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[4,8], trasporto:false, desc:"Cavi penzolanti sulla strada dopo il temporale. VVF + tecnici.", meteo:{Temporale:2.5} },
+  { nome:"Disarcionato al maneggio", pz:1, sal:[30,65], peso:2, emoji:"🐎", prio:[30,40,25,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Ragazzo disarcionato durante la lezione, caduto sulla schiena." },
+  { nome:"Calcio di cavallo in scuderia", pz:1, sal:[25,60], peso:2, emoji:"🐎", prio:[35,40,20,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Addetto scalciato dal cavallo in scuderia, trauma al torace." },
+  { nome:"Raft ribaltato sull'Adda", pz:3, sal:[30,65], peso:2, meteo:{Pioggia:1.5}, emoji:"🛶", prio:[35,40,20,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"lago", desc:"Gommone da rafting ribaltato in rapida, equipaggio in acqua." },
+  { nome:"Canyonista bloccato nella forra", pz:1, sal:[40,75], peso:1, emoji:"🧗", prio:[30,40,25,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"natura", desc:"Canyonista bloccato in forra, infreddolito con trauma alla spalla." },
+  { nome:"Volata in falesia appeso in parete", pz:1, sal:[25,60], peso:2, emoji:"🧗", prio:[40,35,20,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"natura", desc:"Arrampicatore volato in falesia, appeso in parete con trauma alla gamba." },
+  { nome:"Kitesurfista schiantato in spiaggia", pz:1, sal:[30,65], peso:2, emoji:"🪁", prio:[30,40,25,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"lago", desc:"Kitesurfista trascinato dal vento e schiantato in spiaggia.", meteo:{Vento:2} },
+  { nome:"Motoslitta contro un pino", pz:1, sal:[20,55], peso:2, emoji:"🛷", prio:[40,35,20,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"natura", desc:"Motoslitta finita contro un pino fuori pista, conducente incastrato." },
+  { nome:"Scontro tra slittini in pista", pz:2, sal:[45,80], peso:2, emoji:"🛷", prio:[10,35,45,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"natura", desc:"Due slittini scontrati in pista, ragazzi contusi." },
+  { nome:"Svenuto al palaghiaccio durante la gara", pz:1, sal:[55,90], peso:2, emoji:"⛸️", prio:[5,30,50,15], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"misto", desc:"Giovane atleta svenuto al palaghiaccio durante la gara." },
+  { nome:"Disco da hockey in faccia", pz:1, sal:[35,70], peso:1, emoji:"🏒", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Hockeista colpito in faccia dal disco, naso sanguinante." },
+  { nome:"Stoccata di fioretto al torace", pz:1, sal:[40,75], peso:1, emoji:"🤺", prio:[20,40,35,5], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"misto", desc:"Schermidore colpito al torace dalla stoccata, dolore e affanno." },
+  { nome:"Freccia del tiro con l'arco nella gamba", pz:1, sal:[45,80], peso:1, emoji:"🏹", prio:[15,40,40,5], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"misto", desc:"Arciere colpito di rimbalzo alla gamba al campo di tiro." },
+  { nome:"Caduta nella bowl dello skatepark", pz:1, sal:[40,75], peso:2, emoji:"🛹", prio:[15,40,35,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"misto", desc:"Ragazzo caduto nella bowl dello skatepark, trauma al polso." },
+  { nome:"Caduta da parkour sul muretto", pz:1, sal:[30,70], peso:2, emoji:"🤸", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Traceur caduto dal muretto durante un salto, non si alza." },
+  { nome:"Caduta coi pattini in linea in discesa", pz:1, sal:[45,80], peso:2, emoji:"🛼", prio:[10,35,45,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"strada", desc:"Caduta coi pattini in linea in discesa, escoriazioni e trauma alla spalla." },
+  { nome:"Spalla lussata a beach volley", pz:1, sal:[55,90], peso:2, emoji:"🏐", prio:[5,30,50,15], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"misto", desc:"Giocatore con spalla lussata al torneo di beach volley." },
+  { nome:"Pallina da squash in un occhio", pz:1, sal:[50,85], peso:1, emoji:"🎾", prio:[10,35,45,10], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"misto", desc:"Giocatore colpito all'occhio dalla pallina da squash." },
+  { nome:"Amo conficcato nella mano pescando", pz:1, sal:[70,95], peso:2, emoji:"🎣", prio:[3,20,52,25], mezzi:{MSB:1}, durata:[5,10], trasporto:false, zona:"lago", desc:"Pescatore con amo conficcato nella mano, non riesce a toglierlo." },
+  { nome:"Caduto dal castagno a raccogliere castagne", pz:1, sal:[35,70], peso:2, emoji:"🌰", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"natura", desc:"Caduto dal castagno raccogliendo castagne, trauma alla schiena." },
+  { nome:"Morso di ragno violino in cantina", pz:1, sal:[45,80], peso:1, emoji:"🕷️", prio:[20,40,30,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"casa", desc:"Morso sospetto di ragno violino sistemando la cantina." },
+  { nome:"Caduto dal ponteggio al secondo piano", pz:1, sal:[20,55], peso:2, emoji:"🏗️", prio:[45,35,15,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"misto", desc:"Operaio caduto dal ponteggio al secondo piano, trauma multiplo." },
+  { nome:"Imbianchino caduto dalla scala doppia", pz:1, sal:[35,70], peso:2, emoji:"🪜", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"casa", desc:"Imbianchino caduto dalla scala doppia tinteggiando il soffitto." },
+  { nome:"Motosega sulla coscia nel bosco", pz:1, sal:[15,50], peso:2, emoji:"🪚", prio:[55,30,12,3], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"natura", desc:"Taglio di motosega alla coscia tagliando legna, emorragia importante." },
+  { nome:"Fabbro ustionato dalla forgia", pz:1, sal:[40,75], peso:1, emoji:"🔥", prio:[20,40,30,10], mezzi:{MSB:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Fabbro ustionato alle braccia dalla forgia in officina." },
+  { nome:"Fornaio ustionato dal forno a legna", pz:1, sal:[45,80], peso:2, emoji:"🍞", prio:[15,40,35,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"misto", desc:"Fornaio ustionato infornando nel forno a legna." },
+  { nome:"Corriere morso dal cane al cancello", pz:1, sal:[55,90], peso:2, emoji:"📦", prio:[8,30,47,15], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"casa", desc:"Corriere morso dal cane consegnando il pacco al cancello." },
+  { nome:"Postino scivolato sul vialetto ghiacciato", pz:1, sal:[50,85], peso:2, emoji:"📮", prio:[8,32,48,12], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"casa", desc:"Postino scivolato sul vialetto ghiacciato, trauma all'anca." },
+  { nome:"Mano nel compattatore all'isola ecologica", pz:1, sal:[20,55], peso:1, emoji:"♻️", prio:[45,35,15,5], mezzi:{MSA:1}, durata:[10,18], trasporto:true, zona:"misto", desc:"Mano incastrata nel compattatore all'isola ecologica." },
+  { nome:"Caduto dalla botola del solaio", pz:1, sal:[35,70], peso:2, emoji:"🏠", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"casa", desc:"Caduto dalla botola del solaio con la scala retrattile." },
+  { nome:"Ustione da stufa a pellet", pz:1, sal:[50,85], peso:2, emoji:"🔥", prio:[10,35,45,10], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"casa", desc:"Anziano ustionato caricando la stufa a pellet." },
+  { nome:"Ustione da disotturante", pz:1, sal:[35,75], peso:1, emoji:"🧴", prio:[20,40,30,10], mezzi:{MSB:1}, durata:[6,12], trasporto:true, zona:"casa", desc:"Schizzi di disotturante su faccia e braccia pulendo lo scarico." },
+  { nome:"Crisi epilettica sull'autobus", pz:1, sal:[40,75], peso:3, emoji:"🚌", prio:[25,40,30,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"strada", desc:"Passeggero in crisi epilettica sull'autobus, autista fermo." },
+  { nome:"Boccone di traverso alla sagra", pz:1, sal:[25,60], peso:2, emoji:"🍖", prio:[50,35,12,3], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Anziano con boccone di traverso al tendone della sagra, fatica a respirare." },
+  { nome:"Reazione al mezzo di contrasto in radiologia", pz:1, sal:[35,70], peso:1, emoji:"💉", prio:[30,40,25,5], mezzi:{MSA:1}, durata:[8,14], trasporto:true, zona:"misto", desc:"Reazione allergica al mezzo di contrasto dopo la TAC." },
+  { nome:"Reazione al vaccino all'hub", pz:1, sal:[55,90], peso:2, emoji:"💉", prio:[8,30,47,15], mezzi:{MSB:1}, durata:[6,12], trasporto:false, zona:"misto", desc:"Ragazzo con malore dopo il vaccino all'hub, monitorato sul posto." },
+  { nome:"Epistassi che non si ferma", pz:1, sal:[60,95], peso:2, emoji:"🩸", prio:[5,30,50,15], mezzi:{MSB:1}, durata:[5,10], trasporto:false, zona:"casa", desc:"Anziano con sangue dal naso che non si ferma da mezz'ora." },
+  { nome:"Fienile in fiamme", pz:0, peso:1, zona:"natura", emoji:"🔥", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Fienile in fiamme in cascina, fieno e attrezzi coinvolti. Solo VVF." },
+  { nome:"Rotoballe in fiamme nel campo", pz:0, peso:1, zona:"natura", emoji:"🔥", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Rotoballe in fiamme nel campo, fumo denso sulla strada. Solo VVF." },
+  { nome:"Colombaia in fiamme sulla stalla", pz:0, peso:1, zona:"natura", emoji:"🕊️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Colombaia in fiamme sul tetto della stalla, faville sulla paglia. Solo VVF." },
+  { nome:"Canile in fiamme con cani dentro", pz:0, peso:1, zona:"misto", emoji:"🐕", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Canile in fiamme con cani ancora nei box. Solo VVF." },
+  { nome:"Scuderia in fiamme al centro ippico", pz:0, peso:1, zona:"natura", emoji:"🐎", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Scuderia in fiamme al centro ippico, cavalli da evacuare dai box. Solo VVF." },
+  { nome:"Casetta degli attrezzi in fiamme", pz:0, peso:2, zona:"casa", emoji:"🧰", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Casetta degli attrezzi in fiamme in giardino, vicino alla casa. Solo VVF." },
+  { nome:"Fumo dal campanile", pz:0, peso:1, zona:"misto", emoji:"🔔", vvf:true, prio:[5,20,45,30], mezzi:{}, durata:[8,16], trasporto:false, desc:"Fumo dal campanile della chiesa, possibile corto alle campane. Solo VVF." },
+  { nome:"Roulotte a fuoco in campeggio", pz:0, peso:1, zona:"natura", emoji:"🚐", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Roulotte a fuoco in campeggio, bomboletta dentro. Solo VVF." },
+  { nome:"Tendone del circo divelto dal vento", pz:0, peso:1, zona:"misto", emoji:"🎪", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[6,12], trasporto:false, desc:"Tendone del circo divelto dal vento, pali pericolanti. Solo VVF.", meteo:{Vento:3} },
+  { nome:"Palco del concerto crollato", pz:0, peso:1, zona:"misto", emoji:"🎤", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Palco del concerto crollato col vento, sembra senza pubblico. Solo VVF.", meteo:{Vento:2} },
+  { nome:"Escavatore a fuoco in cava", pz:0, peso:1, zona:"natura", emoji:"🚜", vvf:true, prio:[5,20,45,30], mezzi:{}, durata:[8,16], trasporto:false, desc:"Escavatore a fuoco in cava, autista fuori. Solo VVF." },
+  { nome:"Pala meccanica ribaltata in cantiere", pz:0, peso:1, zona:"misto", emoji:"🚜", vvf:true, prio:[5,20,45,30], mezzi:{}, durata:[8,16], trasporto:false, desc:"Pala meccanica ribaltata in cantiere, sembra senza feriti. Solo VVF." },
+  { nome:"Baita in fiamme in quota", pz:0, peso:1, zona:"natura", emoji:"🏕️", vvf:true, prio:[10,25,40,25], mezzi:{}, durata:[12,24], trasporto:false, desc:"Baita in fiamme in quota, occupanti fuori al freddo. Solo VVF." },
+  { nome:"Casera in fiamme all'alpe", pz:0, peso:1, zona:"natura", emoji:"🏔️", vvf:true, prio:[10,25,40,25], mezzi:{}, durata:[12,24], trasporto:false, desc:"Casera in fiamme all'alpe, fieno sopra la stalla. Solo VVF." },
+  { nome:"Barche in fiamme in darsena", pz:0, peso:1, zona:"lago", emoji:"⛵", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[10,20], trasporto:false, desc:"Due barche in fiamme in darsena, fumo sul lungolago. Solo VVF." },
+  { nome:"Negozio in fiamme in centro", pz:0, peso:2, zona:"misto", emoji:"🏪", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Negozio in fiamme in centro, serranda abbassata e fumo. Solo VVF." },
+  { nome:"Canna fumaria della pizzeria a fuoco", pz:0, peso:2, zona:"misto", emoji:"🍕", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[6,12], trasporto:false, desc:"Canna fumaria della pizzeria a fuoco, scintille sul tetto. Solo VVF." },
+  { nome:"Hotel evacuato per fumo", pz:0, peso:1, zona:"misto", emoji:"🏨", vvf:true, prio:[5,20,45,30], mezzi:{}, durata:[10,20], trasporto:false, desc:"Hotel evacuato per fumo ai piani, ospiti nel piazzale. Solo VVF." },
+  { nome:"Allarme incendio al nido", pz:0, peso:1, zona:"misto", emoji:"🧒", vvf:true, prio:[5,20,45,30], mezzi:{}, durata:[6,12], trasporto:false, desc:"Allarme incendio al nido, bimbi evacuati in giardino. Solo VVF." },
+  { nome:"Nube di cloro in piscina", pz:0, peso:1, zona:"misto", emoji:"🏊", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Nube di cloro nella piscina coperta, edificio evacuato. Solo VVF." },
+  { nome:"Fumogeni in curva allo stadio", pz:0, peso:1, zona:"misto", emoji:"🏟️", vvf:true, prio:[3,15,45,37], mezzi:{}, durata:[4,8], trasporto:false, desc:"Fumogeni accesi in curva, fumo denso sulle gradinate. Solo VVF." },
+  { nome:"Isola ecologica in fiamme", pz:0, peso:1, zona:"misto", emoji:"♻️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Cumuli all'isola ecologica in fiamme, fumo tossico. Solo VVF." },
+  { nome:"Autobus a fuoco in deposito", pz:0, peso:1, zona:"misto", emoji:"🚌", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Autobus a fuoco in deposito, vuoto senza passeggeri. Solo VVF." },
+  { nome:"Auto bloccata sul passaggio a livello", pz:0, peso:1, zona:"strada", emoji:"🚂", vvf:true, prio:[15,35,40,10], mezzi:{}, durata:[6,12], trasporto:false, desc:"Auto bloccata sulle rotaie al passaggio a livello, conducente fuori. Solo VVF." },
 ];
 
 const OSPEDALI = [
@@ -1230,6 +1301,9 @@ const OSPEDALI = [
   { nome:"Osp. Manzoni Lecco", lat:45.8521, lng:9.4149, prov:"LC" },
   { nome:"Osp. di Merate", lat:45.6981, lng:9.4273, prov:"LC" },
   { nome:"Osp. di Bellano", lat:46.0481, lng:9.3069, prov:"LC" },
+  { nome:"Osp. San Gerardo Monza", lat:45.6023, lng:9.2605, prov:"MB" },
+  { nome:"Osp. di Vimercate", lat:45.6083, lng:9.3563, prov:"MB" },
+  { nome:"Osp. Salvini Garbagnate", lat:45.5832, lng:9.0946, prov:"MI" },
 ];
 
 const SEDI = [
@@ -1534,7 +1608,7 @@ const MEZZI = [
   { codice:"VERLIS_145.04A2", tipo:"MSB", radio:"VERLIS_145.04A2", sede:"Croce Verde Lissone" },
   { codice:"ITEBRU_037", tipo:"MSB", radio:"ITEBRU_037", sede:"Ital Enferm Brugherio" },
   { codice:"MB_003", tipo:"MSA", radio:"MB_003", sede:"AREU Desio" },
-  { codice:"MB_011", tipo:"MSA", radio:"MB_011", sede:"AREU Monza" },
+  { codice:"MB_011", tipo:"AUTOMEDICA", radio:"MB_011", sede:"AREU Monza" },
   { codice:"MB_004", tipo:"MSA", radio:"MB_004", sede:"AREU Vimercate" },
   { codice:"SOCSER_105.06B1", tipo:"MSB", radio:"SOCSER_105.06B1", sede:"Seregno Soccorso" },
   // MILANO (confinanti)
@@ -2602,6 +2676,68 @@ const CHIAMATE = {
   "Sversamento olio in officina": "«Si è rovesciata la cisterna dell'olio in officina, tutto scivoloso!»",
   "Cavi penzolanti sulla strada": "«Ci sono cavi penzolanti sulla strada dopo il temporale!»",
 "Rete antigrandine volata": "«La rete del frutteto è volata via!»",
+
+  "Disarcionato al maneggio": "«Mio figlio è stato disarcionato al maneggio, è a terra e non si muove!»",
+  "Calcio di cavallo in scuderia": "«Il cavallo ha scalciato il mio collega in scuderia, ha preso una botta al petto!»",
+  "Raft ribaltato sull'Adda": "«Il raft si è ribaltato in rapida, siamo tutti in acqua nell'Adda!»",
+  "Canyonista bloccato nella forra": "«Sono bloccato nella forra, la spalla fa malissimo e ho freddo!»",
+  "Volata in falesia appeso in parete": "«Il mio compagno è volato in falesia, è appeso e la gamba sanguina!»",
+  "Kitesurfista schiantato in spiaggia": "«Il vento l'ha trascinato e si è schiantato in spiaggia, non si alza!»",
+  "Motoslitta contro un pino": "«Siamo usciti di pista con la motoslitta, contro un pino! Il mio amico è incastrato!»",
+  "Scontro tra slittini in pista": "«Due slittini si sono scontrati in pista, i ragazzi piangono tutti!»",
+  "Svenuto al palaghiaccio durante la gara": "«Un ragazzo è svenuto al palaghiaccio in mezzo alla gara!»",
+  "Disco da hockey in faccia": "«Ha preso il disco in piena faccia, perde sangue dal naso!»",
+  "Stoccata di fioretto al torace": "«Mi ha preso la stoccata al petto, mi manca il fiato!»",
+  "Freccia del tiro con l'arco nella gamba": "«Una freccia di rimbalzo mi ha preso la gamba al campo di tiro!»",
+  "Caduta nella bowl dello skatepark": "«Mio figlio è caduto nella bowl allo skatepark, il polso è storto!»",
+  "Caduta da parkour sul muretto": "«Ha sbagliato il salto di parkour dal muretto, è a terra e non si alza!»",
+  "Caduta coi pattini in linea in discesa": "«Sono caduto coi pattini in discesa, la spalla fa malissimo!»",
+  "Spalla lussata a beach volley": "«Giocando a beach volley mi è uscita la spalla, penzola!»",
+  "Pallina da squash in un occhio": "«Ho preso la pallina da squash in un occhio, non vedo niente!»",
+  "Amo conficcato nella mano pescando": "«Ho l'amo conficcato nella mano pescando, non esce!»",
+  "Caduto dal castagno a raccogliere castagne": "«Mio marito è caduto dal castagno, è a terra nella selva e non si muove!»",
+  "Morso di ragno violino in cantina": "«Sistemando la cantina qualcosa mi ha morso, la mano si gonfia!»",
+  "Caduto dal ponteggio al secondo piano": "«Un operaio è caduto dal ponteggio al secondo piano, è grave!»",
+  "Imbianchino caduto dalla scala doppia": "«L'imbianchino è caduto dalla scala, è a terra in soggiorno!»",
+  "Motosega sulla coscia nel bosco": "«Mi sono dato la motosega sulla coscia nel bosco, perdo tanto sangue!»",
+  "Fabbro ustionato dalla forgia": "«Mi sono ustionato le braccia alla forgia, la pelle è andata!»",
+  "Fornaio ustionato dal forno a legna": "«Infornando mi sono ustionato al forno a legna, braccia e faccia!»",
+  "Corriere morso dal cane al cancello": "«Il cane del cliente mi ha morso al cancello, il polpaccio sanguina!»",
+  "Postino scivolato sul vialetto ghiacciato": "«Sono il postino, sono scivolato sul vialetto ghiacciato e non mi alzo!»",
+  "Mano nel compattatore all'isola ecologica": "«Ho la mano incastrata nel compattatore all'isola ecologica!»",
+  "Caduto dalla botola del solaio": "«È caduto dalla botola del solaio con la scala, è a terra in corridoio!»",
+  "Ustione da stufa a pellet": "«Mio padre si è ustionato caricando la stufa a pellet, le mani!»",
+  "Ustione da disotturante": "«Mi è schizzato il disotturante in faccia pulendo lo scarico, brucia!»",
+  "Crisi epilettica sull'autobus": "«Un passeggero ha le convulsioni sull'autobus, ho fermato il mezzo!»",
+  "Boccone di traverso alla sagra": "«Mio padre ha un boccone di traverso alla sagra, diventa blu!»",
+  "Reazione al mezzo di contrasto in radiologia": "«Qui radiologia: il paziente reagisce al mezzo di contrasto, si gonfia!»",
+  "Reazione al vaccino all'hub": "«Qui hub vaccini: un ragazzo sta male dopo la puntura, lo teniamo qui!»",
+  "Epistassi che non si ferma": "«A mio padre esce sangue dal naso da mezz'ora, non si ferma!»",
+  "Fienile in fiamme": "«Il fienile della cascina ha preso fuoco, le fiamme escono dal tetto!»",
+  "Rotoballe in fiamme nel campo": "«Le rotoballe nel campo bruciano, il fumo va sulla strada!»",
+  "Colombaia in fiamme sulla stalla": "«La colombaia sulla stalla ha preso fuoco, le faville cadono sulla paglia!»",
+  "Canile in fiamme con cani dentro": "«Il canile brucia, i cani abbaiano nei box!»",
+  "Maneggio in fiamme": "«Il maneggio ha preso fuoco, i cavalli sono nei box!»",
+  "Scuderia in fiamme al centro ippico": "«La scuderia al centro ippico ha preso fuoco, i cavalli sono nei box!»",
+  "Casetta degli attrezzi in fiamme": "«La casetta degli attrezzi in giardino brucia, vicino a casa!»",
+  "Fumo dal campanile": "«Esce fumo dal campanile della chiesa, si sente odore di bruciato!»",
+  "Roulotte a fuoco in campeggio": "«La roulotte in campeggio ha preso fuoco, c'è una bomboletta dentro!»",
+  "Tendone del circo divelto dal vento": "«Il vento ha divelto il tendone del circo, i pali ballano!»",
+  "Palco del concerto crollato": "«Il palco del concerto è venuto giù col vento!»",
+  "Escavatore a fuoco in cava": "«L'escavatore in cava ha preso fuoco, l'autista è fuori!»",
+  "Pala meccanica ribaltata in cantiere": "«La pala meccanica si è ribaltata in cantiere!»",
+  "Baita in fiamme in quota": "«La baita lassù brucia, siamo usciti tutti al freddo!»",
+  "Casera in fiamme all'alpe": "«La casera all'alpe ha preso fuoco, il fieno sopra brucia!»",
+  "Barche in fiamme in darsena": "«Due barche in darsena bruciano, il fumo copre il lungolago!»",
+  "Negozio in fiamme in centro": "«Dal negozio in centro esce fumo nero, la serranda è giù!»",
+  "Canna fumaria della pizzeria a fuoco": "«La canna della pizzeria sputa scintille, il tetto fuma!»",
+  "Hotel evacuato per fumo": "«Fumo ai piani dell'hotel, stiamo evacuando gli ospiti!»",
+  "Allarme incendio al nido": "«È scattato l'allarme incendio al nido, portiamo i bimbi in giardino!»",
+  "Nube di cloro in piscina": "«C'è una nube di cloro nella piscina coperta, stiamo evacuando!»",
+  "Fumogeni in curva allo stadio": "«Hanno acceso fumogeni in curva, non si vede niente!»",
+  "Isola ecologica in fiamme": "«All'isola ecologica bruciano i cumuli, fumo nero e puzza!»",
+  "Autobus a fuoco in deposito": "«Un autobus in deposito ha preso fuoco, per ora è solo quello!»",
+  "Auto bloccata sul passaggio a livello": "«La macchina è rimasta bloccata sulle rotaie al passaggio a livello!»",
 };
 
 // varianti dialogo per TUTTI i tipi (2 per tipo: si pesca tra base + varianti + extra)
@@ -3428,6 +3564,66 @@ CHIAMATE_VAR = {
   "Sversamento olio in officina": ["«L'olio si allarga in tutta l'officina, scivoliamo!»","«La cisterna si è ribaltata, l'olio va verso la strada!»"],
   "Cavi penzolanti sulla strada": ["«I cavi toccano quasi le auto dopo il temporale!»","«Un cavo penzola in mezzo alla strada, le auto lo schivano!»"],
 "Rete antigrandine volata": ["«La rete vola sul frutteto!»","«Teli della rete ovunque!»"],
+  "Disarcionato al maneggio": ["«Il cavallo l'ha disarcionato alla lezione, piange dalla schiena!»","«Volato di sella al maneggio, è rimasto a terra senza muoversi!»"],
+  "Calcio di cavallo in scuderia": ["«Il cavallo ha tirato un calcio al mio collega, respira male!»","«Scalciato in scuderia mentre lo strigliava, botta forte al torace!»"],
+  "Raft ribaltato sull'Adda": ["«Il gommone si è rovesciato in rapida, siamo aggrappati alle rocce!»","«Raft ribaltato sull'Adda, uno sbatte la testa e gli altri lo tengono!»"],
+  "Canyonista bloccato nella forra": ["«Sono fermo nella forra con la spalla fuori uso, venite a prendermi!»","«Nella forra non riesco più a scendere, la spalla non regge e tremo dal freddo!»"],
+  "Volata in falesia appeso in parete": ["«È volato e penzola dalla corda, la gamba perde sangue!»","«Il mio socio è appeso in parete dopo il volo, non riesce a salire!»"],
+  "Kitesurfista schiantato in spiaggia": ["«La raffica l'ha sbattuto in spiaggia, l'ala è sui sassi!»","«Trascinato dal kite fino a riva, è steso e non risponde bene!»"],
+  "Motoslitta contro un pino": ["«Motoslitta contro il pino fuori pista, il mio amico urla dal dolore!»","«Siamo finiti contro un pino con la motoslitta, la gamba è incastrata sotto!»"],
+  "Scontro tra slittini in pista": ["«Frontale tra slittini in pista, due ragazzi a terra!»","«Si sono scontrati con gli slittini in velocità, piangono tutti e due!»"],
+  "Svenuto al palaghiaccio durante la gara": ["«È crollato sul ghiaccio in gara, lo portano fuori pista!»","«Un atleta è svenuto al palaghiaccio, è pallidissimo!»"],
+  "Disco da hockey in faccia": ["«Il disco l'ha preso in faccia, il naso è tutto storto e sanguina!»","«Colpito dal disco durante la partita, ha la faccia piena di sangue!»"],
+  "Stoccata di fioretto al torace": ["«La stoccata mi ha preso sotto la maschera... al petto, non respiro bene!»","«Dopo la stoccata al torace ho un dolore forte e mi gira la testa!»"],
+  "Freccia del tiro con l'arco nella gamba": ["«Mi è arrivata una freccia nella coscia al campo, è conficcata!»","«Al campo di tiro una freccia di rimbalzo mi ha preso la gamba!»"],
+  "Caduta nella bowl dello skatepark": ["«Nella bowl è volato sullo spigolo, il polso fa un angolo strano!»","«Caduto dallo skate nella buca, si tiene il polso e urla!»"],
+  "Caduta da parkour sul muretto": ["«Ha mancato il salto di parkour, è caduto dal muretto sulla schiena!»","«Dopo il salto dal muretto non si alza più, ha male alle gambe!»"],
+  "Caduta coi pattini in linea in discesa": ["«In discesa coi pattini ho preso un sasso, volo sulla spalla!»","«Sono caduto coi roller in discesa, la spalla non la muovo!»"],
+  "Spalla lussata a beach volley": ["«Schiacciando mi è uscita la spalla, il braccio penzola!»","«Al torneo di beach volley la spalla è andata fuori posto!»"],
+  "Pallina da squash in un occhio": ["«La pallina mi ha preso l'occhio in pieno, lacrima e non vedo!»","«A squash ho beccato la pallina nell'occhio, dolore fortissimo!»"],
+  "Amo conficcato nella mano pescando": ["«L'amo mi è entrato nel palmo pescando, l'archetto è dentro!»","«Pescando al lago l'amo si è conficcato, non oso tirarlo!»"],
+  "Caduto dal castagno a raccogliere castagne": ["«È scivolato dal castagno nella selva, ha battuto la schiena!»","«Raccoglieva castagne ed è caduto dal ramo basso, non si alza!»"],
+  "Morso di ragno violino in cantina": ["«In cantina mi ha morso qualcosa, ora il dito è rosso e gonfio!»","«Ho visto un ragno strano in cantina e la mano brucia e si gonfia!»"],
+  "Caduto dal ponteggio al secondo piano": ["«È volato giù dal ponteggio al secondo piano, è a terra immobile!»","«Un nostro operaio è caduto dal ponteggio, ha battuto ovunque!»"],
+  "Imbianchino caduto dalla scala doppia": ["«La scala si è aperta e l'imbianchino è a terra in soggiorno!»","«Tinteggiava il soffitto ed è caduto dalla scala doppia!»"],
+  "Motosega sulla coscia nel bosco": ["«La motosega mi ha preso la coscia, sto premendo ma sanguina tanto!»","«Tagliavo legna e la lama è partita sulla gamba, aiuto!»"],
+  "Fabbro ustionato dalla forgia": ["«Dalla forgia è schizzata roba incandescente sulle braccia!»","«Mi sono appoggiato al pezzo rovente in fucina, le braccia sono ustionate!»"],
+  "Fornaio ustionato dal forno a legna": ["«Infornando il pane il forno mi ha ustionato braccia e viso!»","«La fiammata del forno a legna mi ha preso mentre infornavo!»"],
+  "Corriere morso dal cane al cancello": ["«Consegnavo il pacco e il cane mi ha azzannato il polpaccio!»","«Al cancello il cane mi è saltato addosso, la gamba sanguina!»"],
+  "Postino scivolato sul vialetto ghiacciato": ["«Sul vialetto ghiacciato sono volato, l'anca fa malissimo!»","«Giro posta: scivolato sul ghiaccio davanti a una villetta, non mi tiro su!»"],
+  "Mano nel compattatore all'isola ecologica": ["«La mano è rimasta nel compattatore, non riesco a sfilarla!»","«All'isola ecologica il compattatore mi ha preso la mano!»"],
+  "Caduto dalla botola del solaio": ["«La scala del solaio ha ceduto, è caduto dalla botola!»","«Saliva in solaio ed è precipitato dalla botola in corridoio!»"],
+  "Ustione da stufa a pellet": ["«Caricando i pellet si è ustionato le mani sulla stufa!»","«Mio padre ha toccato la stufa a pellet accesa, le mani sono rosse!»"],
+  "Ustione da disotturante": ["«Il disotturante mi è schizzato su faccia e braccia, brucia da morire!»","«Pulivo lo scarico e il liquido è schizzato, ho la pelle che brucia!»"],
+  "Crisi epilettica sull'autobus": ["«Un passeggero trema tutto sull'autobus, ho accostato!»","«Sull'autobus un uomo ha le convulsioni e sbatte sui sedili!»"],
+  "Boccone di traverso alla sagra": ["«Al tendone della sagra mio padre soffoca col boccone, è paonazzo!»","«Mangiando alla sagra gli è andato di traverso, non respira!»"],
+  "Reazione al mezzo di contrasto in radiologia": ["«Dopo la TAC col contrasto il paziente si gonfia e fatica a respirare!»","«Qui radiologia: orticaria e gonfiore dopo il mezzo di contrasto!»"],
+  "Reazione al vaccino all'hub": ["«Dopo il vaccino il ragazzo è svenuto, lo teniamo sdraiato qui all'hub!»","«All'hub un vaccinato ha giramenti e vomito, lo monitoriamo!»"],
+  "Epistassi che non si ferma": ["«Il sangue dal naso non accenna a fermarsi, il fazzoletto è pieno!»","«A mio padre sanguina il naso da mezz'ora nonostante il ghiaccio!»"],
+  "Fienile in fiamme": ["«Il fienile brucia tutto, le fiamme lambiscono la stalla!»","«Dalla cascina vedo il fienile in fiamme, il tetto sta cedendo!»"],
+  "Rotoballe in fiamme nel campo": ["«Le rotoballe bruciano nel campo, il fumo invade la provinciale!»","«Nel campo le balle di fieno sono in fiamme una dopo l'altra!»"],
+  "Colombaia in fiamme sulla stalla": ["«La colombaia sul tetto della stalla brucia, bisogna bagnare la paglia sotto!»","«Fiamme dalla colombaia, i colombi volano via nella confusione!»"],
+  "Canile in fiamme con cani dentro": ["«Il canile è in fiamme, i cani sono chiusi nei box!»","«Brucia il canile, i cani abbaiano e non possiamo entrare!»"],
+  "Scuderia in fiamme al centro ippico": ["«Il tetto della scuderia brucia, i cavalli scalpitano nei box!»","«Fiamme alla scuderia del centro ippico, la paglia dei box ha preso fuoco!»"],
+  "Casetta degli attrezzi in fiamme": ["«La casetta attrezzi brucia a due metri da casa nostra!»","«Dal capanno in giardino escono fiamme alte, vicino alla villetta!»"],
+  "Fumo dal campanile": ["«Dal campanile esce fumo denso, odore di plastica bruciata!»","«La cella del campanile fuma, forse le campane elettriche!»"],
+  "Roulotte a fuoco in campeggio": ["«La roulotte brucia in campeggio, la bombola potrebbe scoppiare!»","«In campeggio una roulotte è in fiamme, tutti fuori dalle tende!»"],
+  "Tendone del circo divelto dal vento": ["«Il tendone del circo sbatte, i pali stanno cedendo col vento!»","«La raffica ha scoperchiato il tendone, i teli volano sulle auto!»"],
+  "Palco del concerto crollato": ["«Il palco è crollato col vento, le casse sono a terra!»","«La struttura del palco si è piegata, per fortuna era vuoto!»"],
+  "Escavatore a fuoco in cava": ["«L'escavatore brucia in cava, il gasolio alimenta le fiamme!»","«In cava il cingolato ha preso fuoco, la cabina è avvolta!»"],
+  "Pala meccanica ribaltata in cantiere": ["«La pala si è ribaltata in cantiere, il braccio è sulla strada!»","«In cantiere la ruspa è su un fianco, gasolio in terra!»"],
+  "Baita in fiamme in quota": ["«La baita brucia lassù, siamo tutti fuori al gelo!»","«Fiamme dal tetto della baita, il gestore è uscito con gli ospiti!»"],
+  "Casera in fiamme all'alpe": ["«La casera all'alpe brucia, le fiamme escono dalle finestre!»","«All'alpe la casera è in fiamme, il fieno del fienile sopra!»"],
+  "Barche in fiamme in darsena": ["«In darsena due barche bruciano, il fumo va sul lungolago!»","«Le barche ormeggiate hanno preso fuoco, le cime bruciano!»"],
+  "Negozio in fiamme in centro": ["«Il negozio in centro è pieno di fumo nero, la saracinesca è giù!»","«Dalla vetrina del negozio escono fiamme, la via si riempie di fumo!»"],
+  "Canna fumaria della pizzeria a fuoco": ["«Dalla canna della pizzeria escono fiamme e scintille!»","«Il tetto sopra la pizzeria fuma, la canna è incandescente!»"],
+  "Hotel evacuato per fumo": ["«Fumo denso ai piani dell'hotel, gli ospiti sono nel piazzale!»","«L'hotel puzza di bruciato, stiamo facendo uscire tutti!»"],
+  "Allarme incendio al nido": ["«Al nido suona l'allarme incendio, i bimbi sono in giardino con le maestre!»","«Fumo al nido, abbiamo evacuato i piccoli nel cortile!»"],
+  "Nube di cloro in piscina": ["«In piscina c'è una nube acre, la gente tossisce ed esce!»","«Odore forte di cloro nella piscina coperta, edificio evacuato!»"],
+  "Fumogeni in curva allo stadio": ["«In curva hanno acceso fumogeni, la gradinata è coperta di fumo!»","«Dalla curva sale fumo denso, i tifosi tossiscono!»"],
+  "Isola ecologica in fiamme": ["«All'isola ecologica i cumuli bruciano, colonna di fumo nero!»","«Fiamme tra i rifiuti all'isola ecologica, puzza acre ovunque!»"],
+  "Autobus a fuoco in deposito": ["«Nel deposito un autobus brucia, gli altri sono vicini!»","«Dal bus in deposito escono fiamme, il piazzale si riempie di fumo!»"],
+  "Auto bloccata sul passaggio a livello": ["«La macchina è ferma sulle rotaie, le sbarre si stanno chiudendo!»","«Al passaggio a livello un'auto non riparte, è sulle rotaie!»"],
 };
 
 // Laghi (sagome OSM semplificate per Como/Maggiore, Lugano generoso): niente interventi in acqua
@@ -3511,6 +3707,15 @@ window.COEUSIM = (() => {
     return n;
   }
 
+  // priorità secondo distribuzione del tipo (usata anche per i danni da maltempo forzati)
+  function prioDaTipo(t){
+    const [w1,w2,w3,w4] = t.prio;
+    const rp = Math.random()*100;
+    if (rp < w1) return 1;
+    if (rp < w1+w2) return 2;
+    if (rp < w1+w2+w3) return 3;
+    return 4;
+  }
   function tipoRandom(){
     // pesata: peso base × modificatore meteo × penalità missioni grosse × anti-ripetizione
     // (il meteo sposta le probabilità, non impone nulla; i tipi da tanti mezzi e quelli appena usciti escono più di rado)
@@ -3519,7 +3724,7 @@ window.COEUSIM = (() => {
     const ws = arr.map(t=>{
       const n = nMezziRichiesti(t);
       const recent = ultimiTipi.includes(t.nome) ? PENALITA_RIPETIZIONE : 1;
-      const w = (t.peso||10)*((t.meteo&&t.meteo[meteo.cond])||1)*oreMult(t.nome)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
+      const w = (t.peso||10)*((t.meteo&&t.meteo[meteo.cond])||1)*oreMult(t.nome)*fasciaAmbMult(t)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
       tot+=w; return w;
     });
     let r = Math.random()*tot, t = arr[arr.length-1];
@@ -3528,10 +3733,7 @@ window.COEUSIM = (() => {
     ultimiTipi.push(t.nome);
     if(ultimiTipi.length>STORICO_TIPI) ultimiTipi.shift();
     // priorità secondo distribuzione del tipo
-    const [w1,w2,w3,w4] = t.prio;
-    const rp = Math.random()*100;
-    let p = 4;
-    if (rp < w1) p=1; else if (rp < w1+w2) p=2; else if (rp < w1+w2+w3) p=3;
+    const p = prioDaTipo(t);
     return { tipo:t, prio:p };
   }
 
@@ -3635,6 +3837,11 @@ window.COEUSIM = (() => {
     "Valanga travolge sciatore": ["«L'abbiamo tirato fuori dalla neve, ride... però è strano»"],
     "Annegamento in piscina privata": ["«L'abbiamo ripescato, tossisce... respira, credo»"],
     "Vespa in lattina, puntura in bocca": ["«Ha bevuto dalla lattina e ora ha la gola che pizzica... si gonfia?»"],
+    "Motosega sulla coscia nel bosco": ["«Mi sono tagliato con la sega nel bosco... un taglietto, ma sanguina»","«La lama mi ha sfiorato la gamba tagliando legna... però esce tanto sangue»"],
+    "Boccone di traverso alla sagra": ["«Mangiando alla sagra ha tossito forte... adesso sembra meglio, ma è strano»","«Gli è andato di traverso un boccone, tossisce... dite che passa da solo?»"],
+    "Caduto dal ponteggio al secondo piano": ["«È caduto dal ponteggio ma si è rialzato... cammina, sarà niente»","«Volato dal ponteggio, dice che sta bene... però è tutto storto»"],
+    "Reazione al mezzo di contrasto in radiologia": ["«Dopo la TAC ha prurito ovunque... sarà il cerotto»","«Finita la TAC si gratta e ha i pomfi... magari è il lenzuolo»"],
+    "Crisi epilettica sull'autobus": ["«Sull'autobus un passeggero si dimena... forse gli gira per il caldo»","«Un uomo sull'autobus trema e sbatte... dite che è ubriaco?»"],
   };
   // secondi dialoghi per i tipi più comuni (50%: un giorno dice una cosa, un giorno un'altra)
   const DIAL_EXTRA = {
@@ -3717,12 +3924,69 @@ window.COEUSIM = (() => {
     for(const o of ORE_PESO){ if(o.h.includes(h) && o.rx.test(nome)) m *= o.m; }
     return m;
   }
+  // pianificazione per fasce orarie (pannello ⏰ Fasce): automedica meno/più, più pazienti, maxiemergenze
+  const FASCE = [
+    { nome:"00–06", amb:5, maxi:1, manv:1 },
+    { nome:"06–12", amb:5, maxi:1, manv:1 },
+    { nome:"12–18", amb:5, maxi:1, manv:1 },
+    { nome:"18–24", amb:5, maxi:1, manv:1 },
+  ];
+  function fasciaAmbNum(v){
+    if(v==="meno") return 2;
+    if(v==="norm") return 5;
+    if(v==="piu") return 8;
+    return Math.max(0.5, Math.min(10, parseFloat(v)||5));
+  }
+  // peso missioni da ambulanza 1-10 (1 rarissime … 10 molto frequenti); le automediche restano a probabilità base
+  function fasciaAmbMult(t){
+    if(!(t.mezzi && ((t.mezzi.MSB||0)>0 || (t.mezzi.MSA||0)>0))) return 1;
+    return 0.15*Math.pow(1.55, fasciaAmbNum(FASCE[fasciaIdx()].amb)-1); // 1→0.15 … 5→0.86 … 10→7.7
+  }
+  // frequenza eventi grossi 1-10 (1 rarissima … 10 molto frequente); restano validi mai/rara/freq
+  function fasciaMaxiProb(v){
+    if(v==="mai") return 0;
+    if(v==="rara") return 0.02;
+    if(v==="freq") return 0.06;
+    const n = Math.max(0.5, Math.min(10, parseFloat(v)||1));
+    return 0.002*Math.pow(1.5, n-1); // 0.5→0.16% … 1→0.2% … 5→1% … 8→3.4% … 10→7.7% a chiamata
+  }
+  function fasciaIdx(){ const h = Math.floor(clockMin/60)%24; return h<6?0:h<12?1:h<18?2:3; }
+  function setFascia(i,k,v){
+    if(!FASCE[i]) return;
+    if(k==="maxi"||k==="manv") FASCE[i][k] = Math.max(0.5, Math.min(10, parseFloat(v)||1));
+    else if(k==="amb") FASCE[i][k] = fasciaAmbNum(v);
+  }
+  // liste eventi grossi (UTENTE: mandami le tue liste e le metto qui — i nomi devono esistere nei TIPI)
+  const MAXI_TIPI = ["Maxi tamponamento","Tamponamento in autostrada","Incendio capannone","Esplosione in casa","Crollo edificio","Scontro tra camion","Auto contro camion","Incidente autobus","Aereo precipitato","Scontro auto-auto"];
+  const MANV_TIPI = ["Incidente scuolabus","Incidente stradale","Scontro tra sciatori","Scontro moto-moto","Scontro tra bici","Scontro bici-monopattino in ciclabile","Rissa in campo","Rissa al bar","Sciame d'api","Intossicazione alimentare"];
+  function pescaDaLista(lista){
+    const cand = [];
+    for(const n of lista){ const t = D().TIPI.find(x=>x.nome===n); if(t) cand.push(t); }
+    return cand.length ? cand[rndi(0,cand.length-1)] : null;
+  }
+  function tiraEventoGrande(){
+    // maxiemergenza (5-15 feriti) e MANV (1-8 feriti) — i pazienti si assegnano dopo
+    const f = FASCE[fasciaIdx()];
+    const pMaxi = fasciaMaxiProb(f.maxi), pManv = fasciaMaxiProb(f.manv);
+    const r = Math.random();
+    if(r < pMaxi){ const t = pescaDaLista(MAXI_TIPI); if(t) return { tipo:t, maxi:true }; }
+    if(r < pMaxi + pManv){ const t = pescaDaLista(MANV_TIPI); if(t) return { tipo:t, manv:true }; }
+    return null;
+  }
 
-  function creaBozza(forceProv=null){
+  function creaBozza(forceProv=null, forceTipoNome=null){
     const provs = ["VA","CO","LC","MB"].filter(p=>filters[p] || forceProv);
     const prov = forceProv || provs[rndi(0,provs.length-1)] || "VA";
     const c = comuneRandom(prov);
-    const { tipo, prio } = tipoRandom();
+    let { tipo, prio } = tipoRandom();
+    let maxi = false, manv = false;
+    if(forceTipoNome){
+      const ft = D().TIPI.find(x=>x.nome===forceTipoNome);
+      if(ft){ tipo = ft; prio = prioDaTipo(ft); } // danno mirato (maltempo): niente maxi/MANV sopra
+    } else {
+      const evG = tiraEventoGrande();
+      if(evG){ tipo = evG.tipo; prio = 1; maxi = !!evG.maxi; manv = !!evG.manv; } // evento grosso della fascia: codice rosso
+    }
     const vest = vesteChiamata(tipo);
     let via = viaDaComune(c.n);
     const civ = rndi(1,180);
@@ -3751,9 +4015,12 @@ window.COEUSIM = (() => {
       }
     }
     const pz = randomPazienti(prio, tipo);
+    if(maxi && tipo.pz>0){ const nG = rndi(5,15); while(pz.length < nG) pz.push(salutePaziente(prio, tipo)); } // maxiemergenza: 5-15 feriti
+    else if(manv && tipo.pz>0){ const nM = rndi(1,8); while(pz.length < nM) pz.push(salutePaziente(prio, tipo)); } // MANV: 1-8 feriti
     via = viaDaComune(cc.n); // la via segue il comune effettivo (lago/punto fisso)
     return {
       tipoNome: tipo.nome, // VERO tipo: resta nascosto, si scopre a fine intervento
+      maxi: !!maxi, manv: !!manv,
       truePrio: prio,      // VERA priorità (nascosta: il tipo vero si rivela alla chiusura)
       emoji: tipo.emoji,
       dialogo: vest.dialogo, muta: vest.muta,
@@ -3775,12 +4042,17 @@ window.COEUSIM = (() => {
     if (inAcqua(lat, lng)){ toast("Lì c'è il lago: scegli un punto a terra"); return null; }
     let best = D().COMUNI[0], bd = 1e9;
     for(const c of D().COMUNI){ const d = haversineKm(lat, lng, c.lat, c.lng); if(d<bd){ bd=d; best=c; } }
-    const tp = tipoRandom(), tipo = tp.tipo;
+    const tp = tipoRandom();
+    let tipo = tp.tipo, prioQui = tp.prio, maxiQui = false, manvQui = false;
+    const evQui = tiraEventoGrande();
+    if(evQui){ tipo = evQui.tipo; prioQui = 1; maxiQui = !!evQui.maxi; manvQui = !!evQui.manv; }
     const vest2 = vesteChiamata(tipo);
     const via = viaDaComune(best.n);
-    const pz2 = randomPazienti(tp.prio, tipo);
+    const pz2 = randomPazienti(prioQui, tipo);
+    if(maxiQui && tipo.pz>0){ const nG2 = rndi(5,15); while(pz2.length < nG2) pz2.push(salutePaziente(prioQui, tipo)); }
+    else if(manvQui && tipo.pz>0){ const nM2 = rndi(1,8); while(pz2.length < nM2) pz2.push(salutePaziente(prioQui, tipo)); }
     const b = {
-      tipoNome: tipo.nome, truePrio: tp.prio, emoji: tipo.emoji,
+      tipoNome: tipo.nome, truePrio: prioQui, maxi: maxiQui, manv: manvQui, emoji: tipo.emoji,
       dialogo: vest2.dialogo, muta: vest2.muta,
       lat, lng, indirizzo: `${via} ${rndi(1,180)}`,
       comune: best.n, prov: best.p, vvf: !!tipo.vvf,
@@ -3789,8 +4061,9 @@ window.COEUSIM = (() => {
     };
     const call = { ...b, callId: callCounter++ };
     chiamate.unshift(call);
-    log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
-    blip(); toast("🔔 Nuova chiamata in arrivo!");
+    // maxiemergenze e MANV arrivano in silenzio: niente annunci nel radio, li scopri rispondendo
+    if(!(b.maxi||b.manv)) log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
+    blip(); if(!(b.maxi||b.manv)) toast("🔔 Nuova chiamata in arrivo!");
     refreshCallMarkers(); renderCalls(); updateStats();
     return call;
   }
@@ -3812,15 +4085,46 @@ window.COEUSIM = (() => {
     const b = creaBozza(forceProv);
     const call = { ...b, callId: callCounter++ };
     chiamate.unshift(call);
-    log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
+    // maxiemergenze e MANV arrivano in silenzio: niente annunci nel radio, li scopri rispondendo
+    if(!(b.maxi||b.manv)) log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
     blip();
-    toast("🔔 Nuova chiamata in arrivo!");
+    if(!(b.maxi||b.manv)) toast("🔔 Nuova chiamata in arrivo!");
     refreshCallMarkers();
     renderCalls();
     updateStats();
     return call;
   }
   function nuovaChiamata(prov=null){ return makeChiamata(prov); }
+
+  // --- MALTEMPO CHE PICCHIA: durante temporale/pioggia/vento i danni arrivano davvero, in diretta ---
+  const STORM_TIPI = {
+    Temporale:["Albero in carreggiata","Albero su auto occupata","Albero sui cavi","Albero sul tetto","Sottopasso allagato con auto","Garage interrato allagato","Roggia esondata","Colpito da fulmine","Albero incendiato da fulmine","Feriti dalla grandine","Albero su tenda con occupanti","Sottopasso ferroviario allagato","Albero su pista ciclabile"],
+    Pioggia:["Sottopasso allagato con auto","Garage interrato allagato","Roggia esondata","Sottopasso ferroviario allagato","Cabina elettrica allagata","Canile allagato","Sede canottieri allagata","Auto travolta da frana","Ciclista caduto in sottopasso allagato","Lago esondato"],
+    Vento:["Albero in carreggiata","Albero pericolante","Albero sul tetto","Albero sui cavi","Siepe divelta dal vento","Antenna caduta sul tetto","Ponteggio nel vento","Gonfiabile volato via col vento","Alveare caduto dal tetto","Sup trascinato dal vento","Albero su pista ciclabile","Albero su panchina al parco"]
+  };
+  const STORM_EVERY = { Temporale:7, Pioggia:12, Vento:12 }; // game-min tra un danno e l'altro
+  let stormTimer = 0;
+  function makeChiamataTipo(nome){
+    if(chiamate.length>=3) return null;
+    const b = creaBozza(null, nome);
+    const call = { ...b, callId: callCounter++ };
+    chiamate.unshift(call);
+    const emo = {Temporale:"⛈️",Pioggia:"🌧️",Vento:"💨"}[meteo.cond]||"🔔";
+    log(`${emo} Danno da maltempo a <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`);
+    blip(); toast(`${emo} Danno da maltempo in arrivo!`);
+    refreshCallMarkers(); renderCalls(); updateStats();
+    return call;
+  }
+  function stormTick(dtGameMin){
+    const lista = STORM_TIPI[meteo.cond];
+    if(!lista){ stormTimer = 0; return; }
+    stormTimer += dtGameMin;
+    if(stormTimer < STORM_EVERY[meteo.cond]+rnd(0,4)) return;
+    stormTimer = 0;
+    if(chiamate.length>=3) return; // coda piena: salta questo giro
+    const nome = lista[rndi(0,lista.length-1)];
+    if(D().TIPI.some(x=>x.nome===nome)) makeChiamataTipo(nome);
+  }
 
   // --- CLASSIFICA: scegli il codice colore -> diventa intervento attivo ---
   // R = rosso(P1), G = giallo(P2), V = verde(P3), B = bianco(P4)
@@ -3846,6 +4150,8 @@ window.COEUSIM = (() => {
       tempoSulPosto: 0,
       trasporto: call.trasporto,
       daTrasportare: call.trasporto ? (call.pazienti||[]).filter(x=>x!=null).length : 0, // 1 viaggio ambulanza = 1 paziente
+      // il trasporto parte solo a pazienti stabilizzati al 100% (vedi cura sul posto nel tick)
+      stabilizzato: !(call.trasporto && (call.pazienti||[]).some(s=>s!=null && s<100)),
       dialogo: call.dialogo,
       t0: clockMin, attesa: 0,
       pazienti: (call.pazienti||[]).filter(x=>x!=null),
@@ -3928,7 +4234,7 @@ window.COEUSIM = (() => {
               <div class="intAddr">📍 ${call.indirizzo}, <b>${call.comune}</b> (${call.prov})</div>
               <div class="callBtns"><button class="lstBtn small primary">Rispondi</button><button class="lstBtn small">Rifiuta</button></div>`;
             const [ansBtn, refBtn] = div.querySelectorAll(".callBtns button");
-            ansBtn.onclick = ()=>{ call.answered = true; log(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); };
+            ansBtn.onclick = ()=>{ call.answered = true; if(!(call.maxi||call.manv)) log(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); };
             refBtn.onclick = ()=>rifiutaChiamata(call.callId);
           } else {
            // il richiedente parla: ora classifica il colore
@@ -3997,9 +4303,10 @@ window.COEUSIM = (() => {
   function randomPazienti(prio, tipo){
     const max = tipo ? (tipo.pz ?? 1) : 1;
     if(!(max>0)) return [];
+    const piu = false; // colonna Pazienti rimossa dalle fasce: probabilità base di più coinvolti
     let n = 1;
-    if(max>=3){ const r=Math.random(); n = r<0.6?1 : r<0.85?2 : 3; }
-    else if(max>=2){ n = Math.random()<0.7?1:2; }
+    if(max>=3){ const r=Math.random(); n = piu ? (r<0.35?1:r<0.7?2:3) : (r<0.6?1 : r<0.85?2 : 3); }
+    else if(max>=2){ n = Math.random() < (piu?0.45:0.7) ? 1 : 2; }
     const arr = [];
     for(let i=0;i<n;i++) arr.push(salutePaziente(prio, tipo));
     return arr;
@@ -4007,7 +4314,7 @@ window.COEUSIM = (() => {
   function pazientiTXT(list){
     const a = (list||[]).filter(x=>x!=null);
     if(!a.length) return `👤 Nessun ferito`;
-    return `👤 Pazienti (${a.length}): ${a.map(s=>"<b>"+s+"%</b>").join(" · ")}`;
+    return `👤 Pazienti (${a.length}): ${a.map(s=>"<b>"+Math.round(s)+"%</b>").join(" · ")}`;
   }
   // via reale della città (verificate) o nome generico per i piccoli comuni
   function viaDaComune(nome){
@@ -4089,7 +4396,7 @@ window.COEUSIM = (() => {
     vaiA(mz, iv.lat, iv.lng, "viaggio");
     if(!iv.mezziIds.includes(mz.codice)) iv.mezziIds.push(mz.codice);
     if(iv.stato==="attesa") iv.stato="viaggio";
-    log(`${mz.corpo==="VVF"?"🚒":"🚑"} ${nomem(mz)} ${dirottato?"dirottato":"→"} #${iv.id}`);
+    log(`${mz.corpo==="VVF"?"🚒":(mz.tipo==="AUTOMEDICA"||isMedica(mz))?"🚓":"🚑"} ${nomem(mz)} ${dirottato?"dirottato":"→"} #${iv.id}`);
     refreshMarkers(); renderListe(); updateStats();
     return true;
   }
@@ -4249,6 +4556,12 @@ window.COEUSIM = (() => {
     if(mz.corpo==="VVF"&&!isEli(mz)){ toast("🚒 I VVF non fanno trasporti sanitari"); return; }
     if(mz.tipo==="AUTOMEDICA"||isMedica(mz)){ toast("🚓 L'automedica non può trasportare: serve un'ambulanza"); return; }
     const iv = interventi.find(x=>x.id===mz.interventoId);
+    // sicurezza: niente trasporto se i pazienti non sono stabili al 100%
+    if(iv && iv.trasporto && !iv.stabilizzato){
+      const min = Math.round(Math.min(...(iv.pazienti||[0]).filter(x=>x!=null)));
+      toast(`🩺 Paziente non ancora stabile (${min}%): completa la stabilizzazione al 100%`);
+      return;
+    }
     // ospedale cliccato sulla mappa (o già scelto prima), altrimenti il più vicino al mezzo
     let best = null;
     const want = ospNome || mz.ospedaleScelto;
@@ -4302,7 +4615,7 @@ window.COEUSIM = (() => {
       if(attesaMin>20) pts-=40;
       if(attesaMin>40) pts-=60;
       score+=pts;
-      log(`✅ Intervento #${iv.id} chiuso (+${pts}pt, attesa ${Math.round(attesaMin)}') — era: <b>${iv.tipoNome}</b>`);
+      log(`✅ #${iv.id} chiuso — era: <b>${iv.tipoNome}</b>`);
       interventi = interventi.filter(x=>x.id!==iv.id);
       if(selectedId===iv.id) selectedId=null;
       refreshMarkers(); renderListe(); updateStats();
@@ -4323,6 +4636,7 @@ window.COEUSIM = (() => {
   function meteoUpdate(){
     const el=$("wetter");
     if(el) el.textContent=`${meteo.cond}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
+    // effetti visivi sulla mappa: disattivati su richiesta (il maltempo genera comunque danni)
   }
   function meteoTick(dtGameMin){
     meteoTimer += dtGameMin;
@@ -4356,6 +4670,7 @@ window.COEUSIM = (() => {
     clockMin += dtRealSec*speed/60;
     if(clockMin>=24*60) clockMin-=24*60;
     meteoTick(dtRealSec*speed/60);
+    stormTick(dtRealSec*speed/60); // maltempo che picchia: danni in diretta
 
     // inflow automatico LENTO: le chiamate arrivano una a una nella coda,
     // mai più di 2 in attesa — vanno accettate manualmente
@@ -4386,17 +4701,42 @@ window.COEUSIM = (() => {
         mz.sulPostoTimer -= dtRealSec*speed/60;
         const iv = interventi.find(x=>x.id===mz.interventoId);
         if(iv) iv.tempoSulPosto += dtRealSec*speed/60;
+        // cura sul posto: il personale sanitario stabilizza i pazienti verso il 100%;
+        // senza 100% su tutti non si carica e non si trasporta (niente PRONTO, niente PS)
+        if(iv && iv.trasporto && !iv.stabilizzato && (iv.pazienti||[]).some(s=>s<100) && (mz.corpo!=="VVF"||isEli(mz))){
+          const rate = (mz.tipo==="MSA"||isEli(mz)) ? 9 : mz.tipo==="MSB" ? 5 : 4; // % salute per game-min
+          const q = dtRealSec*speed/60*rate;
+          let step=false;
+          for(let k=0;k<iv.pazienti.length;k++){
+            const prima = iv.pazienti[k];
+            if(prima<100){
+              const dopo = Math.min(100, prima+q);
+              iv.pazienti[k] = Math.round(dopo*10)/10;
+              if(Math.floor(dopo/10)!==Math.floor(prima/10)) step=true;
+            }
+          }
+          if(iv.pazienti.every(s=>s>=100)){
+            iv.stabilizzato = true;
+            log(`💚 #${iv.id} pazienti stabilizzati al 100% — pronti per il trasporto`);
+            refreshMarkers(); renderListe();
+          } else if(step) renderListe(); // aggiorna le % visibili nel dettaglio
+        }
         if(mz.sulPostoTimer<=0){
           // fine sul posto: il paziente viaggia solo in ambulanza;
           // MSA1/MSA2 non trasportano: nei casi gravi seguono l'ambulanza in PS, altrimenti rientrano (come VVF)
           const iv2 = interventi.find(x=>x.id===mz.interventoId);
           if(iv2 && iv2.trasporto && (mz.corpo!=="VVF"||isEli(mz)) && mz.tipo!=="AUTOMEDICA" && !isMedica(mz)){
-            // paziente caricato in ambulanza: resta PRONTO finché l'operatore sceglie l'ospedale (🏥)
-            mz.stato="pronto"; mz.sulPostoTimer=0;
-            log(`${isEli(mz)?"🚁":"🚑"} ${mz.codice}: paziente a bordo, pronto per il trasporto — scegli l'ospedale (🏥 sul mezzo, 2 click = più vicino)`);
-            toast(`${isEli(mz)?"🚁":"🚑"} ${mz.codice} pronto: scegli l'ospedale (🏥)`);
-            refreshMarkers(); renderListe();
-          } else if(iv2 && isMedica(mz)){
+            if(iv2.stabilizzato){
+              // paziente caricato in ambulanza: resta PRONTO finché l'operatore sceglie l'ospedale (🏥)
+              mz.stato="pronto"; mz.sulPostoTimer=0;
+              log(`${isEli(mz)?"🚁":"🚑"} ${mz.codice}: paziente a bordo (stabile al 100%), pronto per il trasporto — scegli l'ospedale (🏥 sul mezzo, 2 click = più vicino)`);
+              toast(`${isEli(mz)?"🚁":"🚑"} ${mz.codice} pronto: scegli l'ospedale (🏥)`);
+              refreshMarkers(); renderListe();
+            } else {
+              mz.sulPostoTimer = 1; // pazienti non ancora stabili al 100%: resta sul posto a curare
+              renderListe();
+            }
+          } else if(iv2 && (isMedica(mz)||mz.tipo==="AUTOMEDICA")){
             const amb = mezzi.find(m=>m.interventoId===iv2.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="trasporto"||m.stato==="ospedale") && m.ospedale);
             const ambInArrivo = !amb && iv2.trasporto && iv2.prio<=2 && mezzi.some(m=>m.interventoId===iv2.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"));
             const ambPronta = !amb && iv2.trasporto && iv2.prio<=2 && mezzi.some(m=>m.interventoId===iv2.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && m.stato==="pronto");
@@ -4470,6 +4810,17 @@ window.COEUSIM = (() => {
     }
   }
 
+  // motivo della richiesta MSA: clinico ma senza rivelare il tipo vero (già visibili salute e codice)
+  function motivoMSA(iv){
+    const ps = (iv.pazienti||[]).filter(s=>s!=null);
+    const min = ps.length ? Math.round(Math.min(...ps)) : null;
+    if(min!=null && min<25) return `paziente critico (salute ${min}%)`;
+    if(min!=null && min<50) return `paziente grave (salute ${min}%)`;
+    if(iv.truePrio===1) return "codice rosso, serve equipaggio medicalizzato";
+    if(iv.truePrio===2) return "paziente instabile, serve equipaggio medicalizzato";
+    return "serve supporto sanitario avanzato";
+  }
+
   // --- REPORT DI SCENA: il primo mezzo arrivato descrive cosa ha trovato e chiede rinforzi se servono ---
   function reportScena(iv, mz){
     // VVF: niente mezzi richiesti, l'operatore ha scelto liberamente — nessuna richiesta rinforzi
@@ -4479,23 +4830,23 @@ window.COEUSIM = (() => {
       return;
     }
     const dot = `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>`;
-    log(`📍 ${dot} ${nomem(mz)} sul posto a <b>${iv.comune}</b> — ${iv.emoji||""} <b>${iv.tipoNome}</b>: ${iv.desc||""} (👤 ${iv.pazienti.map(s=>s+"%").join(" · ")})`);
+    log(`📍 ${dot} ${nomem(mz)} sul posto a <b>${iv.comune}</b> — ${iv.emoji||""} <b>${iv.tipoNome}</b>: ${iv.desc||""} (👤 ${iv.pazienti.map(s=>Math.round(s)+"%").join(" · ")})`);
     // confronta mezzi richiesti dal tipo con quelli effettivamente assegnati
     const ass = mezzi.filter(m=>iv.mezziIds.includes(m.codice));
     const conta = {};
     for(const m of ass){
+      if(m.tipo==="ELI"){ conta.MSA=(conta.MSA||0)+1; conta.MSB=(conta.MSB||0)+1; conta.AUTOMEDICA=(conta.AUTOMEDICA||0)+1; if(m.corpo==="VVF") conta.VVF=(conta.VVF||0)+1; continue; } // l'eli fa da ambulanza e automedica (anche DRAGO VVF)
       if(m.corpo==="VVF"){ conta.VVF=(conta.VVF||0)+1; continue; }
-      if(m.tipo==="ELI"){ conta.MSA=(conta.MSA||0)+1; conta.MSB=(conta.MSB||0)+1; conta.AUTOMEDICA=(conta.AUTOMEDICA||0)+1; continue; } // l'eli fa da ambulanza e automedica
       conta[m.tipo]=(conta[m.tipo]||0)+1;
     }
     const mancano = [];
     for(const k in (iv.richiesti||{})){
       const need = Math.max(0, (iv.richiesti[k]||0)) - (conta[k]||0);
-      if(need>0) mancano.push(`${need}× ${k}`);
+      if(need>0) mancano.push(k==="MSA" ? `${need}× ${k} (${motivoMSA(iv)})` : `${need}× ${k}`);
     }
-    // 1 ambulanza = 1 paziente: con più feriti ne servono altre
+    // 1 ambulanza = 1 paziente: altre ambulanze solo se i feriti superano i mezzi da trasporto già sul posto (eli compreso, anche VVF)
     if(iv.trasporto){
-      const ambAss = ass.filter(m=>m.corpo!=="VVF"&&m.tipo!=="AUTOMEDICA"&&!isMedica(m)).length;
+      const ambAss = ass.filter(m=>(m.corpo!=="VVF"||isEli(m))&&m.tipo!=="AUTOMEDICA"&&!isMedica(m)).length;
       const needAmb = Math.max(0, iv.pazienti.length - ambAss);
       if(needAmb>0) mancano.push(`${needAmb}× ambulanza per ${iv.pazienti.length} pazienti`);
     }
@@ -4503,6 +4854,7 @@ window.COEUSIM = (() => {
     if(mancano.length) log(`⚠️ ${nomem(mz)} chiede rinforzi a <b>${iv.comune}</b>: servono ${mancano.join(", ")}`);
     else if(isMedica(mz) && iv.trasporto && iv.prio<=2 && mezzi.some(m=>m.interventoId===iv.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"))) log(`🚓 ${mz.codice}: aspetta l'ambulanza per seguirla in PS`);
     else if(isMedica(mz) && iv.trasporto) log(`🚓 ${mz.codice}: l'ambulanza porterà il paziente in PS`);
+    else if(mz.tipo==="AUTOMEDICA" && iv.trasporto) log(`🚓 ${nomem(mz)} sul posto: serve un'ambulanza per portare il paziente in PS`);
     else if(iv.trasporto) log(`🚑 ${nomem(mz)}: paziente da portare in PS a fine intervento, nessun altro mezzo necessario`);
     else log(`✅ ${nomem(mz)}: situazione sotto controllo a <b>${iv.comune}</b>, nessun altro mezzo necessario`);
   }
@@ -4816,6 +5168,8 @@ window.COEUSIM = (() => {
       </div>
       <div class="kv"><b>Stato:</b> ${statoLabel(iv.stato)}</div>
       ${iv.reportFatto?`<div class="kv">${pazientiTXT(iv.pazienti)}</div>`:`<div class="kv small">👤 Pazienti: in attesa del primo mezzo sul posto…</div>`}
+      ${iv.reportFatto&&iv.trasporto&&!iv.stabilizzato?`<div class="kv">🩺 Stabilizzazione in corso: trasporto al 100% di salute</div>`:""}
+      ${iv.reportFatto&&iv.trasporto&&iv.stabilizzato&&(iv.daTrasportare||0)>0?`<div class="kv">💚 Pazienti stabili al 100%: pronti per il trasporto</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&(iv.daTrasportare||0)>0?`<div class="kv"><b>🏥 Da trasportare ancora:</b> ${iv.daTrasportare} pazient${iv.daTrasportare>1?"i":"e"}</div>`:""}
       <div class="kv"><b>Mezzi assegnati:</b></div>
       <div id="onScene"></div>
@@ -4848,7 +5202,7 @@ window.COEUSIM = (() => {
       iv.stato="chiuso"; iv.gestito=true; chiusi++; score+=50;
       for(const c of [...iv.mezziIds]){ const m=mezzi.find(x=>x.codice===c); if(m){ vaiA(m, m.baseLat, m.baseLng, "rientro"); } }
       iv.mezziIds=[];
-      log(`✅ Intervento #${iv.id} chiuso manualmente — era: <b>${iv.tipoNome}</b>`);
+      log(`✅ #${iv.id} chiuso — era: <b>${iv.tipoNome}</b>`);
       interventi = interventi.filter(x=>x.id!==iv.id);
       selectedId=null;
       refreshMarkers(); renderListe(); updateStats();
@@ -5178,7 +5532,7 @@ window.COEUSIM = (() => {
   }
 
   return {
-    boot, generaN, nuovaChiamata, accettaChiamata, rifiutaChiamata,
+    boot, generaN, nuovaChiamata, makeChiamataTipo, accettaChiamata, rifiutaChiamata,
     creaChiamataQui, debugZone,
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     switchBase, toggleVVF,
@@ -5192,6 +5546,7 @@ window.COEUSIM = (() => {
     toggleInflow(){autoInflow=!autoInflow; return autoInflow;},
     isInflow(){return autoInflow;},
     setMeteo(c){ if(METEO_NEXT[c]){ meteo.cond=c; meteoTimer=0; meteoUpdate(); return true; } return false; },
+    setFascia(i,k,v){ setFascia(i,k,v); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
     reset(){ interventi=[]; chiamate=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; pickPS=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
@@ -5214,6 +5569,11 @@ window.COEUSIM = (() => {
   function toggleInflow(btn){
     const on = COEUSIM.toggleInflow();
     btn.textContent = on ? "Afflusso: ON" : "Afflusso: OFF";
+  }
+  function toggleFasce(){
+    const p = document.getElementById("fascePanel");
+    p.hidden = !p.hidden;
+    document.getElementById("fasceBtn").classList.toggle("active", !p.hidden);
   }
   function switchBase(which){
     if(window.COEUSIM && COEUSIM.switchBase) COEUSIM.switchBase(which);
