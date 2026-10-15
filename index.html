@@ -112,7 +112,7 @@
   .intPin{ width:26px; height:32px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 2px 2px #0009); }
   .intPin.pulse{ animation:pulse 1.2s infinite; }
   @keyframes pulse{ 0%{ box-shadow:0 0 0 0 #d0000088; } 70%{ box-shadow:0 0 0 10px #d0000000; } 100%{ box-shadow:0 0 0 0 #d0000000; } }
-  .mzDot{ width:48px; height:48px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:26px; filter:drop-shadow(1px 1px 1px #000b); }
+  .mzDot{ width:68px; height:68px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:26px; filter:drop-shadow(1px 1px 1px #000b); }
   .mzDot.viaggio{ filter:drop-shadow(1px 1px 1px #000b); } .mzDot.sul_posto,.mzDot.pronto,.mzDot.trasporto{ filter:drop-shadow(1px 1px 2px #d00000); } .mzDot.ospedale{ filter:drop-shadow(1px 1px 2px #7a00c0); }
   .sedeDot{ width:20px; height:20px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 1px 1px #000b); }
   .ospDot{ width:14px; height:14px; background:#fff; color:#d00000; font-weight:bold; border-radius:2px; display:flex; align-items:center; justify-content:center; border:2px solid #d00000; font-size:8px; }
@@ -184,7 +184,7 @@
   <div style="font-size:12px; line-height:1.6">
     1. Premi <b>📞 Nuova chiamata</b>: squilla il telefono nel pannello Chiamate — si vede solo il luogo, NON il motivo.<br>
     2. Premi <b>Rispondi</b>: il richiedente racconta e <b>spunti i mezzi</b> da inviare (i più vicini, 118 e/o VVF) — puoi spuntare anche mezzi già impegnati o in rientro: vengono <b>dirottati subito</b>, ripartono da dove sono. Poi dai il codice con un click: <b>🚒 Prendi in carico</b> se VVF (senza codice), oppure 🔴🟡🟢⚪ (alla chiusura scopri cos'era davvero) — i mezzi spuntati partono subito. Se è un falso allarme puoi premere <b>✖ Rifiuta</b> anche dopo aver risposto. Occhio: le <b>📵 mute</b> non parlano affatto, solo rumori di fondo. Chi chiama non sempre dice la verità (c'è chi minimizza: "sarà la digestione"...), arrivano anche <b>trasporti programmati</b> (dialisi, visite, terapie) e chiamate dal <b>112/113</b>.<br>
-    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (MSA ed elisoccorso sono più veloci, l'automedica aiuta) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS.<br>
+    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (MSA ed elisoccorso sono più veloci, l'automedica aiuta) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare.<br>
     4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto; <b>click su un mezzo</b> = i suoi dettagli. Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e <b>picchia davvero</b>: col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, col <b>vento</b> volano antenne, ponteggi e gonfiabili. Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). Numero e salute dei pazienti (solo %, niente età né diagnosi) si vedono quando il primo mezzo arriva sul posto. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, <b>🏥 Scegli ospedale</b> (compare sul mezzo quando è PRONTO, paziente a bordo) e poi <b>click sull'ospedale</b> = destinazione (doppio click = più vicino). <b>🆘 Richiedi assistenza</b> = riapre la lista per mandare altri mezzi.
   </div>
@@ -1285,6 +1285,107 @@ const TIPI = [
   { nome:"Isola ecologica in fiamme", pz:0, peso:1, zona:"misto", emoji:"♻️", vvf:true, prio:[5,25,50,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Cumuli all'isola ecologica in fiamme, fumo tossico. Solo VVF." },
   { nome:"Autobus a fuoco in deposito", pz:0, peso:1, zona:"misto", emoji:"🚌", vvf:true, prio:[10,30,40,20], mezzi:{}, durata:[8,16], trasporto:false, desc:"Autobus a fuoco in deposito, vuoto senza passeggeri. Solo VVF." },
   { nome:"Auto bloccata sul passaggio a livello", pz:0, peso:1, zona:"strada", emoji:"🚂", vvf:true, prio:[15,35,40,10], mezzi:{}, durata:[6,12], trasporto:false, desc:"Auto bloccata sulle rotaie al passaggio a livello, conducente fuori. Solo VVF." },
+  { nome:"Anziana scivolata dalla sedia", pz:1, sal:[60,90], peso:4, zona:"casa", emoji:"🪑", prio:[2,15,48,35], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Anziana caduta dalla sedia, botta all'anca." },
+  { nome:"Dito schiacciato nel cancello", pz:1, sal:[70,95], peso:4, zona:"casa", emoji:"🚪", prio:[2,20,50,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Dito gonfio e blu dopo la porta chiusa." },
+  { nome:"Taglio col pelapatate", pz:1, sal:[70,95], peso:3, zona:"casa", emoji:"🥔", prio:[2,20,50,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Taglio al dito pelando le patate." },
+  { nome:"Scottatura dal forno", pz:1, sal:[65,92], peso:4, zona:"casa", emoji:"🔥", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Avambraccio scottato dalla teglia." },
+  { nome:"Febbre alta del bimbo", pz:1, sal:[60,90], peso:5, zona:"casa", emoji:"🤒", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo con 39.5 di febbre, abbacchiato." },
+  { nome:"Vomito del bimbo", pz:1, sal:[60,90], peso:4, zona:"casa", emoji:"🤮", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo che vomita da ore, disidratato." },
+  { nome:"Capogiro in bagno", pz:1, sal:[55,85], peso:4, zona:"casa", emoji:"🛁", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Anziana con capogiri in bagno, quasi svenuta." },
+  { nome:"Pressione alta", pz:1, sal:[55,85], peso:5, zona:"casa", emoji:"💓", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Pressione alle stelle, mal di testa." },
+  { nome:"Pressione bassa e svenimento", pz:1, sal:[55,85], peso:4, zona:"casa", emoji:"💫", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Svenuto in piedi, pressione bassa." },
+  { nome:"Mal di testa fortissimo", pz:1, sal:[60,90], peso:4, zona:"casa", emoji:"🤕", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Cefalea violentissima da ore." },
+  { nome:"Torcicollo acuto", pz:1, sal:[70,95], peso:3, zona:"casa", emoji:"🧣", prio:[1,12,45,42], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Collo bloccato di lato dal mattino." },
+  { nome:"Blocco lombare acuto", pz:1, sal:[65,92], peso:4, zona:"casa", emoji:"🦴", prio:[2,20,50,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Schiena bloccata chinandosi." },
+  { nome:"Dolore al ginocchio artrosico", pz:1, sal:[65,92], peso:3, zona:"casa", emoji:"🦵", prio:[1,12,47,40], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Ginocchio gonfio e dolorante." },
+  { nome:"Dolore alla spalla notturno", pz:1, sal:[65,92], peso:3, zona:"casa", emoji:"💪", prio:[1,12,47,40], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Spalla che non fa dormire." },
+  { nome:"Formicolio alle mani", pz:1, sal:[65,92], peso:3, zona:"casa", emoji:"✋", prio:[2,15,48,35], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Mani addormentate da ore." },
+  { nome:"Mal d'orecchio del bimbo", pz:1, sal:[65,92], peso:4, zona:"casa", emoji:"👂", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo con otite, piange dal dolore." },
+  { nome:"Sfogo da detersivo nuovo", pz:1, sal:[70,95], peso:2, zona:"casa", emoji:"🧴", prio:[1,12,47,40], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Prurito e rossore dopo il bucato." },
+  { nome:"Morso del gatto", pz:1, sal:[65,92], peso:3, zona:"casa", emoji:"🐱", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Morso profondo alla mano dal gatto." },
+  { nome:"Caduta dal letto del bimbo", pz:1, sal:[65,95], peso:4, zona:"casa", emoji:"🛏️", prio:[2,18,52,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo caduto dal letto, bernoccolo." },
+  { nome:"Ferita al labbro", pz:1, sal:[70,95], peso:3, zona:"casa", emoji:"👄", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Labbro spaccato contro il tavolo." },
+  { nome:"Anziano infreddolito in casa fredda", pz:1, sal:[55,85], peso:3, zona:"casa", emoji:"🥶", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Casa fredda, anziano tremante e confuso." },
+  { nome:"Dente rotto che sanguina", pz:1, sal:[70,95], peso:3, zona:"casa", emoji:"🦷", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Dente rotto mordendo, sangue." },
+  { nome:"Truciolo nell'occhio", pz:1, sal:[70,95], peso:3, zona:"casa", emoji:"👁️", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Scheggia nell'occhio, lacrima e non vede." },
+  { nome:"Mano gonfia da spina", pz:1, sal:[70,95], peso:2, zona:"casa", emoji:"🌵", prio:[2,15,50,33], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Spina di rosa nel dito, mano gonfia." },
+  { nome:"Scivolata sul pavimento bagnato", pz:1, sal:[60,90], peso:4, zona:"casa", emoji:"🧽", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Scivolata in cucina, botta alla schiena." },
+  { nome:"Zigomo gonfio dopo caduta", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🤕", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Caduta in corridoio, zigomo gonfio." },
+  { nome:"Bimbo incastrato tra le sponde", pz:1, sal:[80,98], peso:2, zona:"casa", emoji:"🛏️", prio:[1,10,45,44], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo incastrato nel letto, illeso ma bloccato." },
+  { nome:"Pentola bollente sul piede", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🍲", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Acqua bollente rovesciata sul piede." },
+  { nome:"Scivolata sulle scale di casa", pz:1, sal:[55,88], peso:4, zona:"casa", emoji:"🪜", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Ruzzolone sulle scale interne." },
+  { nome:"Anziana caduta che non si alza", pz:1, sal:[55,85], peso:5, zona:"casa", emoji:"🧓", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Anziana a terra, troppo debole per alzarsi." },
+  { nome:"Colpo di frusta in coda", pz:1, sal:[60,90], peso:5, zona:"strada", emoji:"🚗", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Tamponamento in coda, collo dolorante." },
+  { nome:"Ciclista caduto sulle rotaie", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🚲", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Ruota nelle rotaie, volo e abrasioni." },
+  { nome:"Monopattino scivolato sulle foglie", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🛴", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Scivolata sulle foglie bagnate." },
+  { nome:"Pedone sfiorato sulle strisce", pz:1, sal:[55,88], peso:4, zona:"strada", emoji:"🚸", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Auto l'ha sfiorato, contusione e spavento." },
+  { nome:"Scooter contro buca", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🛵", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Buca improvvisa, scooter a terra." },
+  { nome:"Apecar contro il muretto", pz:1, sal:[55,88], peso:3, zona:"strada", emoji:"🛺", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Apecar contro muretto, conducente contuso." },
+  { nome:"Anziano cade dal marciapiede", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🧓", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Inciampato sul gradino, ginocchio sbucciato." },
+  { nome:"Malore lieve alla guida", pz:1, sal:[55,85], peso:4, zona:"strada", emoji:"🚗", prio:[6,32,44,18], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Capogiro alla guida, accostato in tempo." },
+  { nome:"Nausea in autobus", pz:1, sal:[65,92], peso:3, zona:"strada", emoji:"🚌", prio:[2,18,52,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Passeggera con nausea e sudori freddi." },
+  { nome:"Bimbo vomita in coda", pz:1, sal:[65,92], peso:3, zona:"strada", emoji:"🚙", prio:[2,18,52,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo con mal d'auto in coda." },
+  { nome:"Anziana scivola scendendo dal bus", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🚌", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Scivolata dal predellino, botta all'anca." },
+  { nome:"Tamponamento bici-auto", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🚲", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Auto ha toccato la bici, ciclista a terra." },
+  { nome:"Scooterista a terra in rotonda", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🛵", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Scivolato in rotonda, escoriazioni." },
+  { nome:"Sportello addosso in parcheggio", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"🚪", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Stretto tra sportello e palo." },
+  { nome:"Spinta in lite stradale", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"😡", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Spintone in lite, caduto sul marciapiede." },
+  { nome:"Passante inciampa sulla transenna", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"🚧", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Transenna in mezzo, volo e ginocchio aperto." },
+  { nome:"Corridore esausto in maratona", pz:1, sal:[55,88], peso:3, zona:"strada", emoji:"🏃", prio:[4,30,46,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Maratoneta esausto al 30esimo km." },
+  { nome:"Caviglia girata correndo", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🏃", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Storta correndo al parco." },
+  { nome:"Polso dolorante dopo caduta dallo skate", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"🛹", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Caduta dallo skate sul polso." },
+  { nome:"Passeggino contro la buca", pz:1, sal:[60,92], peso:3, zona:"strada", emoji:"👶", prio:[3,25,52,20], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Buca improvvisa, bimbo sballottato." },
+  { nome:"Motorino scivolato sul pavè", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🛵", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Pavè bagnato, motorino a terra." },
+  { nome:"Ciclista caduto per il guinzaglio", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"🐕", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Guinzaglio tra i raggi, volo." },
+  { nome:"Padrona a terra col guinzaglio", pz:1, sal:[60,90], peso:3, zona:"strada", emoji:"🐕", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Cane scattato, padrona trascinata." },
+  { nome:"Svenimento alla fermata del bus", pz:1, sal:[55,88], peso:4, zona:"strada", emoji:"🚌", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Ragazzo svenuto in piedi alla fermata." },
+  { nome:"Caduta dalla bici elettrica", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"⚡", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Peso della bici, caduta e contusioni." },
+  { nome:"Escursionista sfinito", pz:1, sal:[55,88], peso:3, zona:"natura", emoji:"🥾", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Sfinito sul sentiero, non cammina più." },
+  { nome:"Fungaiolo scivolato", pz:1, sal:[60,90], peso:3, zona:"natura", emoji:"🍄", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Scivolata nel bosco, caviglia gonfia." },
+  { nome:"Ginocchio slogato al capanno", pz:1, sal:[60,90], peso:2, zona:"natura", emoji:"🦵", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Torsione al capanno di caccia." },
+  { nome:"Pescatore scivolato sulla riva", pz:1, sal:[60,90], peso:3, zona:"lago", emoji:"🎣", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Riva viscida, caduta e bagno." },
+  { nome:"Bimbo punto dalle vespe al picnic", pz:1, sal:[60,90], peso:3, zona:"natura", emoji:"🐝", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Tre punture di vespa, piange." },
+  { nome:"Volo dall'altalena al parco", pz:1, sal:[60,92], peso:4, zona:"natura", emoji:"🛝", prio:[3,25,52,20], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Volo dall'altalena, botta alla testa." },
+  { nome:"Bernoccolo sullo scivolo", pz:1, sal:[65,95], peso:3, zona:"natura", emoji:"🛝", prio:[2,18,55,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Testata contro lo scivolo." },
+  { nome:"Naso sanguinante al parco giochi", pz:1, sal:[65,92], peso:3, zona:"natura", emoji:"👃", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Pallonata in faccia, naso sanguinante." },
+  { nome:"Piede tagliato sui sassi", pz:1, sal:[65,92], peso:3, zona:"lago", emoji:"🦶", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Vetro tra i sassi, piede tagliato." },
+  { nome:"Bagnante esausto a riva", pz:1, sal:[55,85], peso:3, zona:"lago", emoji:"🌊", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Nuotata lunga, esausto a riva." },
+  { nome:"Caduta dal sup vicino riva", pz:1, sal:[65,92], peso:2, zona:"lago", emoji:"🏄", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Perso equilibrio, ginocchio contro la tavola." },
+  { nome:"Eritema da alghe", pz:1, sal:[70,95], peso:2, zona:"lago", emoji:"🟢", prio:[1,12,47,40], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Rossore pruriginoso dopo il bagno." },
+  { nome:"Morso di cane al parco", pz:1, sal:[60,90], peso:4, zona:"natura", emoji:"🐕", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Morso al polpaccio da cane libero." },
+  { nome:"Allergia ai pollini con occhi gonfi", pz:1, sal:[65,92], peso:2, zona:"natura", emoji:"🤧", prio:[2,15,50,33], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Occhi gonfi e starnuti continui." },
+  { nome:"Vesciche dopo lunga camminata", pz:1, sal:[75,98], peso:2, zona:"natura", emoji:"🥾", prio:[1,10,45,44], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Piedi distrutti dal cammino." },
+  { nome:"Distorsione a calcetto", pz:1, sal:[60,90], peso:5, zona:"misto", emoji:"⚽", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Caviglia girata in partita." },
+  { nome:"Dito gonfio a pallavolo", pz:1, sal:[65,95], peso:3, zona:"misto", emoji:"🏐", prio:[2,18,52,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Mignolo insaccato a muro." },
+  { nome:"Storta a basket", pz:1, sal:[60,90], peso:4, zona:"misto", emoji:"🏀", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Atterrato sul piede altrui." },
+  { nome:"Malore per il caldo a tennis", pz:1, sal:[55,85], peso:3, zona:"misto", emoji:"🎾", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Caldo bestiale, quasi sviene." },
+  { nome:"Vomito in piscina", pz:1, sal:[65,92], peso:3, zona:"misto", emoji:"🏊", prio:[2,18,52,28], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bimbo ha bevuto, vomita a bordo vasca." },
+  { nome:"Piede schiacciato in palestra", pz:1, sal:[60,90], peso:3, zona:"misto", emoji:"🏋️", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Disco caduto sul piede." },
+  { nome:"Capogiro dopo lo squat", pz:1, sal:[60,90], peso:3, zona:"misto", emoji:"🏋️", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Alzata pesante, vista annebbiata." },
+  { nome:"Naso rotto nello sparring", pz:1, sal:[60,90], peso:3, zona:"misto", emoji:"🥊", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Gancio in sparring, naso sanguinante." },
+  { nome:"Spalla dolorante dopo la mischia", pz:1, sal:[60,90], peso:2, zona:"misto", emoji:"🏉", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Mischia chiusa, spalla bloccata." },
+  { nome:"Alluce nero a calcetto", pz:1, sal:[70,95], peso:2, zona:"misto", emoji:"⚽", prio:[2,15,50,33], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Pestone, unghia nera e dolore." },
+  { nome:"Malore in ufficio", pz:1, sal:[55,88], peso:4, zona:"misto", emoji:"🏢", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Svenuta in open space." },
+  { nome:"Piede schiacciato in magazzino", pz:1, sal:[60,90], peso:3, zona:"misto", emoji:"📦", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Scatolone caduto sul piede." },
+  { nome:"Vapore addosso al bar", pz:1, sal:[65,92], peso:3, zona:"misto", emoji:"☕", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Getto di vapore sul braccio." },
+  { nome:"Dito tagliato dal parrucchiere", pz:1, sal:[70,95], peso:2, zona:"misto", emoji:"💇", prio:[2,15,52,31], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Forbici nel dito della cliente." },
+  { nome:"Taglio in cucina professionale", pz:1, sal:[65,92], peso:4, zona:"misto", emoji:"🔪", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Coltello nel dito del cuoco." },
+  { nome:"Chiodo nella scarpa antinfortunistica", pz:1, sal:[65,92], peso:3, zona:"misto", emoji:"👷", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Chiodo passato nella suola." },
+  { nome:"Caduta del rider", pz:1, sal:[60,90], peso:4, zona:"strada", emoji:"🛵", prio:[4,28,48,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Rider a terra in consegna." },
+  { nome:"Colf scivolata sul bagnato", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🧽", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Pavimento appena lavato, volo." },
+  { nome:"Botta in testa al supermercato", pz:1, sal:[60,90], peso:3, zona:"misto", emoji:"🛒", prio:[3,22,52,23], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Scatola dallo scaffale in testa." },
+  { nome:"Dito schiacciato nella saracinesca", pz:1, sal:[65,92], peso:2, zona:"misto", emoji:"🏪", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Saracinesca sul dito chiudendo." },
+  { nome:"Blocco alla schiena scaricando merce", pz:1, sal:[65,92], peso:3, zona:"misto", emoji:"📦", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Cassa pesante, schiena bloccata." },
+  { nome:"Controllo post-operatorio urgente", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🩺", prio:[2,15,48,35], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Ferita chirurgica arrossata e dolente." },
+  { nome:"Medicazione che sanguina", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🩸", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Garza intrisa, sanguina ancora." },
+  { nome:"Febbre dopo il vaccino", pz:1, sal:[65,92], peso:3, zona:"casa", emoji:"💉", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"39 di febbre dopo il vaccino." },
+  { nome:"Glicemia alta senza sintomi", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🍬", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Diabetico con glicemia alta." },
+  { nome:"Ipertensione da ricontrollare", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"💓", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Pressione alta, il medico manda in PS." },
+  { nome:"Anziano confuso in casa", pz:1, sal:[55,85], peso:4, zona:"casa", emoji:"🧓", prio:[5,30,45,20], mezzi:{MSB:1}, durata:[6,12], trasporto:true, desc:"Confuso da ieri, non riconosce i figli." },
+  { nome:"Reazione al farmaco nuovo", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"💊", prio:[3,25,50,22], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Sfogo dopo la prima pastiglia." },
+  { nome:"Aura visiva con mal di testa", pz:1, sal:[65,92], peso:2, zona:"casa", emoji:"👁️", prio:[2,18,50,30], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Lampioni negli occhi e testa che scoppia." },
+  { nome:"Cistite acuta con febbre", pz:1, sal:[60,90], peso:3, zona:"casa", emoji:"🤒", prio:[3,22,50,25], mezzi:{MSB:1}, durata:[5,10], trasporto:true, desc:"Bruciore e febbre a 38.5." },
+
 ];
 
 const OSPEDALI = [
@@ -1607,7 +1708,7 @@ const MEZZI = [
   { codice:"CRIBRU_1458", tipo:"MSB", radio:"CRIBRU_1458", sede:"CRI Brugherio" },
   { codice:"VERLIS_145.04A2", tipo:"MSB", radio:"VERLIS_145.04A2", sede:"Croce Verde Lissone" },
   { codice:"ITEBRU_037", tipo:"MSB", radio:"ITEBRU_037", sede:"Ital Enferm Brugherio" },
-  { codice:"MB_003", tipo:"MSA", radio:"MB_003", sede:"AREU Desio" },
+  { codice:"MB_003", tipo:"AUTOMEDICA", radio:"MB_003", sede:"AREU Desio" },
   { codice:"MB_011", tipo:"AUTOMEDICA", radio:"MB_011", sede:"AREU Monza" },
   { codice:"MB_004", tipo:"MSA", radio:"MB_004", sede:"AREU Vimercate" },
   { codice:"SOCSER_105.06B1", tipo:"MSB", radio:"SOCSER_105.06B1", sede:"Seregno Soccorso" },
@@ -2738,6 +2839,107 @@ const CHIAMATE = {
   "Isola ecologica in fiamme": "«All'isola ecologica bruciano i cumuli, fumo nero e puzza!»",
   "Autobus a fuoco in deposito": "«Un autobus in deposito ha preso fuoco, per ora è solo quello!»",
   "Auto bloccata sul passaggio a livello": "«La macchina è rimasta bloccata sulle rotaie al passaggio a livello!»",
+  "Anziana scivolata dalla sedia": "«Mia madre è caduta dalla sedia, si tiene l'anca e piange!»",
+  "Dito schiacciato nel cancello": "«Mi sono chiuso il dito nella porta, è diventato blu!»",
+  "Taglio col pelapatate": "«Mi sono tagliato pelando le patate, non smette di uscire sangue!»",
+  "Scottatura dal forno": "«Ho appoggiato il braccio alla teglia bollente, brucia da morire!»",
+  "Febbre alta del bimbo": "«Il bimbo ha 39 e mezzo, è bollente e non mangia!»",
+  "Vomito del bimbo": "«Mio figlio vomita da stamattina, non tiene giù niente!»",
+  "Capogiro in bagno": "«Mi gira tutto in bagno, devo sedermi per terra o cado!»",
+  "Pressione alta": "«Ho la pressione altissima e un mal di testa che scoppia!»",
+  "Pressione bassa e svenimento": "«Mio marito è svenuto in piedi, è bianco come un cencio!»",
+  "Mal di testa fortissimo": "«Ho un mal di testa che non passa da ore, non vedo quasi!»",
+  "Torcicollo acuto": "«Ho il collo bloccato di lato, non riesco a girarmi!»",
+  "Blocco lombare acuto": "«Mi sono chinato e la schiena si è bloccata, non mi muovo!»",
+  "Dolore al ginocchio artrosico": "«Il ginocchio è gonfio e non riesco a piegarlo!»",
+  "Dolore alla spalla notturno": "«La spalla mi fa impazzire, non dormo da due notti!»",
+  "Formicolio alle mani": "«Ho le mani addormentate da ore, non sento le dita!»",
+  "Mal d'orecchio del bimbo": "«Il bimbo piange e si tiene l'orecchio, dice che gli fa malissimo!»",
+  "Sfogo da detersivo nuovo": "«Mi sono riempito di macchie rosse che prudono dopo il bucato!»",
+  "Morso del gatto": "«Il gatto mi ha morso la mano, sanguina e si gonfia!»",
+  "Caduta dal letto del bimbo": "«Il piccolo è caduto dal letto, ha un bernoccolo in testa!»",
+  "Ferita al labbro": "«Ha sbattuto il labbro contro il tavolo, sanguina tanto!»",
+  "Anziano infreddolito in casa fredda": "«Mio padre trema in casa fredda, la caldaia è rotta!»",
+  "Dente rotto che sanguina": "«Mi si è rotto un dente mordendo, esce sangue!»",
+  "Truciolo nell'occhio": "«Ho qualcosa nell'occhio, lacrima e non riesco ad aprirlo!»",
+  "Mano gonfia da spina": "«Una spina di rosa nel dito, ora la mano è gonfia!»",
+  "Scivolata sul pavimento bagnato": "«Sono scivolata in cucina, ho preso una botta alla schiena!»",
+  "Zigomo gonfio dopo caduta": "«Sono caduta in corridoio, lo zigomo si sta gonfiando!»",
+  "Bimbo incastrato tra le sponde": "«Il bimbo è incastrato tra le sponde del letto, non esce!»",
+  "Pentola bollente sul piede": "«Mi sono rovesciata l'acqua bollente sul piede!»",
+  "Scivolata sulle scale di casa": "«Sono ruzzolata dalle scale di casa, ho male ovunque!»",
+  "Anziana caduta che non si alza": "«Mia nonna è a terra e non ha la forza di alzarsi!»",
+  "Colpo di frusta in coda": "«Ci hanno tamponato in coda, ho il collo bloccato!»",
+  "Ciclista caduto sulle rotaie": "«La ruota è finita nelle rotaie, sono volato per terra!»",
+  "Monopattino scivolato sulle foglie": "«Sono scivolato sulle foglie bagnate col monopattino!»",
+  "Pedone sfiorato sulle strisce": "«Una macchina mi ha sfiorato sulle strisce, ho male alla gamba!»",
+  "Scooter contro buca": "«Ho preso una buca e lo scooter è andato per terra!»",
+  "Apecar contro il muretto": "«Con l'Apecar sono finito contro il muretto!»",
+  "Anziano cade dal marciapiede": "«Sono inciampato scendendo dal marciapiede, ginocchio sbucciato!»",
+  "Malore lieve alla guida": "«Mi è venuto un capogiro guidando, mi sono fermato di lato!»",
+  "Nausea in autobus": "«Sull'autobus mi sento mancare, nausea e sudore freddo!»",
+  "Bimbo vomita in coda": "«Il bimbo vomita in macchina, siamo fermi in coda!»",
+  "Anziana scivola scendendo dal bus": "«Scendendo dal bus sono scivolata, ho male all'anca!»",
+  "Tamponamento bici-auto": "«Un'auto mi ha toccato in bici, sono a terra!»",
+  "Scooterista a terra in rotonda": "«Sono scivolato in rotonda con lo scooter!»",
+  "Sportello addosso in parcheggio": "«Sono rimasto stretto tra lo sportello e il palo!»",
+  "Spinta in lite stradale": "«Mi ha spinto in lite e sono caduto sul marciapiede!»",
+  "Passante inciampa sulla transenna": "«Ho inciampato in una transenna, ginocchio aperto!»",
+  "Corridore esausto in maratona": "«Al trentesimo chilometro non ho più gambe, non sto in piedi!»",
+  "Caviglia girata correndo": "«Correndo al parco ho girato la caviglia!»",
+  "Polso dolorante dopo caduta dallo skate": "«Caduto dallo skate, il polso si sta gonfiando!»",
+  "Passeggino contro la buca": "«Il passeggino ha preso una buca, il bimbo piange!»",
+  "Motorino scivolato sul pavè": "«Sul pavè bagnato il motorino è scivolato!»",
+  "Ciclista caduto per il guinzaglio": "«Un guinzaglio tra i raggi, sono volato!»",
+  "Padrona a terra col guinzaglio": "«Il cane è scattato e mi ha trascinata per terra!»",
+  "Svenimento alla fermata del bus": "«Un ragazzo è svenuto alla fermata, è a terra!»",
+  "Caduta dalla bici elettrica": "«Con la bici elettrica pesante sono caduta di lato!»",
+  "Escursionista sfinito": "«Sul sentiero non ho più forze, non riesco a camminare!»",
+  "Fungaiolo scivolato": "«Scivolato nel bosco, la caviglia si è gonfiata subito!»",
+  "Ginocchio slogato al capanno": "«Al capanno ho storto il ginocchio, non lo piego!»",
+  "Pescatore scivolato sulla riva": "«Sulla riva viscida sono caduto in acqua, tutto bagnato!»",
+  "Bimbo punto dalle vespe al picnic": "«Le vespe hanno punto il bimbo, urla dal dolore!»",
+  "Volo dall'altalena al parco": "«Il bimbo è volato dall'altalena, ha battuto la testa!»",
+  "Bernoccolo sullo scivolo": "«Ha sbattuto la testa sullo scivolo, bernoccolo grosso!»",
+  "Naso sanguinante al parco giochi": "«Una pallonata in faccia, gli esce sangue dal naso!»",
+  "Piede tagliato sui sassi": "«Camminando sui sassi mi sono tagliato il piede!»",
+  "Bagnante esausto a riva": "«Ho nuotato troppo al largo, a riva non sto in piedi!»",
+  "Caduta dal sup vicino riva": "«Perso equilibrio sul sup, ginocchio contro la tavola!»",
+  "Eritema da alghe": "«Dopo il bagno al lago ho tutto il corpo rosso che prude!»",
+  "Morso di cane al parco": "«Un cane libero mi ha morso il polpaccio!»",
+  "Allergia ai pollini con occhi gonfi": "«Ho gli occhi gonfissimi e non smetto di starnutire!»",
+  "Vesciche dopo lunga camminata": "«Dopo chilometri a piedi ho i piedi distrutti!»",
+  "Distorsione a calcetto": "«A calcetto ho girato la caviglia, sentito crack!»",
+  "Dito gonfio a pallavolo": "«A muro ho insaccato il mignolo, è gonfio!»",
+  "Storta a basket": "«Atterrato sul piede di un altro, caviglia andata!»",
+  "Malore per il caldo a tennis": "«Con questo caldo a tennis mi sento svenire!»",
+  "Vomito in piscina": "«Il bimbo ha bevuto in piscina e ora vomita a bordo vasca!»",
+  "Piede schiacciato in palestra": "«Mi è caduto un disco sul piede in palestra!»",
+  "Capogiro dopo lo squat": "«Dopo lo squat pesante vedo tutto annebbiato!»",
+  "Naso rotto nello sparring": "«In sparring ho preso un gancio, il naso sanguina!»",
+  "Spalla dolorante dopo la mischia": "«Dopo la mischia la spalla è bloccata!»",
+  "Alluce nero a calcetto": "«Un pestone a calcetto, l'alluce è nero!»",
+  "Malore in ufficio": "«Una collega è svenuta in open space!»",
+  "Piede schiacciato in magazzino": "«Uno scatolone mi è caduto sul piede!»",
+  "Vapore addosso al bar": "«Il vapore della macchina mi ha investito il braccio!»",
+  "Dito tagliato dal parrucchiere": "«Con le forbici ho tagliato il dito della cliente!»",
+  "Taglio in cucina professionale": "«Col coltello mi sono preso un dito in cucina!»",
+  "Chiodo nella scarpa antinfortunistica": "«Un chiodo ha passato la suola della scarpa!»",
+  "Caduta del rider": "«Sono caduto con lo scooter in consegna!»",
+  "Colf scivolata sul bagnato": "«La colf è scivolata sul pavimento bagnato!»",
+  "Botta in testa al supermercato": "«Una scatola dallo scaffale mi è caduta in testa!»",
+  "Dito schiacciato nella saracinesca": "«Ho chiuso la saracinesca sul dito!»",
+  "Blocco alla schiena scaricando merce": "«Sollevando una cassa la schiena si è bloccata!»",
+  "Controllo post-operatorio urgente": "«La ferita dell'operazione è rossa e fa male!»",
+  "Medicazione che sanguina": "«La medicazione sanguina ancora, la garza è intrisa!»",
+  "Febbre dopo il vaccino": "«Dopo il vaccino ho 39 di febbre!»",
+  "Glicemia alta senza sintomi": "«Sono diabetico e la glicemia è altissima!»",
+  "Ipertensione da ricontrollare": "«Il medico dice di andare in pronto soccorso per la pressione!»",
+  "Anziano confuso in casa": "«Mio padre da ieri è confuso, non riconosce nessuno!»",
+  "Reazione al farmaco nuovo": "«Dopo la prima pastiglia nuova mi sono riempito di macchie!»",
+  "Aura visiva con mal di testa": "«Vedo lampi negli occhi e la testa scoppia!»",
+  "Cistite acuta con febbre": "«Ho bruciore e 38 e mezzo di febbre!»",
+
 };
 
 // varianti dialogo per TUTTI i tipi (2 per tipo: si pesca tra base + varianti + extra)
@@ -3624,6 +3826,107 @@ CHIAMATE_VAR = {
   "Isola ecologica in fiamme": ["«All'isola ecologica i cumuli bruciano, colonna di fumo nero!»","«Fiamme tra i rifiuti all'isola ecologica, puzza acre ovunque!»"],
   "Autobus a fuoco in deposito": ["«Nel deposito un autobus brucia, gli altri sono vicini!»","«Dal bus in deposito escono fiamme, il piazzale si riempie di fumo!»"],
   "Auto bloccata sul passaggio a livello": ["«La macchina è ferma sulle rotaie, le sbarre si stanno chiudendo!»","«Al passaggio a livello un'auto non riparte, è sulle rotaie!»"],
+  "Anziana scivolata dalla sedia": ["«È scivolata dalla sedia in cucina, si lamenta per l'anca!»","«Caduta seduta per terra, non riesce ad alzarsi da sola!»"],
+  "Dito schiacciato nel cancello": ["«Porta sbattuta dal vento sul dito, è nero!»","«Il dito si gonfia a vista d'occhio, fa malissimo!»"],
+  "Taglio col pelapatate": ["«Taglio profondo al pollice pelando!»","«Sangue ovunque in cucina, non si ferma!»"],
+  "Scottatura dal forno": ["«Braccio rosso vivo dalla teglia, brucia!»","«Scottatura grossa come una mano sull'avambraccio!»"],
+  "Febbre alta del bimbo": ["«Bimbo bollente e mogio, termometro a 39 e mezzo!»","«Febbre alta e brividi, non vuole bere!»"],
+  "Vomito del bimbo": ["«Vomita anche l'acqua da stamattina!»","«Terza volta in un'ora, è sfinito!»"],
+  "Capogiro in bagno": ["«Mi devo sedere per terra o svengo qui in bagno!»","«Tutto gira, mi tengo al lavandino!»"],
+  "Pressione alta": ["«Pressione a 200, testa che scoppia e nausea!»","«Faccia rossa e mal di testa fortissimo!»"],
+  "Pressione bassa e svenimento": ["«Si è accasciato in piedi, ora è pallidissimo!»","«Pressione bassissima, sudato e confuso!»"],
+  "Mal di testa fortissimo": ["«Testa che spacca da ore, vomito anche!»","«Non reggo la luce, dolore insopportabile!»"],
+  "Torcicollo acuto": ["«Stamattina collo bloccato tutto da un lato!»","«Non giro la testa neanche di un centimetro!»"],
+  "Blocco lombare acuto": ["«Piegato a raccogliere e tac, bloccato!»","«Fitta alla schiena, cammino piegato in due!»"],
+  "Dolore al ginocchio artrosico": ["«Ginocchio gonfio come un pallone!»","«Non piego la gamba, dolore acuto!»"],
+  "Dolore alla spalla notturno": ["«Di notte la spalla brucia, non dormo!»","«Non alzo il braccio oltre la spalla!»"],
+  "Formicolio alle mani": ["«Dita addormentate e formicolio continuo!»","«Non sento più le mani da ore!»"],
+  "Mal d'orecchio del bimbo": ["«Si tiene l'orecchio e urla, forse otite!»","«Tutta la notte a piangere per l'orecchio!»"],
+  "Sfogo da detersivo nuovo": ["«Prurito ovunque dal bucato nuovo!»","«Macchie rosse su braccia e collo!»"],
+  "Morso del gatto": ["«Due buchi nella mano, sanguina!»","«Mano che si gonfia dopo il morso!»"],
+  "Caduta dal letto del bimbo": ["«Tonfo nella notte, bernoccolo in fronte!»","«Caduto dal letto, piange ma risponde!»"],
+  "Ferita al labbro": ["«Labbro gonfio che sanguina!»","«Taglio dentro il labbro, non si chiude!»"],
+  "Anziano infreddolito in casa fredda": ["«Trema sotto le coperte, casa gelida!»","«Labbra blu e confusione, caldaia rotta!»"],
+  "Dente rotto che sanguina": ["«Pezzo di dente saltato, sangue in bocca!»","«Morso sfortunato, dente spaccato!»"],
+  "Truciolo nell'occhio": ["«Granello nell'occhio, brucia da morire!»","«Occhio rosso e chiuso, lacrima continuo!»"],
+  "Mano gonfia da spina": ["«Dito gonfio e rosso dalla spina!»","«Non riesco a togliere la spina, pulsa!»"],
+  "Scivolata sul pavimento bagnato": ["«Volo in cucina, schiena a pezzi!»","«Pavimento traditore, caduta di sedere!»"],
+  "Zigomo gonfio dopo caduta": ["«Faccia gonfia da un lato dopo la caduta!»","«Occhio che si chiude dallo zigomo gonfio!»"],
+  "Bimbo incastrato tra le sponde": ["«Testa incastrata tra le sponde, piange!»","«Non riusciamo a liberarlo, è bloccato!»"],
+  "Pentola bollente sul piede": ["«Piede rosso vivo dall'acqua bollente!»","«Vesciche sul piede dalla pentola!»"],
+  "Scivolata sulle scale di casa": ["«Ruzzolone giù dalle scale, aiuto!»","«Caduta sulle scale, male al fianco!»"],
+  "Anziana caduta che non si alza": ["«È a terra da un'ora, non ha forze!»","«Gambe molli, non si regge in piedi!»"],
+  "Colpo di frusta in coda": ["« tamponati in coda, collo rigido!»","«Bot-ta da dietro, testa che gira!»"],
+  "Ciclista caduto sulle rotaie": ["«Binari traditori, volo in bici!»","«A terra sulle rotaie, ginocchia sbucciate!»"],
+  "Monopattino scivolato sulle foglie": ["«Foglie bagnate, monopattino via!»","«Scivolone col monopattino, spalla a terra!»"],
+  "Pedone sfiorato sulle strisce": ["«Mi ha preso lo specchietto sulle strisce!»","«Gamba dolorante, l'auto non si è fermata!»"],
+  "Scooter contro buca": ["«Buca assassina, volo dallo scooter!»","«Manubrio storto e ginocchio aperto!»"],
+  "Apecar contro il muretto": ["«Freni molli, dritto sul muretto!»","«Apecar accartocciato davanti!»"],
+  "Anziano cade dal marciapiede": ["«Gradino alto, ginocchio a terra!»","«Mani sbucciate dalla caduta!»"],
+  "Malore lieve alla guida": ["«Vista annebbiata guidando, accostato!»","«Sudore freddo al volante, mi fermo!»"],
+  "Nausea in autobus": ["«In bus sto per vomitare, fate presto!»","«Sudori freddi e nausea in corsa!»"],
+  "Bimbo vomita in coda": ["«Vomita in auto fermi in coda!»","«Mal d'auto tremendo, sta male!»"],
+  "Anziana scivola scendendo dal bus": ["«Predellino scivoloso, a terra!»","«Anca dolorante dalla caduta dal bus!»"],
+  "Tamponamento bici-auto": ["«Sportellata in bici, a terra!»","«Auto uscita dal parcheggio addosso!»"],
+  "Scooterista a terra in rotonda": ["«Asfalto viscido in rotonda!»","«Gomiti e ginocchia sbucciati!»"],
+  "Sportello addosso in parcheggio": ["«Stretto dallo sportello contro il palo!»","«Fianco schiacciato in parcheggio!»"],
+  "Spinta in lite stradale": ["«Spintone e volo sul marciapiede!»","«Testa sbattuta sul cordolo!»"],
+  "Passante inciampa sulla transenna": ["«Transenna invisibile al buio!»","«Ginocchio squarciato dalla transenna!»"],
+  "Corridore esausto in maratona": ["«Gambe di burro al trentesimo!»","«Crampi ovunque, non cammino!»"],
+  "Caviglia girata correndo": ["«Storta secca correndo!»","«Caviglia gonfia in minuti!»"],
+  "Polso dolorante dopo caduta dallo skate": ["«Mano a terra dallo skate!»","«Polso gonfio che non muovo!»"],
+  "Passeggino contro la buca": ["«Buca e volo del passeggino!»","«Bimbo spaventato e sballottato!»"],
+  "Motorino scivolato sul pavè": ["«Pavè traditore sotto la pioggia!»","«Motorino di traverso sul pavè!»"],
+  "Ciclista caduto per il guinzaglio": ["«Cane in mezzo, volo in bici!»","«Guinzaglio nei raggi, rovinato a terra!»"],
+  "Padrona a terra col guinzaglio": ["«Trascinata dal cane al guinzaglio!»","«Caduta tenendo il cane grosso!»"],
+  "Svenimento alla fermata del bus": ["«Crollato alla fermata, ora è confuso!»","«Ragazzo a terra al capolinea!»"],
+  "Caduta dalla bici elettrica": ["«Troppo pesante, caduta di lato!»","«Bici elettrica addosso in curva!»"],
+  "Escursionista sfinito": ["«Gambe finite sul sentiero!»","«Non riesco più a fare un passo!»"],
+  "Fungaiolo scivolato": ["«Fango nel bosco, caviglia ko!»","«Cesto ovunque e piede gonfio!»"],
+  "Ginocchio slogato al capanno": ["«Torsione al capanno, ginocchio bloccato!»","«Sento il ginocchio instabile!»"],
+  "Pescatore scivolato sulla riva": ["«Riva scivolosa, bagno completo!»","«Caduto con le waders in acqua!»"],
+  "Bimbo punto dalle vespe al picnic": ["«Vespe sul panino, tre punture!»","«Braccino gonfio dalle punture!»"],
+  "Volo dall'altalena al parco": ["«Spinto troppo, volo dall'altalena!»","«Catena mollata, caduto di testa!»"],
+  "Bernoccolo sullo scivolo": ["«Uovo in testa dallo scivolo!»","«Testata al bordo dello scivolo!»"],
+  "Naso sanguinante al parco giochi": ["«Palla in faccia al campetto!»","«Naso che cola sangue dopo la pallonata!»"],
+  "Piede tagliato sui sassi": ["«Vetro tra i sassi del lago!»","«Pianta del piede aperta!»"],
+  "Bagnante esausto a riva": ["«Braccia finite a metà lago!»","«Tremante e sfinito a riva!»"],
+  "Caduta dal sup vicino riva": ["«Onda e giù dal sup!»","«Tavola contro il ginocchio!»"],
+  "Eritema da alghe": ["«Tutto rosso dopo il bagno!»","«Prurito folle dalle alghe!»"],
+  "Morso di cane al parco": ["«Zannata al polpaccio!»","«Cane libero addosso al parco!»"],
+  "Allergia ai pollini con occhi gonfi": ["«Occhi chiusi dal gonfiore!»","«Starnuti a raffica e occhi gonfi!»"],
+  "Vesciche dopo lunga camminata": ["«Piedi a pezzi dal cammino!»","«Vesciche scoppiate, non cammino!»"],
+  "Distorsione a calcetto": ["«Caviglia andata in partita!»","«Crack secco a calcetto!»"],
+  "Dito gonfio a pallavolo": ["«Muro sbagliato, dito ko!»","«Mignolo storto a pallavolo!»"],
+  "Storta a basket": ["«Caviglia sotto canestro!»","«Atterraggio storto a basket!»"],
+  "Malore per il caldo a tennis": ["«Afoso in campo, mi gira tutto!»","«Quasi svenuto al terzo set!»"],
+  "Vomito in piscina": ["«Bimbo verdastro a bordo vasca!»","«Acqua bevuta e vomito!»"],
+  "Piede schiacciato in palestra": ["«Disco da venti chili sul piede!»","«Piede viola in palestra!»"],
+  "Capogiro dopo lo squat": ["«Bilanciere giù e testa leggera!»","«Dopo lo squat vedo nero!»"],
+  "Naso rotto nello sparring": ["«Guantone in faccia!»","«Naso storto dallo sparring!»"],
+  "Spalla dolorante dopo la mischia": ["«Mischia dura, spalla ferma!»","«Braccio che non sale dopo il rugby!»"],
+  "Alluce nero a calcetto": ["«Pestone tremendo a calcetto!»","«Unghia nera e pulsante!»"],
+  "Malore in ufficio": ["«Collassata alla scrivania!»","«Svenuta in riunione!»"],
+  "Piede schiacciato in magazzino": ["«Bancale sul piede!»","«Scatolone dall'alto sul piede!»"],
+  "Vapore addosso al bar": ["«Lancia vapore in faccia!»","«Braccio ustionato dal vapore!»"],
+  "Dito tagliato dal parrucchiere": ["«Forbici scivolate sul dito!»","«Dito della cliente sanguinante!»"],
+  "Taglio in cucina professionale": ["«Coltello affilato nel dito!»","«Taglio profondo in servizio!»"],
+  "Chiodo nella scarpa antinfortunistica": ["«Chiodo passato tutto!»","«Pianta del piede bucata!»"],
+  "Caduta del rider": ["«Freno davanti e volo!»","«Zaino termico ovunque, ginocchio aperto!»"],
+  "Colf scivolata sul bagnato": ["«Volo sul pavimento lavato!»","«Secchio rovesciato e schiena a terra!»"],
+  "Botta in testa al supermercato": ["«Scatola in testa dallo scaffale!»","«Bernoccolo al super!»"],
+  "Dito schiacciato nella saracinesca": ["«Saracinesca calata sul dito!»","«Dito nero dalla saracinesca!»"],
+  "Blocco alla schiena scaricando merce": ["«Cassa da trenta chili e tac!»","«Schiena inchiodata al furgone!»"],
+  "Controllo post-operatorio urgente": ["«Ferita rossa e calda dopo l'operazione!»","«Punti che tirano e bruciano!»"],
+  "Medicazione che sanguina": ["«Garze fradice di sangue!»","«Sanguina sotto il bendaggio!»"],
+  "Febbre dopo il vaccino": ["«Febbriciattolo dopo il vaccino!»","«39 tutto d'un botto dopo la puntura!»"],
+  "Glicemia alta senza sintomi": ["«Apparecchio alle stelle!»","«Glicemia a 400, che faccio?»"],
+  "Ipertensione da ricontrollare": ["«Il medico manda subito in ospedale!»","«Pressione che non scende con le pastiglie!»"],
+  "Anziano confuso in casa": ["«Non riconosce più nessuno da ieri!»","«Farnetica e non risponde a tono!»"],
+  "Reazione al farmaco nuovo": ["«Macchie dopo la pastiglia nuova!»","«Prurito dopo la prima dose!»"],
+  "Aura visiva con mal di testa": ["«Vedo zigzag luminosi ovunque!»","«Metà vista andata e testa che pompa!»"],
+  "Cistite acuta con febbre": ["«Bruciore fortissimo e febbre!»","«Non trattengo e ho la febbre!»"],
+
 };
 
 // Laghi (sagome OSM semplificate per Como/Maggiore, Lugano generoso): niente interventi in acqua
@@ -4526,16 +4829,32 @@ window.COEUSIM = (() => {
   function isMedica(mz){ return /^MSA[12][\s_]/.test(mz.codice||""); }
   // ELI = elisoccorso: vola in linea d'aria, fa da automedica E da ambulanza (trasporta)
   function isEli(mz){ return mz.tipo==="ELI"; }
-  // ambulanza disegnata (SVG) per marker e tooltip; gli altri restano emoji
-  const AMB_SVG = `<svg viewBox="0 0 39 26" width="40" height="27" aria-hidden="true"><ellipse cx="21" cy="23.4" rx="17" ry="1.6" fill="#000" opacity="0.15"/><circle cx="10" cy="18" r="3.6" fill="#222"/><circle cx="10" cy="18" r="1.5" fill="#bbb"/><circle cx="30" cy="18" r="3.6" fill="#222"/><circle cx="30" cy="18" r="1.5" fill="#bbb"/><rect x="3" y="6" width="24" height="12" rx="2.5" fill="#ffffff" stroke="#333" stroke-width="1.4"/><path d="M27 8 h5 l5 5 v5 h-10 z" fill="#ffffff" stroke="#333" stroke-width="1.4" stroke-linejoin="round"/><path d="M28.4 9.4 h3.4 l3.6 3.6 h-7 z" fill="#9fd0f5" stroke="#333" stroke-width="0.8" stroke-linejoin="round"/><rect x="3" y="12.5" width="24" height="2.8" fill="#d00000"/><rect x="11.6" y="7.4" width="3" height="4.6" fill="#d00000"/><rect x="9.8" y="8.9" width="6.6" height="2.2" fill="#d00000"/><rect x="10" y="3.6" width="10" height="2.4" rx="1" fill="#444"/><rect x="10.8" y="4" width="3.8" height="1.6" fill="#2255ff"/><rect x="15.4" y="4" width="3.8" height="1.6" fill="#ff2222"/><rect x="36.2" y="13.4" width="1.4" height="2.2" fill="#ffdf60" stroke="#333" stroke-width="0.6"/></svg>`;
+  // supporto avanzato (MSA/automedica/eli): se la scena l'ha chiesto, si aspetta il suo arrivo
+  function isAvanzato(mz){ return mz && (mz.tipo==="MSA"||mz.tipo==="AUTOMEDICA"||mz.tipo==="ELI"||isMedica(mz)||isEli(mz)); }
+  function msaSulPosto(iv){ return mezzi.some(m=>m.interventoId===iv.id && m.stato==="sul_posto" && isAvanzato(m)); }
+  function msaAtteso(iv){ return iv && iv.attesaMSA && !msaSulPosto(iv); }
+  // ambulanza vista laterale stile LSTSim (croce rossa, banda MSB rossa / MSA gialla)
+    function AMB_TOP(stripe, s){
+    return `<svg viewBox="0 0 54 42" width="${s}" height="${s}" aria-hidden="true"><ellipse cx="27" cy="37" rx="19" ry="3" fill="#000" opacity="0.2"/><clipPath id="ambClip"><path d="M7,8 H37 Q39,8 41,10 L48,16 Q49,17 49,19 V28 Q49,32 45,32 H7 Q3,32 3,28 V12 Q3,8 7,8 Z"/></clipPath><path d="M7,8 H37 Q39,8 41,10 L48,16 Q49,17 49,19 V28 Q49,32 45,32 H7 Q3,32 3,28 V12 Q3,8 7,8 Z" fill="#ffffff" stroke="#3a2530" stroke-width="2"/><g clip-path="url(#ambClip)"><rect x="3" y="21" width="46" height="5.5" fill="${stripe}"/><rect x="40" y="11" width="9" height="8" rx="1" fill="#5fb5e8"/><polygon points="40,19 44,11 46.5,11 42.5,19" fill="#2f7fb8"/></g><rect x="24" y="4.5" width="2" height="3.5" fill="#3a2530"/><rect x="21" y="1" width="8" height="4" rx="1" fill="#e8332a" stroke="#3a2530" stroke-width="1.2"/><rect x="40" y="11" width="9" height="8" rx="1" fill="none" stroke="#3a2530" stroke-width="1.5"/><polygon points="42,13 44.5,13 42,17.5" fill="#cfeaff"/><path d="M11.5 10.5 H15.5 V13.8 H18.8 V17.8 H15.5 V21 H11.5 V17.8 H8.2 V13.8 H11.5 Z" fill="#e8332a" stroke="#3a2530" stroke-width="1.2" stroke-linejoin="round"/><rect x="47" y="23" width="2" height="3" fill="#ffdf60" stroke="#3a2530" stroke-width="0.8"/><circle cx="13" cy="32" r="5.5" fill="#3a2530"/><circle cx="13" cy="32" r="2.5" fill="#9fb3c8"/><circle cx="38" cy="32" r="5.5" fill="#3a2530"/><circle cx="38" cy="32" r="2.5" fill="#9fb3c8"/></svg>`;
+  }
+  function CAR_TOP(s){
+    return `<svg viewBox="0 0 54 42" width="${s}" height="${s}" aria-hidden="true"><ellipse cx="27" cy="37" rx="19" ry="3" fill="#000" opacity="0.2"/><clipPath id="carClip"><path d="M5,31 V22 Q5,18 9,17.5 L17,16.5 L23,9.5 Q24,8 26,8 H35 Q37,8 38.5,9.5 L43,15.5 L47,17 Q50,18 50,21.5 V28 Q50,32 46,32 H9 Q5,32 5,31 Z"/></clipPath><path d="M5,31 V22 Q5,18 9,17.5 L17,16.5 L23,9.5 Q24,8 26,8 H35 Q37,8 38.5,9.5 L43,15.5 L47,17 Q50,18 50,21.5 V28 Q50,32 46,32 H9 Q5,32 5,31 Z" fill="#ffffff" stroke="#3a2530" stroke-width="2"/><g clip-path="url(#carClip)"><rect x="5" y="23" width="45" height="4.5" fill="#0645ad"/><polygon points="25,9 31,9 28,16.5 21,16.5" fill="#5fb5e8"/><rect x="30" y="9" width="7" height="7.5" fill="#5fb5e8"/></g><polygon points="25,9 31,9 28,16.5 21,16.5" fill="none" stroke="#3a2530" stroke-width="1.5"/><rect x="30" y="9" width="7" height="7.5" fill="none" stroke="#3a2530" stroke-width="1.5"/><polygon points="32,10.5 35,10.5 32,15" fill="#cfeaff"/><rect x="27" y="4.5" width="2" height="3.5" fill="#3a2530"/><rect x="24" y="1" width="5" height="4" rx="1" fill="#2255ff" stroke="#3a2530" stroke-width="1.2"/><rect x="30" y="1" width="5" height="4" rx="1" fill="#ff2222" stroke="#3a2530" stroke-width="1.2"/><rect x="48" y="23" width="2" height="3" fill="#ffdf60" stroke="#3a2530" stroke-width="0.8"/><rect x="4" y="23" width="1.6" height="3" fill="#d00000"/><circle cx="15" cy="32" r="5" fill="#3a2530"/><circle cx="15" cy="32" r="2.2" fill="#9fb3c8"/><circle cx="39" cy="32" r="5" fill="#3a2530"/><circle cx="39" cy="32" r="2.2" fill="#9fb3c8"/></svg>`;
+  }
+  function HELI_TOP(col, s){
+    return `<svg viewBox="0 0 54 42" width="${s}" height="${s}" aria-hidden="true"><rect x="6" y="3" width="42" height="3" rx="1.5" fill="#3a2530"/><rect x="25" y="6" width="3" height="7" fill="#3a2530"/><polygon points="21,19 6,14 6,17.5 21,24" fill="${col}" stroke="#3a2530" stroke-width="1.5" stroke-linejoin="round"/><polygon points="6,14 3,5 6.5,5 9.5,14" fill="${col}" stroke="#3a2530" stroke-width="1.5" stroke-linejoin="round"/><rect x="2" y="5" width="2.4" height="11" rx="1" fill="#3a2530"/><clipPath id="heliClip"><rect x="19" y="12" width="22" height="16" rx="8"/></clipPath><rect x="19" y="12" width="22" height="16" rx="8" fill="${col}" stroke="#3a2530" stroke-width="2"/><g clip-path="url(#heliClip)"><rect x="19" y="21" width="22" height="3.2" fill="#ffffff" opacity="0.9"/></g><ellipse cx="34" cy="19.5" rx="4.5" ry="5.5" fill="#5fb5e8" stroke="#3a2530" stroke-width="1.5"/><polygon points="32.5,15.5 35,15.5 33,22" fill="#cfeaff"/><rect x="23" y="28" width="2.5" height="6" fill="#3a2530"/><rect x="33" y="28" width="2.5" height="6" fill="#3a2530"/><rect x="20" y="33.5" width="20" height="2.5" rx="1.2" fill="#3a2530"/></svg>`;
+  }
+  function TRUCK_TOP(s){
+    return `<svg viewBox="0 0 60 42" width="${s}" height="${s}" aria-hidden="true"><ellipse cx="30" cy="37" rx="22" ry="3" fill="#000" opacity="0.2"/><rect x="6" y="5" width="36" height="3.5" rx="1" fill="#c9c9c9" stroke="#3a2530" stroke-width="1.5"/><line x1="12" y1="5" x2="12" y2="8.5" stroke="#3a2530" stroke-width="1"/><line x1="20" y1="5" x2="20" y2="8.5" stroke="#3a2530" stroke-width="1"/><line x1="28" y1="5" x2="28" y2="8.5" stroke="#3a2530" stroke-width="1"/><line x1="36" y1="5" x2="36" y2="8.5" stroke="#3a2530" stroke-width="1"/><clipPath id="truckClip"><path d="M3,31 V12 Q3,10 5,10 H38 L44,10 L52,17 Q53,18 53,20 V28 Q53,32 49,32 H7 Q3,32 3,31 Z"/></clipPath><path d="M3,31 V12 Q3,10 5,10 H38 L44,10 L52,17 Q53,18 53,20 V28 Q53,32 49,32 H7 Q3,32 3,31 Z" fill="#d00000" stroke="#3a2530" stroke-width="2"/><g clip-path="url(#truckClip)"><rect x="3" y="21" width="50" height="4" fill="#ffffff"/><rect x="41" y="12" width="8" height="7" fill="#5fb5e8"/><rect x="7" y="12" width="9" height="17" fill="#c9c9c9"/><rect x="18" y="12" width="9" height="17" fill="#c9c9c9"/></g><rect x="41" y="12" width="8" height="7" fill="none" stroke="#3a2530" stroke-width="1.5"/><polygon points="43,13.5 45.5,13.5 43,17.5" fill="#cfeaff"/><rect x="7" y="12" width="9" height="17" fill="none" stroke="#3a2530" stroke-width="1.2"/><rect x="18" y="12" width="9" height="17" fill="none" stroke="#3a2530" stroke-width="1.2"/><line x1="7" y1="17" x2="16" y2="17" stroke="#3a2530" stroke-width="0.7"/><line x1="7" y1="21" x2="16" y2="21" stroke="#3a2530" stroke-width="0.7"/><line x1="18" y1="17" x2="27" y2="17" stroke="#3a2530" stroke-width="0.7"/><line x1="18" y1="21" x2="27" y2="21" stroke="#3a2530" stroke-width="0.7"/><rect x="40" y="6.5" width="2" height="3.5" fill="#3a2530"/><rect x="37" y="3" width="8" height="4" rx="1" fill="#2255ff" stroke="#3a2530" stroke-width="1.2"/><rect x="51" y="23" width="2" height="3" fill="#ffdf60" stroke="#3a2530" stroke-width="0.8"/><circle cx="12" cy="32" r="5" fill="#3a2530"/><circle cx="12" cy="32" r="2.2" fill="#9fb3c8"/><circle cx="28" cy="32" r="5" fill="#3a2530"/><circle cx="28" cy="32" r="2.2" fill="#9fb3c8"/><circle cx="44" cy="32" r="5" fill="#3a2530"/><circle cx="44" cy="32" r="2.2" fill="#9fb3c8"/></svg>`;
+  }
   // nome da mostrare: nominativo radio ("APS ISPRA"), mai il codice sigla ("IS-APS")
   function nomem(mz){ return (mz && (mz.radio||mz.codice)) || "?"; }
-  function iconFor(mz){
+  function iconFor(mz, px){
+    const s = px||40;
     if(!mz) return "🚑";
-    if(mz.corpo==="VVF") return mz.tipo==="ELI" ? "🚁" : "🚒";
-    if(isEli(mz)) return "🚁";
-    if(mz.tipo==="AUTOMEDICA"||isMedica(mz)) return "🚓";
-    return AMB_SVG;
+    if(mz.corpo==="VVF") return mz.tipo==="ELI" ? HELI_TOP("#d00000",s) : TRUCK_TOP(s);
+    if(isEli(mz)) return HELI_TOP("#ffcf00",s);
+    if(mz.tipo==="AUTOMEDICA"||isMedica(mz)) return CAR_TOP(s);
+    return AMB_TOP(mz.tipo==="MSA" ? "#ffcf00" : "#d00000", s); // MSA banda gialla, MSB banda rossa
   }
 
   // PS in due tempi: primo tocco arma la scelta, il click sull'ospedale la conferma; secondo tocco = più vicino
@@ -4702,8 +5021,9 @@ window.COEUSIM = (() => {
         const iv = interventi.find(x=>x.id===mz.interventoId);
         if(iv) iv.tempoSulPosto += dtRealSec*speed/60;
         // cura sul posto: il personale sanitario stabilizza i pazienti verso il 100%;
-        // senza 100% su tutti non si carica e non si trasporta (niente PRONTO, niente PS)
-        if(iv && iv.trasporto && !iv.stabilizzato && (iv.pazienti||[]).some(s=>s<100) && (mz.corpo!=="VVF"||isEli(mz))){
+        // senza 100% su tutti non si carica e non si trasporta (niente PRONTO, niente PS).
+        // Se la scena ha chiesto un MSA, l'equipaggio aspetta il suo arrivo prima di curare/caricare.
+        if(iv && iv.trasporto && !iv.stabilizzato && !msaAtteso(iv) && (iv.pazienti||[]).some(s=>s<100) && (mz.corpo!=="VVF"||isEli(mz))){
           const rate = (mz.tipo==="MSA"||isEli(mz)) ? 9 : mz.tipo==="MSB" ? 5 : 4; // % salute per game-min
           const q = dtRealSec*speed/60*rate;
           let step=false;
@@ -4726,7 +5046,10 @@ window.COEUSIM = (() => {
           // MSA1/MSA2 non trasportano: nei casi gravi seguono l'ambulanza in PS, altrimenti rientrano (come VVF)
           const iv2 = interventi.find(x=>x.id===mz.interventoId);
           if(iv2 && iv2.trasporto && (mz.corpo!=="VVF"||isEli(mz)) && mz.tipo!=="AUTOMEDICA" && !isMedica(mz)){
-            if(iv2.stabilizzato){
+            if(msaAtteso(iv2)){
+              mz.sulPostoTimer = 1; // MSA richiesto ma non ancora arrivato: si aspetta, niente carico
+              renderListe();
+            } else if(iv2.stabilizzato){
               // paziente caricato in ambulanza: resta PRONTO finché l'operatore sceglie l'ospedale (🏥)
               mz.stato="pronto"; mz.sulPostoTimer=0;
               log(`${isEli(mz)?"🚁":"🚑"} ${mz.codice}: paziente a bordo (stabile al 100%), pronto per il trasporto — scegli l'ospedale (🏥 sul mezzo, 2 click = più vicino)`);
@@ -4801,6 +5124,10 @@ window.COEUSIM = (() => {
         iv.stato="sul_posto"; iv.gestito=true;
         // durata sul posto = durata intervento (se più mezzi, usa max)
         mz.sulPostoTimer = iv.durata * rnd(0.8,1.2);
+        if(iv.attesaMSA && isAvanzato(mz)){
+          iv.attesaMSA = false; // supporto avanzato arrivato: si può stabilizzare e caricare
+          log(`🚓 ${nomem(mz)} sul posto (#${iv.id}): supporto avanzato arrivato, l'equipaggio riprende`);
+        }
         if(!iv.reportFatto){ iv.reportFatto = true; reportScena(iv, mz); }
         else log(`📍 ${nomem(mz)} sul posto (#${iv.id})`);
       } else {
@@ -4840,9 +5167,10 @@ window.COEUSIM = (() => {
       conta[m.tipo]=(conta[m.tipo]||0)+1;
     }
     const mancano = [];
+    let chiedeMSA = false;
     for(const k in (iv.richiesti||{})){
       const need = Math.max(0, (iv.richiesti[k]||0)) - (conta[k]||0);
-      if(need>0) mancano.push(k==="MSA" ? `${need}× ${k} (${motivoMSA(iv)})` : `${need}× ${k}`);
+      if(need>0){ if(k==="MSA"||k==="AUTOMEDICA") chiedeMSA = true; mancano.push(k==="MSA" ? `${need}× ${k} (${motivoMSA(iv)})` : `${need}× ${k}`); }
     }
     // 1 ambulanza = 1 paziente: altre ambulanze solo se i feriti superano i mezzi da trasporto già sul posto (eli compreso, anche VVF)
     if(iv.trasporto){
@@ -4852,6 +5180,10 @@ window.COEUSIM = (() => {
     }
     if(Object.keys(iv.richiesti||{}).length===0 && !(conta.VVF>0)) mancano.push("VVF");
     if(mancano.length) log(`⚠️ ${nomem(mz)} chiede rinforzi a <b>${iv.comune}</b>: servono ${mancano.join(", ")}`);
+    if(chiedeMSA && !msaSulPosto(iv)){
+      iv.attesaMSA = true; // l'equipaggio aspetta l'MSA prima di stabilizzare e caricare
+      log(`⏳ #${iv.id}: l'equipaggio aspetta l'arrivo dell'MSA richiesto prima di caricare il paziente`);
+    }
     else if(isMedica(mz) && iv.trasporto && iv.prio<=2 && mezzi.some(m=>m.interventoId===iv.id && m!==mz && !isMedica(m) && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"))) log(`🚓 ${mz.codice}: aspetta l'ambulanza per seguirla in PS`);
     else if(isMedica(mz) && iv.trasporto) log(`🚓 ${mz.codice}: l'ambulanza porterà il paziente in PS`);
     else if(mz.tipo==="AUTOMEDICA" && iv.trasporto) log(`🚓 ${nomem(mz)} sul posto: serve un'ambulanza per portare il paziente in PS`);
@@ -4963,7 +5295,7 @@ window.COEUSIM = (() => {
     let h = `<b>${isVVF?"🚒":"🏠"} ${nome}</b>`;
     if(!inSede.length) h += `<br><span class="small">nessun mezzo in sede</span>`;
     else for(const m of inSede.slice(0,12))
-      h += `<br>${iconFor(m)} ${m.radio||m.codice} (${m.tipo})`;
+      h += `<br>${iconFor(m,22)} ${m.radio||m.codice} (${m.tipo})`;
     if(inSede.length>12) h += `<br><span class="small">+ altri ${inSede.length-12}</span>`;
     return h;
   }
@@ -4994,8 +5326,8 @@ window.COEUSIM = (() => {
       const isBusy = mz.stato!=="disponibile";
       const mk = L.marker([mz.lat,mz.lng],{
        icon: L.divIcon({className:'mzIcon',
-          html:`<div class="mzDot ${mz.stato}" title="${nomem(mz)} ${statoLabel(mz.stato)}">${iconFor(mz)}</div>`,
-          iconSize:[52,52], iconAnchor:[26,26]})
+          html:`<div class="mzDot ${mz.stato}" title="${nomem(mz)} ${statoLabel(mz.stato)}">${iconFor(mz,64)}</div>`,
+          iconSize:[68,68], iconAnchor:[34,34]})
       });
       mk.bindTooltip(`${nomem(mz)} (${mz.tipo})<br>${mz.sede} - ${mz.stato}${mz.interventoId?" → #"+mz.interventoId:""}`);
       mk.on("click", ()=>{ selMz = mz.codice; showMzDetail(mz.codice); renderListe(); const el = document.querySelector("#mzList .selMz"); if(el) el.scrollIntoView({block:"nearest"}); });
@@ -5169,6 +5501,7 @@ window.COEUSIM = (() => {
       <div class="kv"><b>Stato:</b> ${statoLabel(iv.stato)}</div>
       ${iv.reportFatto?`<div class="kv">${pazientiTXT(iv.pazienti)}</div>`:`<div class="kv small">👤 Pazienti: in attesa del primo mezzo sul posto…</div>`}
       ${iv.reportFatto&&iv.trasporto&&!iv.stabilizzato?`<div class="kv">🩺 Stabilizzazione in corso: trasporto al 100% di salute</div>`:""}
+      ${msaAtteso(iv)?`<div class="kv">⏳ In attesa dell'MSA richiesto: l'equipaggio aspetta il suo arrivo</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&iv.stabilizzato&&(iv.daTrasportare||0)>0?`<div class="kv">💚 Pazienti stabili al 100%: pronti per il trasporto</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&(iv.daTrasportare||0)>0?`<div class="kv"><b>🏥 Da trasportare ancora:</b> ${iv.daTrasportare} pazient${iv.daTrasportare>1?"i":"e"}</div>`:""}
       <div class="kv"><b>Mezzi assegnati:</b></div>
