@@ -142,7 +142,7 @@
   <div id="lstTop">
     <div class="title">🚨 COEU SIM — Varese • Como • Lecco • Monza Brianza <span>stile LSTSim • mappa Esri (no OSM) • mezzi reali</span></div>
     <div class="spacer"></div>
-    <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span id="clockEl">08:00</span></div>
+    <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span style="position:relative"><button class="lstBtn small" id="oraBtn" title="Scegli l'orario"><span id="clockEl">08:00</span> ▾</button><span id="oraMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:180px"><div class="small" style="margin-bottom:2px">Orario di gioco:</div><div><button class="lstBtn small" data-h="0">00</button> <button class="lstBtn small" data-h="4">04</button> <button class="lstBtn small" data-h="8">08</button> <button class="lstBtn small" data-h="12">12</button> <button class="lstBtn small" data-h="16">16</button> <button class="lstBtn small" data-h="20">20</button></div><div style="margin-top:3px"><input type="time" id="oraInput" value="08:00" style="font:inherit"> <button class="lstBtn small primary" id="oraVai">Vai</button></div></span></span></div>
     <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
     <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
     <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
@@ -182,7 +182,7 @@
 
   <div id="lstGridBot">
     <div class="lstPanel">
-      <div class="lstHead"><span id="funkClock">14:45:50</span><span style="flex:1"></span><span id="wetter">Pioggia, 16 °C 🌧️</span></div>
+      <div class="lstHead"><span id="funkClock">14:45:50</span><span style="flex:1"></span><span style="position:relative"><button class="lstBtn small" id="meteoBtn" title="Scegli il meteo"><span id="wetter">Nuvoloso, 14 °C ☁️</span> ▾</button><span id="meteoMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:150px"></span></span></div>
       <div id="logBox"></div>
     </div>
     <div class="lstPanel">
@@ -202,8 +202,8 @@
   <div style="font-size:12px; line-height:1.6">
     1. Premi <b>📞 Nuova chiamata</b>: squilla il telefono nel pannello Chiamate — si vede solo il luogo, NON il motivo.<br>
     2. Premi <b>Rispondi</b>: il richiedente racconta. Poi premi <b>📋 Crea nuovo incarico</b>: spunti i mezzi da inviare (i più vicini, 118 e/o VVF — anche mezzi già impegnati o in rientro: vengono <b>dirottati subito</b>, ripartono da dove sono) e scegli il codice: <b>🚒 Crea intervento</b> se VVF (senza codice), oppure 🔴🟡🟢⚪ (alla chiusura scopri cos'era davvero). <b>✅ Crea intervento</b> fa partire tutto e chiude il blocco. Se è un falso allarme puoi premere <b>✖ Rifiuta</b> anche dopo aver risposto. Occhio: le <b>📵 mute</b> non parlano affatto, solo rumori di fondo. Chi chiama non sempre dice la verità (c'è chi minimizza: "sarà la digestione"...), arrivano anche <b>trasporti programmati</b> (dialisi, visite, terapie) e chiamate dal <b>112/113</b>.<br>
-    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (MSA ed elisoccorso sono più veloci, l'automedica aiuta) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare.<br>
-    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto, con la via reale del punto cliccato; <b>click su un mezzo</b> = i suoi dettagli (stato FMS 1-8: da libero in sede puoi metterlo <b>🔧 6 fuori servizio</b> e rimetterlo <b>✅ 1 in servizio</b>). Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e <b>picchia davvero</b>: col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, col <b>vento</b> volano antenne, ponteggi e gonfiabili. Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
+    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (MSA ed elisoccorso sono più veloci, l'automedica aiuta) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e compare <b>🏥 Scegli ospedale</b> (ogni ambulanza porta 1 paziente: con più feriti servono più ambulanze); le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare. All'arrivo l'equipaggio fa <b>sopralluogo</b> e solo dopo <b>riferisce via radio</b> cosa ha trovato e quanti sono i feriti; i <b>🚒 VVF restano a lavorare a lungo</b> con aggiornamenti radio sull'evoluzione (e se trovano feriti chiedono un'ambulanza: se un ferito resta senza ambulanza, la radio lo sollecita).<br>
+    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). Premi sull'<b>orologio</b> in alto per cambiare l'ora di gioco (presets o ora esatta: cambiano missioni, fasce e pesi notte/giorno). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto, con la via reale del punto cliccato; <b>click su un mezzo</b> = i suoi dettagli (stato FMS 1-8: da libero in sede puoi metterlo <b>🔧 6 fuori servizio</b> e rimetterlo <b>✅ 1 in servizio</b>). Con <b>Afflusso ON</b> le chiamate arrivano da sole, lentamente. Il <b>meteo</b> in alto evolve da solo e <b>picchia davvero</b> — premi sul <b>riquadro meteo</b> per sceglierlo tu (sereno, nuvoloso, nebbia, pioggia, pioggia intensa, temporale, vento forte; poi evolve da solo): col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, con la <b>pioggia intensa</b> i danni sono più frequenti, col <b>vento forte</b> volano antenne, ponteggi e gonfiabili, con la <b>nebbia</b> i mezzi vanno più piano e aumentano gli incidenti stradali. Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). Numero e salute dei pazienti (solo %, niente età né diagnosi) si vedono quando il primo mezzo arriva sul posto. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, <b>🏥 Scegli ospedale</b> (compare sul mezzo quando è PRONTO, paziente a bordo) e poi <b>click sull'ospedale</b> = destinazione (doppio click = più vicino). <b>🆘 Richiedi assistenza</b> = apre la finestra per mandare altri mezzi.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
@@ -5365,6 +5365,15 @@ const OSPEDALI = [
   { nome:"Osp. San Gerardo Monza", lat:45.6023, lng:9.2605, prov:"MB" },
   { nome:"Osp. di Vimercate", lat:45.6083, lng:9.3563, prov:"MB" },
   { nome:"Osp. Salvini Garbagnate", lat:45.5832, lng:9.0946, prov:"MI" },
+  { nome:"Osp. di Cittiglio", lat:45.8942, lng:8.6675, prov:"VA" },
+  { nome:"Osp. Carlo Ondoli Angera", lat:45.7756, lng:8.5790, prov:"VA" },
+  { nome:"Osp. Nuovo Legnano", lat:45.5802, lng:8.8880, prov:"MI" },
+  { nome:"Osp. Mater Domini Castellanza", lat:45.6092, lng:8.9071, prov:"VA" },
+  { nome:"Osp. di Desio", lat:45.6266, lng:9.1959, prov:"MB" },
+  { nome:"Osp. Moriggia Gravedona", lat:46.1424, lng:9.2997, prov:"CO" },
+  { nome:"Osp. Filippo Del Ponte Varese", lat:45.8155, lng:8.8344, prov:"VA" },
+  { nome:"Osp. Fornaroli Magenta", lat:45.4711, lng:8.8936, prov:"MI" },
+  { nome:"Osp. di Circolo Rho", lat:45.5345, lng:9.0344, prov:"MI" },
 ];
 
 const SEDI = [
@@ -8000,7 +8009,7 @@ window.COEUSIM = (() => {
       const ws = arr.map(x=>{
         const n = nMezziRichiesti(x);
         const recent = ultimiTipi.includes(x.nome) ? PENALITA_RIPETIZIONE : 1;
-        const w = (x.peso||10)*((x.meteo&&x.meteo[meteo.cond])||1)*oreMult(x.nome)*sensoMult(x.nome)*fasciaAmbMult(x)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
+        const w = (x.peso||10)*((x.meteo&&x.meteo[meteo.cond])||1)*oreMult(x.nome)*sensoMult(x.nome)*(meteo.cond==="Nebbia"&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
         tot+=w; return w;
       });
       let r = Math.random()*tot, cand = arr[arr.length-1];
@@ -8220,7 +8229,8 @@ window.COEUSIM = (() => {
       if(temp>12) m*=0.05;
     }
     if(SENSO_ESTATE.test(nome) && !/cloro/i.test(nome)){ // piscina coperta col cloro: tutto l'anno
-      if(cond==="Pioggia"||cond==="Temporale") m*=0.1; // tuffi e pedalò sotto il temporale: quasi mai
+      if(cond==="Pioggia"||cond==="Temporale"||cond==="Pioggia intensa") m*=0.1; // tuffi e pedalò col maltempo: quasi mai
+      if(cond==="Nebbia") m*=0.5; // lago e spiaggia nella nebbia: pochi
       if(temp<5) return 0;
       if(temp<10) m*=0.05; else if(temp<15) m*=0.3;
     }
@@ -8482,7 +8492,7 @@ window.COEUSIM = (() => {
     Pioggia:["Sottopasso allagato con auto","Garage interrato allagato","Roggia esondata","Sottopasso ferroviario allagato","Cabina elettrica allagata","Canile allagato","Sede canottieri allagata","Auto travolta da frana","Ciclista caduto in sottopasso allagato","Lago esondato"],
     Vento:["Albero in carreggiata","Albero pericolante","Albero sul tetto","Albero sui cavi","Siepe divelta dal vento","Antenna caduta sul tetto","Ponteggio nel vento","Gonfiabile volato via col vento","Alveare caduto dal tetto","Sup trascinato dal vento","Albero su pista ciclabile","Albero su panchina al parco"]
   };
-  const STORM_EVERY = { Temporale:7, Pioggia:12, Vento:12 }; // game-min tra un danno e l'altro
+  const STORM_EVERY = { Temporale:6, Pioggia:12, "Pioggia intensa":6, Vento:7 }; // temporale e vento forte picchiano duro e spesso // game-min tra un danno e l'altro
   let stormTimer = 0;
   function makeChiamataTipo(nome){
     if(chiamate.length>=3) return null;
@@ -8494,14 +8504,14 @@ window.COEUSIM = (() => {
     const b = creaBozza(null, nome);
     const call = { ...b, callId: callCounter++ };
     chiamate.unshift(call);
-    const emo = {Temporale:"⛈️",Pioggia:"🌧️",Vento:"💨"}[meteo.cond]||"🔔";
+    const emo = {Temporale:"⛈️",Pioggia:"🌦️","Pioggia intensa":"🌧️",Vento:"💨"}[meteo.cond]||"🔔";
     log(`${emo} Danno da maltempo a <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm");
     blip(); toast(`${emo} Danno da maltempo in arrivo!`);
     refreshCallMarkers(); renderCalls(); updateStats();
     return call;
   }
   function stormTick(dtGameMin){
-    const lista = STORM_TIPI[meteo.cond];
+    const lista = STORM_TIPI[meteo.cond] || (meteo.cond==="Pioggia intensa" ? STORM_TIPI.Pioggia : null); // l’intensa fa gli stessi danni della pioggia
     if(!lista){ stormTimer = 0; return; }
     stormTimer += dtGameMin;
     if(stormTimer < STORM_EVERY[meteo.cond]+rnd(0,4)) return;
@@ -9413,16 +9423,62 @@ window.COEUSIM = (() => {
   let meteo = {cond:"Nuvoloso", temp:14};
   let meteoTimer = 0;
   const METEO_NEXT = {
-    Sereno:{temp:[18,28], next:{Sereno:65,Nuvoloso:25,Vento:10}},
-    Nuvoloso:{temp:[13,20], next:{Nuvoloso:50,Sereno:20,Pioggia:22,Vento:8}},
-    Pioggia:{temp:[9,16], next:{Pioggia:50,Nuvoloso:22,Temporale:16,Vento:12}},
-    Temporale:{temp:[11,18], next:{Temporale:30,Pioggia:42,Nuvoloso:18,Vento:10}},
-    Vento:{temp:[11,19], next:{Vento:38,Nuvoloso:30,Sereno:14,Temporale:18}},
+    Sereno:{temp:[18,28], next:{Sereno:60,Nuvoloso:24,Nebbia:6,Vento:10}},
+    Nuvoloso:{temp:[13,20], next:{Nuvoloso:45,Sereno:18,Pioggia:18,Nebbia:9,Vento:10}},
+    Nebbia:{temp:[8,15], next:{Nebbia:40,Nuvoloso:25,Sereno:20,Pioggia:15}},
+    Pioggia:{temp:[9,16], next:{Pioggia:43,"Pioggia intensa":12,Nuvoloso:20,Temporale:13,Vento:12}},
+    "Pioggia intensa":{temp:[8,14], next:{"Pioggia intensa":35,Pioggia:35,Temporale:15,Nuvoloso:15}},
+    Temporale:{temp:[11,18], next:{Temporale:28,Pioggia:35,"Pioggia intensa":14,Nuvoloso:15,Vento:8}},
+    Vento:{temp:[11,19], next:{Vento:35,Nuvoloso:28,Sereno:12,Temporale:12,Pioggia:13}},
   };
-  const METEO_EMOJI = {Sereno:"☀️",Nuvoloso:"☁️",Pioggia:"🌧️",Temporale:"⛈️",Vento:"💨"};
+  const METEO_EMOJI = {Sereno:"☀️",Nuvoloso:"☁️",Nebbia:"🌫️",Pioggia:"🌦️","Pioggia intensa":"🌧️",Temporale:"⛈️",Vento:"💨"};
+  // selettore meteo manuale: il riquadro in alto diventa un tasto con le 7 condizioni;
+  // "Vento" si mostra come "Vento forte". La scelta vale subito, poi il meteo evolve da solo.
+  const METEO_SCELTE = ["Sereno","Nuvoloso","Nebbia","Pioggia","Pioggia intensa","Temporale","Vento"];
+  const METEO_NOME = {Vento:"Vento forte"};
+  function meteoNome(c){ return METEO_NOME[c]||c; }
+  function impostaMeteo(c){
+    if(!METEO_NEXT[c]) return false;
+    meteo.cond = c;
+    const lim = METEO_NEXT[c].temp;
+    if(lim) meteo.temp = rnd(lim[0],lim[1]);
+    meteoTimer = 0; meteoUpdate();
+    return true;
+  }
+  function wireMeteo(){
+    const btn = $("meteoBtn"), menu = $("meteoMenu");
+    if(!btn || !menu || btn._w) return; btn._w = true;
+    menu.innerHTML = "";
+    for(const c of METEO_SCELTE){
+      const b = document.createElement("button");
+      b.className = "lstBtn small"; b.style.cssText = "display:block;width:100%;text-align:left;margin:1px 0;";
+      b.textContent = (METEO_EMOJI[c]||"") + " " + meteoNome(c);
+      b.onclick = e=>{ e.stopPropagation(); impostaMeteo(c); log("🌦️ Meteo impostato: <b>" + meteoNome(c) + "</b> (poi evolve da solo)"); menu.hidden = true; };
+      menu.appendChild(b);
+    }
+    btn.onclick = e=>{ e.stopPropagation(); menu.hidden = !menu.hidden; };
+    document.addEventListener("click", ()=>{ menu.hidden = true; });
+  }
+  // orologio a tasto: scelta manuale dell’ora di gioco (presets + ora esatta);
+  // cambia subito fasce orarie, pesi notte/giorno e coerenza missioni
+  function impostaOrario(h, m){
+    h = Math.max(0, Math.min(23, h|0)); m = Math.max(0, Math.min(59, m|0));
+    clockMin = h*60+m; updateClock();
+    log("🕐 Orario impostato: <b>" + String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0") + "</b> — cambiano le missioni in arrivo");
+    return true;
+  }
+  function wireOra(){
+    const btn = $("oraBtn"), menu = $("oraMenu");
+    if(!btn || !menu || btn._w) return; btn._w = true;
+    menu.querySelectorAll("[data-h]").forEach(b=>{ b.onclick = e=>{ e.stopPropagation(); impostaOrario(+b.dataset.h, 0); menu.hidden = true; }; });
+    const vai = $("oraVai");
+    if(vai) vai.onclick = e=>{ e.stopPropagation(); const v = ($("oraInput")||{}).value || "08:00"; const p = v.split(":"); impostaOrario(+p[0], +(p[1]||0)); menu.hidden = true; };
+    btn.onclick = e=>{ e.stopPropagation(); const inp = $("oraInput"); if(inp) inp.value = String(Math.floor(clockMin/60)).padStart(2,"0") + ":" + String(Math.floor(clockMin%60)).padStart(2,"0"); menu.hidden = !menu.hidden; };
+    document.addEventListener("click", ()=>{ menu.hidden = true; });
+  }
   function meteoUpdate(){
     const el=$("wetter");
-    if(el) el.textContent=`${meteo.cond}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
+    if(el) el.textContent=`${meteoNome(meteo.cond)}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
     // effetti visivi sulla mappa: disattivati su richiesta (il maltempo genera comunque danni)
   }
   function meteoTick(dtGameMin){
@@ -9474,7 +9530,7 @@ window.COEUSIM = (() => {
     for(const mz of mezzi){
       if(mz.stato==="viaggio"||mz.stato==="trasporto"||mz.stato==="rientro"){
         // avanza lungo il percorso stradale (fallback dritto se manca); gli eli volano dritti e più veloci
-        const velKmh = isEli(mz) ? 180 : 55; // velocità media simulata
+        const velKmh = isEli(mz) ? 180 : (meteo.cond==="Nebbia" ? 50 : 75); // velocita media simulata (nella nebbia si va piano)
         const gameHours = (dtRealSec*speed/60)/60;
         const stepKm = velKmh*gameHours;
         if (advanceAlongPath(mz, stepKm)){
@@ -9517,8 +9573,10 @@ window.COEUSIM = (() => {
             if(msaAtteso(iv2)){
               mz.sulPostoTimer = 1; // MSA richiesto ma non ancora arrivato: si aspetta, niente carico
               renderListe();
-            } else if(iv2.stabilizzato){
-              // paziente caricato in ambulanza: resta PRONTO finché l'operatore sceglie l'ospedale (🏥)
+           } else if(iv2.stabilizzato && iv2.reportFatto){
+             // paziente caricato in ambulanza: resta PRONTO finché l'operatore sceglie l'ospedale (🏥)
+             // (niente carico prima del report di scena: prima si valuta, poi si trasporta)
+             // ATTENZIONE: condizione estesa sotto, non duplicare questo ramo
               mz.stato="pronto"; mz.sulPostoTimer=0;
               log(`${isEli(mz)?"🚁":"🚑"} ${mz.codice}: paziente a bordo (stabile al 100%), pronto per il trasporto — scegli l'ospedale (🏥 sul mezzo, 2 click = più vicino)`, "ok");
               toast(`${isEli(mz)?"🚁":"🚑"} ${mz.codice} pronto: scegli l'ospedale (🏥)`);
@@ -9565,6 +9623,7 @@ window.COEUSIM = (() => {
     for(const iv of interventi){
       if(iv.stato==="attesa") iv.attesa = clockMin-iv.t0;
     }
+    scenaTick(dtRealSec*speed/60); // sopralluogo, evoluzione VVF e solleciti via radio
 
     // refresh UI leggera ogni tick
     updateClock();
@@ -9591,12 +9650,16 @@ window.COEUSIM = (() => {
       if(iv){
         iv.stato="sul_posto"; iv.gestito=true; iv.tSulPosto=clockMin;
         // durata sul posto = durata intervento (se più mezzi, usa max)
-        mz.sulPostoTimer = iv.durata * rnd(0.8,1.2);
+        mz.sulPostoTimer = iv.durata * (iv.vvf ? rnd(1.4,2.0) : rnd(0.8,1.2)); // i VVF restano a lavorare a lungo
         if(iv.attesaMSA && isAvanzato(mz)){
           iv.attesaMSA = false; // supporto avanzato arrivato: si può stabilizzare e caricare
           log(`🚓 ${nomem(mz)} sul posto: supporto avanzato arrivato, l'equipaggio riprende`, "status");
         }
-        if(!iv.reportFatto){ iv.reportFatto = true; reportScena(iv, mz); }
+        // prima il sopralluogo: cosa è successo e quanti feriti lo riferiscono via radio dopo aver valutato
+        if(!iv.valutato){
+          if(iv.sopralluogo==null) iv.sopralluogo = iv.vvf ? rnd(2,4) : rnd(2,5);
+          log(iv.vvf ? `🚒 ${nomem(mz)} sul posto a <b>${iv.comune}</b>: stiamo valutando la situazione, vi aggiorno tra poco` : `🔍 ${nomem(mz)} sul posto a <b>${iv.comune}</b>: sopralluogo in corso, vi riferisco tra poco`);
+        }
         else log(`📍 ${nomem(mz)} sul posto`, "status");
       } else {
         mz.sulPostoTimer=5;
@@ -9666,6 +9729,84 @@ window.COEUSIM = (() => {
     else log(`✅ ${nomem(mz)}: situazione sotto controllo a <b>${iv.comune}</b>, nessun altro mezzo necessario`);
   }
 
+  // evoluzione di un intervento VVF: resta sul posto a lavorare e aggiorna via radio;
+  // alla prima evoluzione puo trovare feriti e chiedere un'ambulanza
+  function evoluzioneVVF(iv, mz){
+    const nm = iv.tipoNome || "";
+    if(!iv.feritiVVF && !(iv.pazienti||[]).some(s=>s!=null) && !iv.trasporto && Math.random()<0.34){
+      const n = Math.random()<0.7 ? 1 : 2;
+      iv.pazienti = [];
+      for(let k=0;k<n;k++) iv.pazienti.push(rndi(25,80));
+      iv.trasporto = true; iv.daTrasportare = n; iv.stabilizzato = false;
+      iv.feritiVVF = true; iv.sollecito = 6;
+      log(`🚒 ${nomem(mz)} da <b>${iv.comune}</b>: abbiamo trovat${n>1?"i":"o"} <b>${n} ferito${n>1?"i":""}</b> — serve un'ambulanza qui, subito!`, "alarm");
+      toast(`🚒 Feriti a ${iv.comune}: manda un'ambulanza (🆘)`);
+      return;
+    }
+    const tardi = (iv.evoluzioni||0) >= 2;
+    let righe;
+    if(/incendio|fuoco|fiamme|brucia|rogo|falo|camino|sterpagli|canneto|boschiv|legnaia|discarica|cassonetto|tetto|fotovoltaico|auto a fuoco/i.test(nm))
+      righe = tardi
+        ? ["fuoco sotto controllo, iniziamo la bonifica", "fiamme spente, bonifica e messa in sicurezza in corso", "spento, restiamo per la bonifica e i controlli finali"]
+        : ["stiamo attaccando le fiamme, la zona è transennata", "manichette stese, attacco al fuoco in corso", "le fiamme si estendono, apriamo un secondo getto"];
+    else if(/allaga|esonda|acqua|alluvione|prosciuga|pompa|tubo|perdita|fuga gas/i.test(nm))
+      righe = tardi
+        ? ["quasi prosciugato, restano pulizia e verifiche finali", "livello in calo netto, ultime verifiche in corso"]
+        : ["idrovore al lavoro, livello in calo lento", "stiamo prosciugando, serve ancora tempo"];
+    else if(/persona|recupero|ricerca|dispers|apertura|ascensore|blocc|soccorso|scompars/i.test(nm))
+      righe = tardi
+        ? ["situazione quasi in sicurezza, ultime operazioni", "stiamo concludendo, zona quasi in sicurezza"]
+        : ["squadra al lavoro per raggiungere la persona", "stiamo operando, vi aggiorno appena c'è qualcosa"];
+    else
+      righe = tardi
+        ? ["quasi finito, ultime verifiche in corso", "stiamo concludendo la messa in sicurezza"]
+        : ["squadre al lavoro sulla scena", "lavori in corso, vi aggiorno tra poco"];
+    log(`🚒 ${nomem(mz)} da <b>${iv.comune}</b>: ${righe[rndi(0,righe.length-1)]}`);
+  }
+
+  // sopralluogo ed evoluzione scene, ogni tick: gli equipaggi valutano prima di riferire;
+  // i VVF aggiornano via radio mentre lavorano; i feriti senza ambulanza vengono sollecitati
+  function scenaTick(dtG){
+    for(const iv of interventi){
+      if(iv.stato==="chiuso") continue;
+      // feriti in attesa di ambulanza: sollecito periodico se nessun 118 legato all'intervento
+      if(iv.trasporto && (iv.daTrasportare||0)>0){
+        const aiuto = mezzi.some(m=>m.interventoId===iv.id && m.corpo!=="VVF" && (m.stato==="viaggio"||m.stato==="sul_posto"||m.stato==="pronto"||m.stato==="trasporto"));
+        if(!aiuto){
+          iv.sollecito = (iv.sollecito==null ? 10 : iv.sollecito) - dtG;
+          if(iv.sollecito<=0){
+            iv.sollecito = 12;
+            log(`⏰ A <b>${iv.comune}</b>: ${iv.daTrasportare} ferito${iv.daTrasportare>1?"i":""} ancora senza ambulanza — mandate qualcuno!`, "alarm");
+          }
+        } else iv.sollecito = 10;
+      }
+      const sulPosto = mezzi.filter(m=>m.interventoId===iv.id && m.stato==="sul_posto");
+      if(!sulPosto.length) continue;
+      const primo = sulPosto[0];
+      if(!iv.valutato){
+        if(iv.sopralluogo==null) iv.sopralluogo = iv.vvf ? rnd(2,4) : rnd(2,5);
+        iv.sopralluogo -= dtG;
+        if(iv.sopralluogo<=0){
+          iv.valutato = true; iv.reportFatto = true;
+          reportScena(iv, primo);
+          if(iv.vvf){ iv.evoluzioni = 0; iv.evolTra = rnd(4,8); }
+          refreshMarkers(); renderListe(); updateStats();
+        }
+        continue;
+      }
+      if(iv.vvf && (iv.evoluzioni||0)<2){
+        if(iv.evolTra==null) iv.evolTra = rnd(4,8);
+        iv.evolTra -= dtG;
+        if(iv.evolTra<=0){
+          iv.evoluzioni = (iv.evoluzioni||0)+1;
+          evoluzioneVVF(iv, primo);
+          iv.evolTra = rnd(5,10);
+          refreshMarkers(); renderListe(); updateStats();
+        }
+      }
+    }
+  }
+
  // ---------- MAPPA (NON OSM!) ----------
  function initMap(){
     // TUTTO ESRI, niente OSM standard, niente API key. Default: Karte (street) come LSTSim.
@@ -9679,11 +9820,8 @@ window.COEUSIM = (() => {
     map._karte = esriStreet; map._sat = satGroup;
     // niente selettore layer standard: si usano i bottoni Karte/Satellit in stile LSTSim
 
-    if (L.markerClusterGroup) {
-      layerInterventi = L.markerClusterGroup({ maxClusterRadius: 45, showCoverageOnHover: false });
-    } else {
-      layerInterventi = L.layerGroup();
-    }
+    // niente raggruppamento: ogni intervento mostra sempre il suo spillo (richiesta utente)
+    layerInterventi = L.layerGroup();
     layerInterventi.addTo(map);
     layerMezzi = L.layerGroup().addTo(map);
     layerSedi = L.layerGroup().addTo(map);
@@ -9776,7 +9914,7 @@ window.COEUSIM = (() => {
   }
 
   // spillo rosso stile LSTSim per gli interventi
-  const PIN_SVG = `<svg width="26" height="32" viewBox="0 0 26 32"><path d="M13 1 C6 1 2 6.5 2 12 C2 20.5 13 31 13 31 C13 31 24 20.5 24 12 C24 6.5 20 1 13 1 Z" fill="#d00000" stroke="#fff" stroke-width="1.5"/><circle cx="13" cy="12" r="4" fill="#fff"/></svg>`;
+  function pinSVG(iv){ const c = iv.vvf ? "#666666" : prioColor(iv.prio); return `<svg width="26" height="32" viewBox="0 0 26 32"><path d="M13 1 C6 1 2 6.5 2 12 C2 20.5 13 31 13 31 C13 31 24 20.5 24 12 C24 6.5 20 1 13 1 Z" fill="${c}" stroke="#fff" stroke-width="1.5"/><circle cx="13" cy="12" r="4" fill="#fff"/></svg>`; }
   function refreshMarkers(){
     if(!map) return;
     layerInterventi.clearLayers(); markersInt.clear();
@@ -9786,7 +9924,7 @@ window.COEUSIM = (() => {
       const pulse = iv.stato==="attesa" ? " pulse" : "";
       const mk = L.marker([iv.lat,iv.lng],{
         icon: L.divIcon({className:'intIcon',
-          html:`<div class="intPin${pulse}">${PIN_SVG}</div>`,
+          html:`<div class="intPin${pulse}">${pinSVG(iv)}</div>`,
           iconSize:[26,32], iconAnchor:[13,30]})
       });
       mk.bindTooltip(`${luogoIV(iv,false)}<br>Stato: ${iv.stato}`);
@@ -10071,6 +10209,8 @@ window.COEUSIM = (() => {
     initMezzi();
     initMap();
     renderCalls(); renderListe(); updateStats(); updateClock();
+    wireMeteo(); // il riquadro meteo e un tasto con scelta manuale
+    wireOra(); // l’orologio e un tasto con scelta manuale dell’ora
     try{ setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },300); }catch(e){}
     try{ window.addEventListener("resize", ()=>{ try{ map.invalidateSize(); }catch(e){} }); }catch(e){}
     log("Centrale COEU SIM VA/CO/LC — inizio turno. Mezzi pronti.");
@@ -10116,7 +10256,8 @@ window.COEUSIM = (() => {
     getSpeed(){return speed;},
     toggleInflow(){autoInflow=!autoInflow; return autoInflow;},
     isInflow(){return autoInflow;},
-    setMeteo(c){ if(METEO_NEXT[c]){ meteo.cond=c; meteoTimer=0; meteoUpdate(); return true; } return false; },
+    setMeteo(c){ return impostaMeteo(c); },
+    setOrario(h,m){ return impostaOrario(h,m); },
     setFascia(i,k,v){ setFascia(i,k,v); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
