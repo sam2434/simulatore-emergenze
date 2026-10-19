@@ -61328,8 +61328,10 @@ window.COEUSIM = (() => {
  // distribuzione pazienti per missione (solo selezione, i dati restano esatti):
  // tipi da 1 coinvolto meno frequenti, da 2-3 più frequenti (target tabella utente:
  // almeno 10 missioni su 200 con N pazienti alle probabilità richieste)
- const PZ1_MULT = 0.46, PZ2_MULT = 0.68, PZ3_MULT = 1.1, PZ4_MULT = 1.02;
+ const PZ1_MULT = 0.9, PZ2_MULT = 0.68, PZ3_MULT = 1.7, PZ4_MULT = 1.02;
  function pazMult(x){ const pz = x.pz||0; return pz===1 ? PZ1_MULT : pz===2 ? PZ2_MULT : pz===3 ? PZ3_MULT : pz===4 ? PZ4_MULT : 1; }
+ const TRIPLO_MULT = 0.17; // scontri a 3 mezzi ("X, Y e Z"): ne abbiamo 211, senza freno dominano
+ function triploMult(nome){ return /scontro tra [^,]+,[^,]+ e /i.test(nome||"") ? TRIPLO_MULT : 1; }
    function tipoRandom(){
     // pesata: peso base × modificatore meteo × penalità missioni grosse × anti-ripetizione
     // (il meteo sposta le probabilità, non impone nulla; i tipi da tanti mezzi e quelli appena usciti escono più di rado;
@@ -61342,7 +61344,7 @@ window.COEUSIM = (() => {
       const ws = arr.map(x=>{
         const n = nMezziRichiesti(x);
         const recent = ultimiTipi.includes(x.nome) ? PENALITA_RIPETIZIONE : 1;
-        const w = (x.peso||10)*((x.meteo&&x.meteo[meteo.cond])||1)*oreMult(x.nome)*sensoMult(x.nome)*(meteo.cond==="Nebbia"&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*pazMult(x)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
+        const w = (x.peso||10)*((x.meteo&&x.meteo[meteo.cond])||1)*oreMult(x.nome)*sensoMult(x.nome)*(meteo.cond==="Nebbia"&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*pazMult(x)*triploMult(x.nome)*Math.pow(PENALITA_MISSIONI_GROSSE, Math.max(0,n-1))*recent;
         tot+=w; return w;
       });
       let r = Math.random()*tot, cand = arr[arr.length-1];
