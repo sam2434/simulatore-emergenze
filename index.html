@@ -5,7 +5,7 @@
   /* ===== LSTSim clone - tema chiaro classico ===== */
   *{ box-sizing:border-box; }
   body{ text-align:left; background:#c9c9c9; color:#111; font-family:Verdana,Tahoma,Arial,sans-serif; font-size:12px; margin:0; }
-  #app{ max-width:none; margin:0; padding:6px; }
+  #app{ max-width:none; margin:0; padding:6px; min-height:100vh; display:flex; flex-direction:column; }
   #lstTop{ background:linear-gradient(#fdfdfd,#d9d9d9); border:1px solid #7a7a7a; padding:5px 8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
   #lstTop .title{ font-weight:bold; font-size:13px; }
   #lstTop .title span{ font-weight:normal; color:#444; font-size:11px; }
@@ -19,7 +19,8 @@
   #lstStats{ font-size:11px; background:#fff; border:1px solid #808080; padding:2px 8px; }
   #lstStats b{ font-size:12px; }
   #lstGridTop{ display:grid; grid-template-columns:1fr 220px 360px; gap:6px; margin-top:6px; }
-  #lstGridBot{ display:grid; grid-template-columns:1fr 520px; gap:6px; margin-top:6px; }
+  #lstGridBot{ display:grid; grid-template-columns:1fr 520px; gap:6px; margin-top:6px; flex:1 1 auto; }
+  #lstGridBot .lstPanel{ display:flex; flex-direction:column; }
   @media(max-width:1000px){ #lstGridTop{ grid-template-columns:1fr 1fr; } #pIncident{ grid-column:1/-1; } #lstGridBot{ grid-template-columns:1fr; } }
   @media(max-width:640px){ #lstGridTop{ grid-template-columns:1fr; } }
   .lstPanel{ background:#f2f2f2; border:1px solid #7a7a7a; }
@@ -91,7 +92,7 @@
   .onSceneRow svg{ width:26px; height:auto; }
   /* funk + calls */
   #funkHead{ display:flex; gap:8px; align-items:center; }
-  #logBox{ height:120px; overflow:auto; background:#fff; padding:4px 6px; font-size:14px; line-height:1.5; }
+  #logBox{ flex:1 1 auto; height:auto; min-height:120px; overflow:auto; background:#fff; padding:4px 6px; font-size:14px; line-height:1.5; }
   #logBox .lt{ color:#666; font-family:monospace; }
   #logBox div{ border-left:4px solid transparent; padding:1px 4px; }
   #logBox .alarm{ border-left-color:#d00000; background:#ffe9e9; font-weight:bold; }
@@ -100,7 +101,7 @@
   #logBox .crit{ background:#ffd9d9; border-left:4px solid #d00000; padding:1px 4px; font-weight:bold; }
   .funkS{ display:inline-block; font-weight:bold; color:#fff; font-size:10px; padding:0 4px; border:1px solid #555; margin:0 2px; }
   #intList{ height:190px; overflow:auto; background:#fff; padding:0; display:block; }
-  #callQueue{ max-height:400px; overflow:auto; background:#fff8e1; border-bottom:1px solid #7a7a7a; }
+  #callQueue{ flex:1 1 auto; min-height:120px; max-height:none; overflow:auto; background:#fff8e1; border-bottom:1px solid #7a7a7a; }
   .callCard{ padding:5px 6px; border-bottom:2px solid #e6a100; background:#fffbe8; }
   .callLST{ display:flex; align-items:center; gap:8px; }
   .callLST .callTime{ color:#555; font-variant-numeric:tabular-nums; }
