@@ -27,8 +27,9 @@
   .lstHead .right{ margin-left:auto; font-weight:normal; font-size:11px; display:flex; gap:4px; align-items:center; }
   .lstHead .tab{ border:1px solid #808080; background:#fff; padding:1px 8px; cursor:pointer; font-weight:normal; }
   .lstHead .tab.on{ background:#fdf0c0; font-weight:bold; }
-  #mapWrap{ position:relative; }
-  #mapEl{ height:calc(50vh - 190px); min-height:210px; width:100%; background:#e8e4d8; }
+  #lstGridTop .lstPanel:first-child{ display:flex; flex-direction:column; }
+  #mapWrap{ position:relative; flex:1 1 auto; display:flex; flex-direction:column; min-height:300px; }
+  #mapEl{ flex:1 1 auto; height:auto; min-height:300px; width:100%; background:#e8e4d8; }
   #mapToggle{ position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:600; display:flex; gap:0; border:1px solid #808080; }
   #mapToggle button{ border:0; padding:2px 12px; font-size:11px; cursor:pointer; background:#fff; font-family:inherit; }
   #mapToggle button.on{ background:#ffe9a8; font-weight:bold; }
