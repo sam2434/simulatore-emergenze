@@ -65143,7 +65143,7 @@ window.COEUSIM = (() => {
   // mai `flusso`: niente azzeramenti errati, niente debiti accumulati.
   const RITMI = {
     tranquillo:{ base:0.45, picco:0.05, calma:0.30, cap:5 },   // turno calmo: poche chiamate, morbido
-    normale:{ base:1.0, picco:0.12, calma:0.18, cap:8 },       // turno standard
+    normale:{ base:1.8, picco:0.12, calma:0.10, cap:12 },      // turno standard (1x: ~1 chiamata al minuto di giorno)
     intenso:{ base:2.1, picco:0.20, calma:0.10, cap:12 },      // serata che picchia
     maxi:{ base:3.2, picco:0.30, calma:0.04, cap:16 },         // maxi emergenza: pioggia di chiamate
   };
