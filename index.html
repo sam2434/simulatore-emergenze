@@ -67037,8 +67037,8 @@ window.COEUSIM = (() => {
      const pa = s<40 ? rndi(80,100) : s<=70 ? rndi(100,120) : rndi(110,140);
      vit = "FC"+fc+" Sat"+Math.max(70,sat-(disp?5:0))+"% PA"+pa;
    }
-   // priorità di soccorso (triage) dalla salute: il colore si vede nella scheda
-   const t = s<25 ? 1 : s<50 ? 2 : s<75 ? 3 : 4;
+   // priorità di soccorso (triage) dalla salute: il colore si vede nella scheda (mai bianco: i lievi sono verdi)
+   const t = s<25 ? 1 : s<50 ? 2 : 3; // lievi = VERDI (il bianco resta solo come codice missione)
    return { s:sesso, e:eta, c:cosc, q:quadro, v:vit, intr, t };
   }
   // ---------- NUMERO DINAMICO DEI PAZIENTI: la centrale parte da info incomplete ----------
@@ -67177,9 +67177,13 @@ window.COEUSIM = (() => {
   }
  function codQuad(prio){
   if(!(prio>0)) return "";
-  const L = prio===1?"R":prio===2?"G":prio===3?"V":"B";
   const N = prio===1?"ROSSO":prio===2?"GIALLO":prio===3?"VERDE":"BIANCO";
-  return `<span class="trasQ" style="background:${prioColor(prio)}" title="Codice trasporto: ${N}">${L}</span>`;
+  return `<span class="trasQ" style="background:${prioColor(prio)}" title="Codice trasporto: ${N}"></span>`;
+ }
+ // quadratino trasporto del PAZIENTE (triage profili[k].t), mai il codice missione
+ function codQuadPaz(iv, k){
+  const p = iv && iv.profili && iv.profili[k];
+  return codQuad((p && p.t) || 3);
  }
  function pazientiHTML(iv){
     const list = (iv.pazienti||[]).filter(x=>x!=null);
@@ -67187,20 +67191,20 @@ window.COEUSIM = (() => {
     const claimedIdx = new Set(claimants(iv.id).map(m=>(m.pazIdx!=null?m.pazIdx:m.affido)));
     const righe = list.map((s,k)=>{
       const p = (iv.profili||[])[k];
-      const tcol = prioColor((p&&p.t)||4);
-      const dot = p ? `<span class="prioDot" style="background:${tcol}" title="triage P${p.t||4}"></span> ` : "";
+      const tcol = prioColor((p&&p.t)||3);
+      const dot = p ? `<span class="prioDot" style="background:${tcol}" title="triage P${p.t||3}"></span> ` : "";
       const _crit = !!((s!=null && s<SOGLIA_MSA && pazAttivo(iv,k)) && !msaAssegnatoA(iv,k)); // scritta MSA solo sotto il 35%: sopra sparisce (anche col flag di gestione ancora attivo); alla presa in carico sparisce
       const base = `Paziente ${k+1}: <b style="color:${saluteCol(s)}">${Math.round(s)}%</b>${_crit?' <b style="color:#d40000">MSA</b>':""}`;
       const bis = bisognoPaziente(iv,k);
       const st = statoPaziente(iv,k);
       const _rifOk = iv.trasporto && iv.reportFatto && (st===4||st===6) && Math.round(s)>=70;
       let tag = "";
-      if(st===10) tag = `<span style="color:#2e8b57">✅ ${ospShort((iv.pazDest&&iv.pazDest[k])||"")}${codQuad(iv.prio)}</span>`;
+      if(st===10) tag = `<span style="color:#2e8b57">✅ ${ospShort((iv.pazDest&&iv.pazDest[k])||"")}${codQuadPaz(iv,k)}</span>`;
       else if(st===11) tag = `<span style="color:#2e8b57">✅ concluso sul posto</span>`;
       else if(st===12) tag = `✋ rifiuto registrato`;
       else if(st===13) tag = `🕊 deceduto`;
       else if(st===14) tag = `✅ concluso`;
-      else if(st===9){ const _d=(iv.pazDest&&iv.pazDest[k])||""; tag = _d?("🚑 "+ospShort(_d)+codQuad(iv.prio)):"🚑 in trasporto"; }
+      else if(st===9){ const _d=(iv.pazDest&&iv.pazDest[k])||""; tag = _d?("🚑 "+ospShort(_d)+codQuadPaz(iv,k)):"🚑 in trasporto"; }
       else if(st===8){ const _cm=mezzi.find(m=>m.interventoId===iv.id&&m.pazIdx===k&&m.trasportaPz); tag = _cm?("🚑 a bordo ("+nomem(_cm)+")"):"🚑 a bordo"; }
       else if(st===7){ const _am=(iv.affidi&&iv.affidi[k])?mezzi.find(m=>m.codice===iv.affidi[k]):null; tag = _am?("👨‍⚕️ in carico ("+nomem(_am)+")"):"👨‍⚕️ preso in carico"; }
       else if(st===5) tag = `🔒 in attesa di liberazione`;
@@ -68023,7 +68027,7 @@ window.COEUSIM = (() => {
   function mezziInPS(nome){ return mezzi.filter(m=>m.stato==="ospedale"&&m.ospedale===nome); }
   function ospPSHTML(nome){
     const inPS = mezziInPS(nome);
-    return inPS.length ? `<br><b>In PS:</b> ${inPS.map(m=>{ const v=(m.interventoId!=null)?interventi.find(x=>x.id===m.interventoId):null; return nomem(m)+(v?codQuad(v.prio):""); }).join(", ")}` : "";
+    return inPS.length ? `<br><b>In PS:</b> ${inPS.map(m=>{ const v=(m.interventoId!=null)?interventi.find(x=>x.id===m.interventoId):null; const kk=(m.pazIdx!=null?m.pazIdx:m.affido); return nomem(m)+(v?codQuadPaz(v,kk):""); }).join(", ")}` : "";
   }
   function ospTooltipHTML(o){ return `<b>${o.nomeUff||o.nome}</b>${ospPSHTML(o.nome)}`; }
   function mostraOspedale(nome){
@@ -69802,7 +69806,7 @@ window.COEUSIM = (() => {
         div.className = "intRow" + (iv.id===selectedId?" sel":"");
         div.id = "introw-" + iv.id;
        const badge = iv.prio>0 ? `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>` : `<span title="Senza codice — VVF">🚒</span>`;
-        const hList = [...new Set(iv.mezziIds.map(c=>mezzi.find(x=>x.codice===c)).filter(m=>m&&m.ospedale&&(m.stato==="trasporto"||m.stato==="ospedale")).map(m=>ospShort(m.ospedale)+codQuad(iv.prio)))];
+        const hList = [...new Set(iv.mezziIds.map(c=>mezzi.find(x=>x.codice===c)).filter(m=>m&&m.ospedale&&(m.stato==="trasporto"||m.stato==="ospedale")).map(m=>ospShort(m.ospedale)+codQuadPaz(iv,(m.pazIdx!=null?m.pazIdx:m.affido))))];
         div.innerHTML = badge + `<span style="flex:1;min-width:0">📍 ${luogoIV(iv,true)}${hList.length?`<div class="intH">${hList.join(" · ")}</div>`:""}</span><span class="caret">${iv.id===selectedId?"▾":"▸"}</span>`;
         div.title=`#${iv.id} — ${statoLabel(iv.stato)} — ${iv.mezziIds.map(c=>nomem(mezzi.find(x=>x.codice===c))).join(", ")||"nessun mezzo"}`;
         div.onclick = ()=>selectIntervento(iv.id);
@@ -69885,7 +69889,7 @@ window.COEUSIM = (() => {
       <div class="kv"><b>Posizione:</b> ${mz.sede} ${mz.stato!=="disponibile"&&iv?"→ #"+iv.id:""}</div>
       ${mz.uscita>0?`<div class="kv">🚪 In uscita dalla sede…</div>`:""}
       <div class="kv"><b>Ospedale:</b> ${mz.ospedale||"—"}</div>
-      <div class="kv"><b>Paziente a bordo:</b> ${(mz.trasportaPz&&mz.pazIdx!=null&&iv)?("P"+(mz.pazIdx+1)+" \u2192 "+(mz.ospedale||"PS")+codQuad(iv.prio)):"— occupato: no"}</div>
+      <div class="kv"><b>Paziente a bordo:</b> ${(mz.trasportaPz&&mz.pazIdx!=null&&iv)?("P"+(mz.pazIdx+1)+" \u2192 "+(mz.ospedale||"PS")+codQuadPaz(iv,mz.pazIdx)):"— occupato: no"}</div>
       <div style="margin-top:4px; display:flex; gap:4px;">
         <button class="lstBtn small" id="mzReBtn">↩️ Rientra</button>
         ${mz.stato==="disponibile"&&mz.interventoId==null?`<button class="lstBtn small" id="mzFsBtn" title="Stato FMS 6: non riceve più missioni">🔧 6 Fuori servizio</button>`:""}
@@ -69949,7 +69953,7 @@ window.COEUSIM = (() => {
       const mz=mezzi.find(x=>x.codice===c);
       if(!mz) continue;
       const row=document.createElement("div"); row.className="onSceneRow";
-      const htag = (mz.ospedale&&(mz.stato==="trasporto"||mz.stato==="ospedale"))?` <span class="small" style="color:#0645ad">${ospShort(mz.ospedale)}${codQuad(iv.prio)}</span>`:"";
+      const htag = (mz.ospedale&&(mz.stato==="trasporto"||mz.stato==="ospedale"))?` <span class="small" style="color:#0645ad">${ospShort(mz.ospedale)}${codQuadPaz(iv,(mz.pazIdx!=null?mz.pazIdx:mz.affido))}</span>`:"";
       const ptag = (mz.trasportaPz&&mz.pazIdx!=null&&iv) ? ` <span class="small" style="color:#d00000">🚑 P${mz.pazIdx+1}</span>` : "";
       const mcol = mz.tipo==="CNSAS" ? "#e6a100" : mz.tipo==="PMA" ? "#0e7c86" : mz.cat==="VVF" ? "#555" : (mz.cat==="AMBULANZA" ? "#0645ad" : "#d00000");
       row.innerHTML=`<span style="flex:1"><span style="color:${mcol}">${nomem(mz)}</span>${htag}${ptag}</span><span class="stBox st-${mz.stato}">${stNum(mz.stato)}</span>`;
@@ -70777,18 +70781,19 @@ window.COEULIVE = (() => {
         loggato = !!(r && r.data && r.data.session);
       }
     }catch(_){ loggato = false; }
-    const prima = snap.length ? snap[0] : null;
-    return {
-      configurato: configurato(),
-      host: hostPubblico(),
-      loggato,
-      pubblica: pubblicaOn(),
-      missioni: snap.length,
-      prima: prima ? {
-        codice: prima.codice || "SENZA CODICE",
-        mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
-        tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : ""
-      } : null,
+      const prima = snap.length ? snap[0] : null;
+      return {
+        configurato: configurato(),
+        host: hostPubblico(),
+        loggato,
+        pubblica: pubblicaOn(),
+        missioni: snap.length,
+        prima: prima ? {
+          codice: prima.codice || "SENZA CODICE",
+          mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
+          tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : "",
+          tpaz: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.tr ? (m.tpaz || "non ancora a bordo") : "non trasporta")) || "?").join("+") : ""
+        } : null,
       errore: lastError || "",
       sync: lastSync || "",
       scritture: moveCount
@@ -70915,6 +70920,7 @@ window.COEULIVE = (() => {
         const d = await diagnostica();
         const prima = d.prima
           ? ("prima missione: " + d.prima.codice + " + " + d.prima.mezzi + " mezzi" + (d.prima.tipi ? " (" + d.prima.tipi + ")" : ""))
+          + (d.prima.tpaz ? " · trasporto: " + d.prima.tpaz : "")
           : "nessuna missione aperta";
         if(st) st.textContent = "🧪 config: " + (d.configurato ? "sì" : "no") +
           " · login: " + (d.loggato ? "sì" : "no") +

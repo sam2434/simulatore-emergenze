@@ -271,7 +271,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>" +
-        ((v.tr && pazLet && inTrasporto) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '">' + pazLet + "</span>" : "") +
+        ((v.tr && pazLet && inTrasporto) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
         ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
         '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
         esc(statoMezzoIT(v.s)) + "</span></div>";
