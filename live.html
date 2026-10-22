@@ -286,7 +286,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   function avvia(){
     SUPABASE_URL = urlPulita();
     SUPABASE_ANON_KEY = String(SUPABASE_ANON_KEY || "").trim();
-    if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co/rest/v1/") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
+    if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
       $("caricamento").hidden = true;
       mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
       return;
