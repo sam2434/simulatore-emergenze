@@ -71,9 +71,14 @@
   .centro{ text-align:center; color:var(--mut); padding:40px 10px; font-size:15px; }
   .errore{ background:#fde7e5; border:1px solid var(--red); border-radius:6px;
     padding:14px; margin-bottom:10px; font-size:14px; }
-  .errore button{ background:var(--areu); color:#fff; border:0; border-radius:6px;
+.errore button{ background:var(--areu); color:#fff; border:0; border-radius:6px;
     padding:8px 16px; font-size:14px; cursor:pointer; margin-top:8px; }
-  footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
+  .errore ol{ margin:8px 0 8px 20px; padding:0; }
+  .errore li{ margin:4px 0; }
+  .errore details{ margin-top:8px; font-size:13px; }
+  .errore code{ display:block; margin-top:4px; padding:8px; background:#fff;
+    border:1px solid #e3b7b4; border-radius:6px; word-break:break-all; }
+footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   footer a{ color:var(--link); }
   .spinner{ width:34px; height:34px; border:4px solid #b9c6d2; border-top-color:var(--areu);
     border-radius:50%; margin:30px auto 10px; animation:gira 0.9s linear infinite; }
@@ -151,6 +156,25 @@
     }catch(_){ return ""; }
   }
 
+  function urlPulita(){
+    var u = String(SUPABASE_URL || "").trim();
+    while(u.slice(-1) === "/") u = u.slice(0, -1);
+    return u;
+  }
+
+  function hostContattato(){
+    try{ return new URL(urlPulita()).hostname; }
+    catch(_){ return ""; }
+  }
+
+  function erroreDiRete(msg){
+    var t = String(msg || "");
+    return t.indexOf("Failed to fetch") >= 0 ||
+      t.indexOf("NetworkError") >= 0 ||
+      t.indexOf("Load failed") >= 0 ||
+      t.indexOf("ERR_") >= 0;
+  }
+
   function statoMezzoIT(s){
     var m = { viaggio:"IN VIAGGIO", sul_posto:"SUL POSTO", pronto:"PRONTO",
       trasporto:"TRASPORTO", ospedale:"IN PS", rientro:"RIENTRO",
@@ -217,6 +241,26 @@
     if(btn) btn.onclick = function(){ b.hidden = true; ricarica(); };
   }
 
+  function mostraErroreRete(msg){
+    var b = $("errBox");
+    var host = hostContattato();
+    var hostTxt = host ? esc(host) : "l’indirizzo configurato";
+    var hostHref = host ? esc("https://" + host) : "#";
+    b.hidden = false;
+    b.innerHTML = "⚠️ <b>La pagina non riesce a raggiungere " + hostTxt + ".</b><br>" +
+      "Il gioco non è toccato. Controlla questi punti, in ordine:" +
+      "<ol>" +
+      "<li><b>Project URL</b>: deve essere simile a <b>https://xxxx.supabase.co</b>, senza spazi, senza <b>/rest/v1</b> e senza chiavi dentro l’indirizzo.</li>" +
+      "<li><b>Publishable key</b>: di solito inizia con <b>sb_publishable_</b>. Non usare mai una chiave che inizia con <b>sb_secret_</b>: è riservata e non va nel browser.</li>" +
+      "<li>Apri il progetto nel browser: <a href=\"" + hostHref + "\" target=\"_blank\" rel=\"noopener\">" + hostTxt + "</a>. Se non si apre, il progetto può essere sbagliato, in pausa oppure la rete lo blocca.</li>" +
+      "<li>Prova un’altra rete o un altro browser e, se usi VPN/ad-block/firewall aziendale, disattivalo per un minuto e riprova.</li>" +
+      "</ol>" +
+      "<details><summary>Dettaglio tecnico</summary><code>" + esc(String(msg || "errore di rete").slice(0, 300)) + "</code></details>" +
+      '<br><button id="riprovaBtn">🔄 Riprova ora</button>';
+    var btn = $("riprovaBtn");
+    if(btn) btn.onclick = function(){ b.hidden = true; ricarica(); };
+  }
+
   async function ricarica(){
     if(!client) return;
     try{
@@ -232,15 +276,24 @@
       $("caricamento").hidden = true;
       disegna();
     }catch(e){
+      var msg = String((e && e.message) || e);
       $("caricamento").hidden = true;
-      mostraErrore("impossibile caricare le missioni (" + String((e && e.message) || e).slice(0, 180) + "). Il gioco non è toccato: riprova tra poco.", true);
+      if(erroreDiRete(msg)) mostraErroreRete(msg);
+      else mostraErrore("impossibile caricare le missioni (" + msg.slice(0, 180) + "). Il gioco non è toccato: riprova tra poco.", true);
     }
   }
 
   function avvia(){
-    if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
+    SUPABASE_URL = urlPulita();
+    SUPABASE_ANON_KEY = String(SUPABASE_ANON_KEY || "").trim();
+    if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co/rest/v1/") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
       $("caricamento").hidden = true;
       mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
+      return;
+    }
+    if(SUPABASE_URL.indexOf("sb_secret_") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_secret_") === 0){
+      $("caricamento").hidden = true;
+      mostraErrore("hai incollato una chiave riservata sb_secret_: sostituiscila con la Publishable key e non pubblicare mai la chiave riservata.", false);
       return;
     }
     if(!window.supabase || !window.supabase.createClient){
@@ -249,6 +302,10 @@
       return;
     }
     try{
+      var u = new URL(SUPABASE_URL);
+      if(u.protocol !== "https:" || u.hostname.toLowerCase().indexOf(".supabase.co") < 0){
+        throw new Error("URL non valido");
+      }
       client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }catch(e){
       $("caricamento").hidden = true;
