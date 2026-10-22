@@ -21,8 +21,8 @@
  * ===================================================================== */
 window.COEULIVE = (() => {
   // >>>>>>>>>>>>>>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI <<<<<<<<<<<<<<<<<<<<<<<
-  const SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
-  const SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
+  const SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   const LS_VISTE = "coeulive_viste";     // missione_id mai visti (per chiudere dopo un reload)
