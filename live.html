@@ -7,50 +7,75 @@
 <meta name="description" content="Missioni in corso del Simulatore Emergenze, aggiornate in tempo reale. Pagina pubblica di sola lettura.">
 <style>
   :root{
-    --bg:#0f141b; --card:#1a2230; --card2:#222d42; --txt:#eef2f7; --mut:#9fb0c7;
-    --red:#ff4d4d; --yel:#ffb020; --grn:#35c759; --wht:#c8d2e0; --acc:#4da3ff;
+    --areu:#004898; --areu-dark:#003a75;
+    --bg:#dfe6ec; --card:#ffffff; --txt:#1a1a1a; --mut:#5a6b7c;
+    --red:#d52b1e; --yel:#f5a800; --grn:#2e8b57; --link:#0b5cc0;
   }
   *{ box-sizing:border-box; }
   body{ margin:0; background:var(--bg); color:var(--txt);
-    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; }
-  header{ position:sticky; top:0; z-index:10; background:#0b0f16f0; backdrop-filter:blur(6px);
-    border-bottom:1px solid #2a3648; padding:12px 16px; }
+    font-family:"Roboto","Segoe UI",system-ui,Arial,sans-serif; }
+  /* ===== Header stile AREU ===== */
+  header{ position:sticky; top:0; z-index:10; background:var(--areu); color:#fff;
+    padding:10px 14px; box-shadow:0 2px 6px #0005; }
   .wrap{ max-width:1100px; margin:0 auto; }
-  h1{ font-size:20px; margin:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .live-dot{ width:12px; height:12px; border-radius:50%; background:var(--red);
-    box-shadow:0 0 0 0 #ff4d4d88; animation:pulse 1.6s infinite; display:inline-block; }
-  @keyframes pulse{ 0%{box-shadow:0 0 0 0 #ff4d4d88;} 70%{box-shadow:0 0 0 10px #ff4d4d00;} 100%{box-shadow:0 0 0 0 #ff4d4d00;} }
-  .sub{ color:var(--mut); font-size:13px; margin-top:4px; }
+  .bar{ display:flex; align-items:center; gap:12px; }
+  .hamb{ font-size:24px; background:none; border:0; color:#fff; cursor:pointer; padding:2px 6px; }
+  .logo{ display:flex; align-items:center; gap:10px; flex:1; }
+  .logo .ast{ font-size:30px; font-weight:900; line-height:1; }
+  .logo .name{ font-size:30px; font-weight:800; letter-spacing:2px; }
+  .logo .agenzia{ font-size:11px; line-height:1.25; border-left:1px solid #ffffff88; padding-left:10px; }
+  .searchbtn{ font-size:22px; background:none; border:0; color:#fff; cursor:pointer; padding:2px 6px; }
   .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .toolbar input,.toolbar select{ background:var(--card); color:var(--txt);
-    border:1px solid #2f3d55; border-radius:8px; padding:8px 10px; font-size:14px; }
+  .toolbar input,.toolbar select{ background:#fff; color:var(--txt);
+    border:1px solid #ffffff66; border-radius:6px; padding:8px 10px; font-size:14px; }
   .toolbar input{ flex:1 1 200px; }
-  main{ padding:16px; }
-  #statoRiga{ color:var(--mut); font-size:13px; margin-bottom:12px; }
-  #griglia{ display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px; }
-  .card{ background:var(--card); border:1px solid #2a3648; border-left:6px solid var(--wht);
-    border-radius:12px; padding:12px 14px; }
-  .card.attiva{ border-left-color:var(--red); }
-  .card.in_corso{ border-left-color:var(--yel); }
-  .card.chiusa{ border-left-color:var(--grn); opacity:.75; }
-  .card h2{ font-size:16px; margin:0 0 6px; }
-  .meta{ font-size:13px; color:var(--mut); line-height:1.7; }
-  .meta b{ color:var(--txt); }
-  .badge{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
-    border-radius:20px; margin-left:6px; vertical-align:middle; }
-  .badge.attiva{ background:#ff4d4d22; color:var(--red); border:1px solid var(--red); }
-  .badge.in_corso{ background:#ffb02022; color:var(--yel); border:1px solid var(--yel); }
-  .badge.chiusa{ background:#35c75922; color:var(--grn); border:1px solid var(--grn); }
-  .pz{ font-size:13px; margin-top:6px; }
-  .ora{ font-size:12px; color:var(--mut); margin-top:4px; }
+  /* ===== Lista missioni ===== */
+  main{ padding:10px; }
+  #statoRiga{ color:var(--mut); font-size:12px; margin:2px 2px 8px; }
+  #conto{ font-weight:700; }
+  .card{ background:var(--card); border-radius:4px; padding:10px 12px 10px 12px;
+    margin-bottom:10px; box-shadow:0 1px 3px #0003; display:flex; gap:10px; }
+  .badge{ flex:none; width:30px; height:30px; border-radius:50%; margin-top:2px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:900; color:#fff; }
+  .badge.attiva{ background:var(--red); }
+  .badge.in_corso{ background:var(--yel); }
+  .badge.chiusa{ background:#9aa7b2; }
+  .cardBody{ flex:1; min-width:0; font-size:14px; line-height:1.45; }
+  .rigaTitolo{ font-weight:700; }
+  .rigaTitolo .via{ color:var(--link); text-decoration:underline; font-weight:400; }
+  .rigaDesc{ margin-top:2px; }
+  .rigaEnti{ color:var(--mut); font-size:13px; margin-top:2px; }
+  .rigaStato{ margin-top:4px; font-size:12px; color:var(--mut); }
+  .rigaStato b{ color:var(--txt); }
+  .codice-pill{ display:inline-block; font-size:11px; font-weight:800; padding:1px 8px;
+    border-radius:12px; margin-left:6px; vertical-align:middle; letter-spacing:.5px; }
+  .codice-pill.ROSSO{ background:#fde7e5; color:var(--red); }
+  .codice-pill.GIALLO{ background:#fef3d8; color:#8a6100; }
+  .codice-pill.VERDE{ background:#e2f3e8; color:#1e6b3a; }
+  .codice-pill.BIANCO{ background:#e4eaee; color:#5a6b7c; }
+  .mezzi{ margin:6px 0 0; border-top:1px solid #e3e9ee; }
+  .mz{ display:flex; align-items:center; gap:8px; padding:5px 0;
+    border-bottom:1px solid #eef2f5; font-size:13px; }
+  .mz:last-child{ border-bottom:0; }
+  .mz .amb{ font-size:19px; }
+  .mz .nome{ font-weight:700; }
+  .mz .cod{ color:var(--mut); font-family:monospace; font-size:12px; }
+  .mz .st{ margin-left:auto; font-size:11px; font-weight:700; white-space:nowrap; }
+  .mz .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; }
+  .stato-pill{ display:inline-block; font-size:11px; font-weight:700; padding:1px 8px;
+    border-radius:12px; margin-left:6px; vertical-align:middle; }
+  .stato-pill.attiva{ background:#fde7e5; color:var(--red); }
+  .stato-pill.in_corso{ background:#fef3d8; color:#8a6100; }
+  .stato-pill.chiusa{ background:#e4eaee; color:var(--mut); }
   .centro{ text-align:center; color:var(--mut); padding:40px 10px; font-size:15px; }
-  .errore{ background:#3a1414; border:1px solid var(--red); border-radius:12px;
-    padding:16px; margin-bottom:12px; }
-  .errore button{ background:var(--red); color:#fff; border:0; border-radius:8px;
+  .errore{ background:#fde7e5; border:1px solid var(--red); border-radius:6px;
+    padding:14px; margin-bottom:10px; font-size:14px; }
+  .errore button{ background:var(--areu); color:#fff; border:0; border-radius:6px;
     padding:8px 16px; font-size:14px; cursor:pointer; margin-top:8px; }
   footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
-  footer a{ color:var(--acc); }
-  .spinner{ width:34px; height:34px; border:4px solid #2a3648; border-top-color:var(--red);
+  footer a{ color:var(--link); }
+  .spinner{ width:34px; height:34px; border:4px solid #b9c6d2; border-top-color:var(--areu);
     border-radius:50%; margin:30px auto 10px; animation:gira 0.9s linear infinite; }
   @keyframes gira{ to{ transform:rotate(360deg); } }
 </style>
@@ -58,9 +83,15 @@
 <body>
 <header>
   <div class="wrap">
-    <h1><span class="live-dot"></span> Missioni live <span id="conto" style="font-size:13px;color:var(--mut)"></span></h1>
-    <div class="sub">Quadro pubblico in tempo reale delle missioni del simulatore. Pagina di sola lettura: mostra solo le missioni pubblicate.</div>
-    <div class="toolbar">
+    <div class="bar">
+      <button class="hamb" id="hambBtn" title="Menu">☰</button>
+      <div class="logo">
+        <span class="ast">✳</span><span class="name">AREU</span>
+        <span class="agenzia">Agenzia<br>Regionale<br>Emergenza<br>Urgenza</span>
+      </div>
+      <button class="searchbtn" id="searchBtn" title="Cerca">🔍</button>
+    </div>
+    <div class="toolbar" id="toolbar">
       <input id="cerca" type="search" placeholder="🔍 Cerca tipologia, luogo, comune…" autocomplete="off">
       <select id="filtroStato">
         <option value="attive">Aperte (attive + in corso)</option>
@@ -73,7 +104,7 @@
   </div>
 </header>
 <main class="wrap">
-  <div id="statoRiga">Connessione in corso…</div>
+  <div id="statoRiga">Connessione in corso… <span id="conto"></span></div>
   <div id="errBox" class="errore" hidden></div>
   <div id="caricamento"><div class="spinner"></div><div class="centro">Caricamento missioni…</div></div>
   <div id="griglia"></div>
@@ -86,8 +117,8 @@
 (function(){
   "use strict";
   // >>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI (gli stessi del simulatore) >>>>>>>>>>>
-  var SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
-  var SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
+  var SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
+  var SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
 
@@ -103,15 +134,47 @@
   function statoIT(s){
     return s === "attiva" ? "ATTIVA" : s === "in_corso" ? "IN CORSO" : s === "chiusa" ? "CHIUSA" : String(s).toUpperCase();
   }
-  function oraIT(ts){
+  function oraHM(ts){
+    try{
+      var d = new Date(ts);
+      return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }catch(_){ return "--:--"; }
+  }
+  function quando(ts){
     try{
       var d = new Date(ts), now = new Date(), diff = Math.max(0, now - d);
       var m = Math.floor(diff / 60000);
-      var h = String(d.getHours()).padStart(2, "0"), mi = String(d.getMinutes()).padStart(2, "0");
       if(m < 1) return "adesso";
-      if(m < 60) return m + " min fa (" + h + ":" + mi + ")";
-      return h + ":" + mi + (d.toDateString() === now.toDateString() ? "" : " · " + d.toLocaleDateString("it-IT"));
+      if(m < 60) return m + " min fa";
+      if(d.toDateString() === now.toDateString()) return "oggi " + oraHM(ts);
+      return d.toLocaleDateString("it-IT") + " " + oraHM(ts);
     }catch(_){ return ""; }
+  }
+
+  function statoMezzoIT(s){
+    var m = { viaggio:"IN VIAGGIO", sul_posto:"SUL POSTO", pronto:"PRONTO",
+      trasporto:"TRASPORTO", ospedale:"IN PS", rientro:"RIENTRO",
+      disponibile:"LIBERO", fuori_servizio:"FUORI SERVIZIO" };
+    return m[s] || String(s || "?").toUpperCase();
+  }
+  function dotMezzo(s){
+    if(s === "sul_posto" || s === "pronto" || s === "trasporto") return "#d52b1e";
+    if(s === "viaggio") return "#f5a800";
+    if(s === "ospedale") return "#7a00c0";
+    return "#9aa7b2";
+  }
+  function mezziHTML(mz){
+    var arr = [];
+    if(Array.isArray(mz)) arr = mz;
+    else { try{ arr = JSON.parse(mz || "[]"); }catch(_){ arr = []; } }
+    if(!arr.length) return "";
+    return '<div class="mezzi">' + arr.map(function(v){
+      return '<div class="mz"><span class="amb">🚑</span>' +
+        '<span class="nome">' + esc(v.n || "?") + '</span>' +
+        '<span class="cod">' + esc(v.c || "") + "</span>" +
+        '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
+        esc(statoMezzoIT(v.s)) + "</span></div>";
+    }).join("") + "</div>";
   }
 
   function disegna(){
@@ -124,20 +187,24 @@
       return ((r.tipologia || "") + " " + (r.localita || "") + " " + (r.comune || "")).toLowerCase().indexOf(q) >= 0;
     });
     var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
-    $("conto").textContent = "· " + aperte + " aperte";
-    $("statoRiga").textContent = pronte
-      ? ("Aggiornato " + new Date().toLocaleTimeString("it-IT") + " · " + righe.length + " missioni · aggiornamento automatico attivo 🟢")
-      : "Connessione in corso…";
+    $("conto").textContent = "· " + aperte + " aperte · aggiornato " + new Date().toLocaleTimeString("it-IT");
     $("vuoto").hidden = vis.length > 0;
     $("griglia").innerHTML = vis.map(function(r){
       var st = r.stato === "in_corso" ? "in_corso" : r.stato;
-      return '<article class="card ' + esc(st) + '">' +
-        "<h2>" + esc(r.tipologia || "?") + '<span class="badge ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span></h2>" +
-        '<div class="meta">📍 <b>' + esc(r.localita || "?") + "</b>" +
-        (r.comune ? "<br>🏘️ " + esc(r.comune) + (r.provincia ? " (" + esc(r.provincia) + ")" : "") : "") + "</div>" +
-        '<div class="pz">👤 Pazienti: <b>' + esc(r.num_pazienti) + "</b></div>" +
-        '<div class="ora">🕐 ' + esc(oraIT(r.updated_at)) + " · #" + esc(r.missione_id) + "</div>" +
-        "</article>";
+      var luogo = (r.comune || "").toUpperCase() + (r.provincia ? " (" + esc(r.provincia) + ")" : "");
+      var via = esc(r.localita || "?");
+      var cod = String(r.codice || "SENZA CODICE").toUpperCase();
+      var codCls = ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(cod) >= 0 ? cod : "BIANCO";
+      return '<article class="card">' +
+        '<div class="badge ' + esc(st) + '">✳</div>' +
+        '<div class="cardBody">' +
+        '<div class="rigaTitolo">' + esc(oraHM(r.updated_at)) + " " + esc(luogo) + " - " + esc((r.tipologia || "?").toUpperCase()) + ' - <span class="via">' + via + "</span>" +
+        '<span class="codice-pill ' + codCls + '">' + esc(cod) + "</span>" +
+        '<span class="stato-pill ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span></div>" +
+        '<div class="rigaDesc">INC ' + esc((r.tipologia || "?").toUpperCase()) + ". Coinvolte " + esc(r.num_pazienti) + (Number(r.num_pazienti) === 1 ? " persona." : " persone.") + "</div>" +
+        mezziHTML(r.mezzi) +
+        '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · #" + esc(r.missione_id) + "</div>" +
+        "</div></article>";
     }).join("");
   }
 
@@ -154,7 +221,7 @@
     if(!client) return;
     try{
       var q = client.from("missioni_live")
-        .select("missione_id,tipologia,localita,comune,provincia,num_pazienti,stato,updated_at")
+        .select("missione_id,tipologia,localita,comune,provincia,num_pazienti,stato,codice,mezzi,updated_at")
         .eq("pubblica", true)
         .order("updated_at", { ascending: false })
         .limit(LIMITE);
@@ -192,13 +259,20 @@
     try{
       canale = client.channel("missioni-live")
         .on("postgres_changes", { event: "*", schema: "public", table: "missioni_live" }, function(){ ricarica(); })
-        .subscribe(function(stato){
-          if(stato === "SUBSCRIBED"){ $("statoRiga").textContent += ""; }
-        });
+        .subscribe();
     }catch(_){ /* il polling sotto copre comunque gli aggiornamenti */ }
     setInterval(ricarica, POLL_MS); // rete di sicurezza se il Realtime salta
     $("cerca").addEventListener("input", disegna);
     $("filtroStato").addEventListener("change", disegna);
+    $("searchBtn").addEventListener("click", function(){
+      var t = $("toolbar");
+      t.style.display = (t.style.display === "none") ? "flex" : "none";
+      if(t.style.display !== "none") $("cerca").focus();
+    });
+    $("hambBtn").addEventListener("click", function(){
+      var t = $("toolbar");
+      t.style.display = (t.style.display === "none") ? "flex" : "none";
+    });
   }
 
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", avvia);

@@ -5682,7 +5682,12 @@ window.COEUSIM = (() => {
         comune: iv.comune||"",
         prov: iv.prov||"",
         nPaz: (iv.pazienti||[]).length,
-        stato: iv.stato||"attesa"
+        stato: iv.stato||"attesa",
+        codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
+        mezzi: (iv.mezziIds||[]).map(function(cd){
+          const m = mezzi.find(function(x){ return x.codice===cd; });
+          return { c: cd, n: nomem(m), s: m ? m.stato : "?" };
+        })
       }));
     },
     chiamateIds(){ return chiamate.map(c=>c.callId); },

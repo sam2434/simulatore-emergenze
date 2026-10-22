@@ -21,8 +21,8 @@
  * ===================================================================== */
 window.COEULIVE = (() => {
   // >>>>>>>>>>>>>>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI <<<<<<<<<<<<<<<<<<<<<<<
-  const SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
+  const SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
+  const SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   const LS_VISTE = "coeulive_viste";     // missione_id mai visti (per chiudere dopo un reload)
@@ -54,6 +54,8 @@ window.COEULIVE = (() => {
     const loc = (m.indirizzo || "") +
       ((m.comune && (m.indirizzo || "").indexOf(m.comune) < 0) ? " - " + m.comune : "") +
       (m.prov ? " (" + m.prov + ")" : "");
+    // NOTA: richiede le colonne `codice` (text) e `mezzi` (jsonb) in tabella.
+    // Esegui una volta in SQL Editor: vedi MIGRAZIONE in fondo al file.
     return {
       missione_id: String(m.id),
       tipologia: m.tipo || "?",
@@ -62,12 +64,14 @@ window.COEULIVE = (() => {
       provincia: m.prov || null,
       num_pazienti: Math.max(0, m.nPaz | 0),
       stato: mappaStato(m.stato),
-      pubblica: true
+      pubblica: true,
+      codice: m.codice || "SENZA CODICE",
+      mezzi: Array.isArray(m.mezzi) ? m.mezzi : []
     };
   }
 
   function hashRow(r){
-    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica].join("|");
+    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica, r.codice, JSON.stringify(r.mezzi)].join("|");
   }
 
   function setBox(txt){
@@ -222,3 +226,12 @@ window.COEULIVE = (() => {
 
   return { init, tick, configurato, mappaStato, buildRow };
 })();
+/* =====================================================================
+ * MIGRAZIONE (una sola volta, in Supabase Dashboard > SQL Editor).
+ * Aggiunge le 2 colonne usate per codice colore e mezzi assegnati.
+ * Non tocca dati, RLS o policy esistenti.
+ * =====================================================================
+ * alter table public.missioni_live
+ *   add column if not exists codice text not null default 'SENZA CODICE',
+ *   add column if not exists mezzi jsonb not null default '[]';
+ */
