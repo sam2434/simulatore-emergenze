@@ -192,6 +192,33 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return d.toLocaleDateString("it-IT") + " " + oraHM(ts);
     }catch(_){ return ""; }
   }
+  function durataIT(da, a){
+    try{
+      var ms = Math.max(0, new Date(a) - new Date(da));
+      var m = Math.floor(ms / 60000);
+      if(m < 1) return "meno di 1 min";
+      if(m < 60) return m + " min";
+      var h = Math.floor(m / 60);
+      if(h < 24) return h + " h " + (m % 60) + " min";
+      return Math.floor(h / 24) + " g " + (h % 24) + " h";
+    }catch(_){ return ""; }
+  }
+  function origineBadge(o){
+    return o === "ia" ? ' <span title="Generata e gestita dalla centrale IA autonoma">🤖</span>' : "";
+  }
+  function cronologiaHTML(cr){
+    var arr = [];
+    if(Array.isArray(cr)) arr = cr;
+    else { try{ arr = JSON.parse(cr || "[]"); }catch(_){ arr = []; } }
+    if(!arr.length) return "";
+    var items = arr.slice(-30).map(function(e){
+      var t = "", x = "";
+      if(e && typeof e === "object"){ t = e.t ? oraHM(e.t) + " " : ""; x = e.e || ""; }
+      else x = String(e);
+      return "<div>• <b>" + esc(t) + "</b>" + esc(x) + "</div>";
+    }).join("");
+    return '<details style="margin-top:4px;font-size:12px;color:var(--mut)"><summary style="cursor:pointer">🕘 Cronologia (' + arr.length + ")</summary>" + items + "</details>";
+  }
 
   function urlPulita(){
     var u = String(SUPABASE_URL || "").trim();
@@ -296,13 +323,18 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var via = esc(r.localita || "?");
       var cod = String(r.codice || "SENZA CODICE").toUpperCase();
       var codCls = ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(cod) >= 0 ? cod : "SENZA";
+      var fine = (r.stato === "chiusa" && (r.chiusa_il || r.updated_at)) ? (r.chiusa_il || r.updated_at) : new Date().toISOString();
+      var dur = r.created_at ? durataIT(r.created_at, fine) : "";
+      var descr = r.descrizione ? '<div class="rigaEnti">' + esc(r.descrizione) + "</div>" : "";
       return '<article class="card">' +
         '<div class="badge cod-' + codCls + '" title="Codice di invio: ' + esc(cod) + '">✳</div>' +
         '<div class="cardBody">' +
-        '<div class="rigaTitolo">' + esc(oraHM(r.updated_at)) + " " + esc(luogo) + " - " + esc((r.tipologia || "?").toUpperCase()) + ' - <span class="via">' + via + "</span>" +
-        '<span class="stato-pill ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span></div>" +
+        '<div class="rigaTitolo">' + esc(oraHM(r.created_at || r.updated_at)) + " " + esc(luogo) + " - " + esc((r.tipologia || "?").toUpperCase()) + ' - <span class="via">' + via + "</span>" +
+        '<span class="stato-pill ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span>" + origineBadge(r.origine) + "</div>" +
+        descr +
         mezziHTML(r.mezzi, codCls === "SENZA" ? "SENZA CODICE" : codCls) +
-        '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · #" + esc(r.missione_id) + "</div>" +
+        cronologiaHTML(r.cronologia) +
+        '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · ⏱ " + esc(dur) + " · #" + esc(r.missione_id) + "</div>" +
         "</div></article>";
     }).join("");
   }
@@ -397,7 +429,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(!client) return;
     try{
       var q = client.from("missioni_live")
-        .select("missione_id,tipologia,localita,comune,provincia,num_pazienti,stato,codice,mezzi,updated_at")
+        .select("missione_id,tipologia,descrizione,localita,comune,provincia,num_pazienti,stato,codice,mezzi,cronologia,origine,created_at,updated_at,chiusa_il")
         .eq("pubblica", true)
         .order("updated_at", { ascending: false })
         .limit(LIMITE);

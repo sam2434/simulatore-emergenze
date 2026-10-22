@@ -70211,10 +70211,14 @@ window.COEUSIM = (() => {
     missioniLive(){
       return interventi.filter(iv=>iv&&iv.stato!=="chiuso").map(iv=>({
         id: iv.id,
+        midEsterno: iv.midEsterno || null,
+        daIA: !!iv.daIA,
         tipo: iv.tipoNome||"?",
         indirizzo: iv.indirizzo||"",
         comune: iv.comune||"",
         prov: iv.prov||"",
+        lat: iv.lat||null,
+        lng: iv.lng||null,
         nPaz: (iv.pazienti||[]).length,
         stato: iv.stato||"attesa",
         codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
@@ -70232,6 +70236,107 @@ window.COEUSIM = (() => {
       }));
     },
     chiamateIds(){ return chiamate.map(c=>c.callId); },
+    missioneCaricata(mid){ return interventi.some(x=>x.midEsterno===String(mid)); },
+    // presa in carico di una missione IA da Supabase: ricostruisce l'intervento
+    // nello stato esatto (posizione, mezzi, pazienti, stadi) e lascia che il
+    // motore locale prosegua da lì (cura, PRONTO, scelta PS, chiusura)
+    caricaMissioneIA(r){
+      if(!r || r.missione_id == null) return null;
+      const mid = String(r.missione_id);
+      if(interventi.some(x=>x.midEsterno===mid)) return null; // già caricata
+      const prio = r.codice==="ROSSO"?1:r.codice==="GIALLO"?2:r.codice==="VERDE"?3:r.codice==="BIANCO"?4:0;
+      const pazArr = Array.isArray(r.pazienti) ? r.pazienti : [];
+      const salute = pazArr.map(p=>{ const v = +((p && p.s) ?? 70); return Math.max(3, Math.min(99, Math.round(v))); });
+      const profili = pazArr.map(p=>({ s:"?", e:"?", c:"cosciente", q:"quadro in verifica", v:"—", intr:false, t:(+((p && p.t) ?? 3)) || 3 }));
+      let passatoMin = 0;
+      try{ const ca = new Date(r.created_at).getTime(); if(ca>0) passatoMin = Math.max(0, Math.round((Date.now()-ca)/60000)); }catch(_){}
+      const t0 = Math.max(0, clockMin - passatoMin);
+      const iv = {
+        id: idCounter++,
+        midEsterno: mid, daIA: true,
+        callId: "IA-"+mid, tipo: "IA", tipoNome: r.tipologia||"?",
+        col: { nome: r.codice||"SENZA CODICE" },
+        prio,
+        lat: +r.lat || 0, lng: +r.lng || 0,
+        accLa: +r.lat || 0, accLng: +r.lng || 0,
+        zona: "misto",
+        indirizzo: r.localita||"", comune: r.comune||"?", prov: r.provincia||"?",
+        stato: (r.stato==="in_corso") ? "sul_posto" : "attesa",
+        mezziIds: [],
+        richiesti: [],
+        durata: 0,
+        tempoSulPosto: (r.stato==="in_corso") ? passatoMin : 0,
+        trasporto: salute.length>0,
+        daTrasportare: salute.length,
+        stabilizzato: true, valutato: true, reportFatto: true, gestito: true,
+        dialogo: r.descrizione||"", muta: false, visto: [],
+        profili, illesi: 0, evac: 0, variante: "ia",
+        t0, attesa: passatoMin,
+        pazienti: salute.slice(),
+        pazientiNascosti: [],
+        profiliNascosti: [],
+        pazIgnoti: false, pazDaVerificare: false, scopTra: null,
+        emoji: "🤖", desc: r.descrizione||"",
+        ospedale: null,
+        pazDest: {},
+        pazConsegnati: {},
+        supporti: null,
+        fuoco: null,
+      };
+      iv.pazIds = (iv.pazienti||[]).map((_,k)=>"M"+iv.id+"-P"+(k+1));
+      iv.pazS = {}; iv.affidi = {}; iv.liberati = {}; iv.avvisi = {}; iv.libTimer = 0; iv.noVVFTimer = 0;
+      if(iv.prio>0) contaColori[iv.prio]=(contaColori[iv.prio]||0)+1;
+      interventi.unshift(iv);
+      selectedId = iv.id;
+      initSupporti(iv);
+      // mezzi: ricollega quelli locali liberi, nello stato IA (viaggio libero,
+      // sul posto fermi sul punto, trasporto/ospedale -> PRONTO a bordo)
+      let kTr = 0;
+      for(const vm of (Array.isArray(r.mezzi) ? r.mezzi : [])){
+        if(!vm || !vm.c) continue;
+        const st = String(vm.s||"");
+        if(st==="rientro" || st==="disponibile" || st==="fuori_servizio") continue;
+        const mz = mezzi.find(m=>m && m.codice===vm.c);
+        if(!mz || mz.interventoId!=null) continue; // occupato altrove: resta nello storico cloud
+        if(mz.trasportaPz || mz.pazIdx!=null || mz.affido!=null) continue;
+        if(!["disponibile","viaggio","rientro","sul_posto"].includes(mz.stato)) continue;
+        if(!assegnaMezzo(mz.codice, iv.id, true)) continue;
+        const jx = (iv.lat || 0) + (Math.random()-0.5)*0.002, jy = (iv.lng || 0) + (Math.random()-0.5)*0.002;
+        mz.lat = jx; mz.lng = jy;
+        if(st==="sul_posto"){ mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy; }
+        else if(st==="trasporto" || st==="ospedale" || st==="pronto"){
+          mz.stato="pronto"; mz.targetLat=jx; mz.targetLng=jy;
+          if(kTr<salute.length){ mz.trasportaPz=true; mz.pazIdx=kTr; kTr++; }
+        }
+        // "viaggio": resta in viaggio dalla sede con il flusso normale
+      }
+      // stadi pazienti coerenti con i mezzi ricollegati
+      for(let k=0;k<salute.length;k++){
+        const m = mezzi.find(x=>x && x.interventoId===iv.id && x.pazIdx===k && x.trasportaPz);
+        let st;
+        if(m) st = 8;
+        else if(mezzi.some(x=>x && x.interventoId===iv.id && (x.stato==="sul_posto"||x.stato==="pronto"))) st = 4;
+        else if(mezzi.some(x=>x && x.interventoId===iv.id)) st = 3;
+        else st = iv.trasporto ? 6 : 2;
+        iv.pazS[k] = { st, dal: t0, log: [] };
+      }
+      // vvf se solo mezzi VVF ricollegati (il codice resta quello IA per coerenza live)
+      const Assegnati = mezzi.filter(m=>m && m.interventoId===iv.id);
+      iv.vvf = Assegnati.length>0 && Assegnati.every(m=>m.corpo==="VVF" || m.tipo==="VVF" || (m.cat||"")==="VVF");
+      if(iv.prio===0 && !iv.vvf) iv.prio = 3; // mai senza codice in lista
+      // cronologia IA nel radio (solo le ultime 5, il resto resta nel pannello live)
+      const crono = Array.isArray(r.cronologia) ? r.cronologia : [];
+      if(crono.length>5) log(`🤖 <b>${iv.comune}</b>: …${crono.length-5} aggiornamenti precedenti nel pannello Live`, "status");
+      for(const e of crono.slice(-5)){ if(e && e.e) log(`🤖 <b>${iv.comune}</b>: ${e.e}`, "status"); }
+      log(`🤖 Centrale IA: missione <b>${iv.tipoNome}</b> a <b>${iv.comune}</b> presa in carico — prosegui da qui`, "status");
+      refreshCallMarkers();
+      refreshMarkers();
+      renderCalls();
+      renderListe();
+      updateStats();
+      try{ statAccetta({ callId: iv.callId, tipoNome: iv.tipoNome }, iv); }catch(_){}
+      return iv.id;
+    },
     stPaz: statoPaziente,
     verificaStati,
     archivioPazienti(){ return storicoPazienti.slice(); },
@@ -70657,7 +70762,7 @@ window.COEULIVE = (() => {
   const POLL_MS = 5000;
 
   let client = null, timer = null, booted = false;
-  let lastError = "", lastSync = null, moveCount = 0;
+  let lastError = "", lastSync = null, moveCount = 0, tickCount = 0;
   let cache = new Map(); // missione_id -> hash riga (solo righe attive viste in questa sessione)
 
   function $(id){ return document.getElementById(id); }
@@ -70682,22 +70787,29 @@ window.COEULIVE = (() => {
       (m.prov ? " (" + m.prov + ")" : "");
     // NOTA: richiede le colonne `codice` (text) e `mezzi` (jsonb) in tabella.
     // Esegui una volta in SQL Editor: vedi MIGRAZIONE in fondo al file.
+    const esterna = m.midEsterno != null ? String(m.midEsterno) : String(m.id);
+    const adottata = !!m.daIA;
     return {
-      missione_id: String(m.id),
+      missione_id: esterna,
       tipologia: m.tipo || "?",
       localita: loc || "?",
       comune: m.comune || null,
       provincia: m.prov || null,
+      lat: (m.lat != null ? +m.lat : null),
+      lng: (m.lng != null ? +m.lng : null),
       num_pazienti: Math.max(0, m.nPaz | 0),
       stato: mappaStato(m.stato),
       pubblica: true,
       codice: m.codice || "SENZA CODICE",
-      mezzi: Array.isArray(m.mezzi) ? m.mezzi : []
+      mezzi: Array.isArray(m.mezzi) ? m.mezzi : [],
+      origine: adottata ? "ia" : "simulatore",
+      gestita_da: "simulatore", // chi scrive qui è il simulatore; l'IA salta queste righe
+      heartbeat_at: adottata ? new Date().toISOString() : null
     };
   }
 
   function hashRow(r){
-    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica, r.codice, JSON.stringify(r.mezzi)].join("|");
+    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica, r.codice, r.origine, r.gestita_da, JSON.stringify(r.mezzi)].join("|");
   }
 
   function setBox(txt){
@@ -70800,6 +70912,55 @@ window.COEULIVE = (() => {
     statoUI();
     const st = $("liveStatus");
     if(st) st.textContent = lastError ? ("⚠️ " + lastError) : ("✅ sessione attiva (" + moveCount + " scritture)");
+    // --- heartbeat adottate + loader IA (throttle: non a ogni tick) ---
+    tickCount++;
+    try{
+      if(client && window.COEUSIM && COEUSIM.missioniLive){
+        const snap2 = COEUSIM.missioniLive() || [];
+        const adottate = snap2.filter(m=>m.daIA).map(m=>String(m.midEsterno || m.id));
+        if(adottate.length && tickCount % 6 === 0){
+          try{ await client.from("missioni_live").update({ heartbeat_at: new Date().toISOString() }).in("missione_id", adottate); }catch(_){}
+        }
+        if(tickCount % 12 === 0) await caricaMissioniIA();
+      }
+    }catch(_){ /* mai bloccare il gioco */ }
+  }
+
+  // --- presa in carico delle missioni aperte generate dalla centrale IA ---
+  // Solo da loggati (serve il claim in scrittura); senza login il gioco resta
+  // invariato e le missioni IA continuano a evolvere in cloud.
+  async function caricaMissioniIA(){
+    if(!client || !window.COEUSIM || !COEUSIM.caricaMissioneIA) return;
+    let res;
+    try{
+      res = await client.from("missioni_live")
+        .select("missione_id,tipologia,descrizione,localita,comune,provincia,lat,lng,num_pazienti,pazienti,stato,codice,mezzi,cronologia,created_at")
+        .eq("origine", "ia").eq("gestita_da", "ia").in("stato", ["attiva", "in_corso"])
+        .order("created_at", { ascending: true }).limit(20);
+    }catch(_){ return; }
+    if(!res || res.error || !res.data) return;
+    for(const r of res.data){
+      try{
+        if(COEUSIM.missioneCaricata && COEUSIM.missioneCaricata(r.missione_id)) continue;
+        const id = COEUSIM.caricaMissioneIA(r);
+        if(id == null) continue;
+        // claim: da ora la gestisce il simulatore; semina lo storico cumulativo
+        const crono = Array.isArray(r.cronologia) ? r.cronologia.slice(-99) : [];
+        crono.push({ t: Date.now(), e: "🎮 simulatore: missione presa in carico, prosegue da qui." });
+        try{
+          await client.from("missioni_live").update({
+            gestita_da: "simulatore", heartbeat_at: new Date().toISOString(), cronologia: crono
+          }).eq("missione_id", r.missione_id);
+        }catch(_){}
+        try{
+          const righe = loadRighe();
+          righe[String(r.missione_id)] = Object.assign({}, r, { gestita_da: "simulatore", cronologia: crono });
+          saveRighe(righe);
+          const visti = loadSet(LS_VISTE); visti.add(String(r.missione_id)); saveSet(LS_VISTE, visti);
+          const chiuse = loadSet(LS_CHIUSE); chiuse.delete(String(r.missione_id)); saveSet(LS_CHIUSE, chiuse);
+        }catch(_){}
+      }catch(_){ /* una riga storta non ferma le altre */ }
+    }
   }
 
   function pubblicaOn(){
@@ -71055,16 +71216,31 @@ window.COEULIVE = (() => {
     return { ok:true, chiuse:n };
   }
 
-  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate };
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate, caricaMissioniIA };
 })();
 /* =====================================================================
- * MIGRAZIONE (una sola volta, in Supabase Dashboard > SQL Editor).
- * Aggiunge le 2 colonne usate per codice colore e mezzi assegnati.
- * Non tocca dati, RLS o policy esistenti.
+ * MIGRAZIONI (una sola volta ciascuna, in Supabase Dashboard > SQL Editor).
+ * Non toccano dati, RLS o policy esistenti.
  * =====================================================================
+ * -- 1) codice + mezzi (centrale operativa classica):
  * alter table public.missioni_live
  *   add column if not exists codice text not null default 'SENZA CODICE',
  *   add column if not exists mezzi jsonb not null default '[]';
+ *
+ * -- 2) centrale IA autonoma (vedi src/ia-cloud/schema-ia.sql, consigliato:
+ * --    eseguire quel file che include anche ia_stato + job Cron):
+ * alter table public.missioni_live
+ *   add column if not exists descrizione text not null default '',
+ *   add column if not exists lat double precision,
+ *   add column if not exists lng double precision,
+ *   add column if not exists pazienti jsonb not null default '[]',
+ *   add column if not exists cronologia jsonb not null default '[]',
+ *   add column if not exists origine text not null default 'simulatore',
+ *   add column if not exists gestita_da text not null default 'simulatore',
+ *   add column if not exists heartbeat_at timestamptz,
+ *   add column if not exists chiusa_il timestamptz,
+ *   add column if not exists ia_fase text,
+ *   add column if not exists ia_scade timestamptz;
  */
 
 </script>
