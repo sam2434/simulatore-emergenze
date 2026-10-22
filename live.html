@@ -264,10 +264,11 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(!arr.length) return "";
     var trCod = trasportoDaCodice(cod);
     return '<div class="mezzi">' + arr.map(function(v){
+      var inTrasporto = v.s === "trasporto" || v.s === "ospedale";
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>" +
-        ((v.tr && trCod) ? '<span class="trDot ' + cod + '" title="Codice di trasporto: ' + esc(String(cod || "").toUpperCase()) + '">' + trCod + "</span>" : "") +
+        ((v.tr && trCod && inTrasporto) ? '<span class="trDot ' + cod + '" title="Codice di trasporto: ' + esc(String(cod || "").toUpperCase()) + '">' + trCod + "</span>" : "") +
         ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
         '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
         esc(statoMezzoIT(v.s)) + "</span></div>";
