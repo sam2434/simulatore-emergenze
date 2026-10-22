@@ -21,8 +21,8 @@
  * ===================================================================== */
 window.COEULIVE = (() => {
   // >>>>>>>>>>>>>>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI <<<<<<<<<<<<<<<<<<<<<<<
-  let SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
-  let SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
+  let SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
+  let SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   const FILE_URL = SUPABASE_URL;
@@ -60,8 +60,8 @@ window.COEULIVE = (() => {
   function saveSet(k, s){ try{ localStorage.setItem(k, JSON.stringify([...s].slice(-500))); }catch(_){} }
 
   function configurato(){
-    return SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") < 0 &&
-           SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") < 0 &&
+    return SUPABASE_URL.indexOf("INSERISCI-IL-TUO") < 0 &&
+           SUPABASE_ANON_KEY.indexOf("INCOLLA-QUI") < 0 &&
            SUPABASE_URL.indexOf("http") === 0;
   }
 
@@ -112,6 +112,23 @@ window.COEULIVE = (() => {
     }catch(_){ setBox("⚠️ live: errore rete"); }
   }
 
+  const LS_RIGHE = "coeulive_righe";   // missione_id -> ultima riga completa (storico mezzi fino alla chiusura)
+  function loadRighe(){ try{ const o = JSON.parse(localStorage.getItem(LS_RIGHE) || "{}"); return (o && typeof o === "object") ? o : {}; }catch(_){ return {}; } }
+  function saveRighe(o){
+    try{
+      const keys = Object.keys(o).slice(-500), slim = {};
+      for(const k of keys) slim[k] = o[k];
+      localStorage.setItem(LS_RIGHE, JSON.stringify(slim));
+    }catch(_){}
+  }
+  // unione per codice mezzo: i dati freschi vincono, gli usciti di scena restano con l'ultimo stato noto
+  function unisciMezzi(vecchi, nuovi){
+    const map = {};
+    for(const v of (vecchi || [])) if(v && v.c) map[v.c] = v;
+    for(const v of (nuovi || [])) if(v && v.c) map[v.c] = v;
+    return Object.values(map);
+  }
+
   async function tick(){
     if(!client || !configurato()) return;
     if(!pubblicaOn()) return; // toggle globale spento: nessuna scrittura
@@ -124,14 +141,25 @@ window.COEULIVE = (() => {
     try{ snap = COEUSIM.missioniLive() || []; }catch(_){ return; }
 
     const visti = loadSet(LS_VISTE), chiuse = loadSet(LS_CHIUSE);
+    const righe = loadRighe();
     const ora = new Set(), daScrivere = [];
     for(const m of snap){
-      const r = buildRow(m), h = hashRow(r);
+      const r = buildRow(m);
+      const prev = righe[r.missione_id];
+      // stesso intervento (stesso tipo+luogo): accumula tutti i mezzi visti finora.
+      // Se l'id è stato riusato da un nuovo intervento (dopo un reset), si riparte da zero.
+      if(prev && prev.tipologia === r.tipologia && prev.localita === r.localita){
+        r.mezzi = unisciMezzi(prev.mezzi, r.mezzi);
+      }
+      const h = hashRow(r);
+      righe[r.missione_id] = r;
       ora.add(r.missione_id);
       visti.add(r.missione_id);
       if(cache.get(r.missione_id) !== h){ daScrivere.push(r); cache.set(r.missione_id, h); }
     }
-    // chiuse per sparizione: viste prima, non piu presenti, mai marcate
+    // chiuse per sparizione: viste prima, non piu presenti, mai marcate.
+    // Alla chiusura si salva la riga COMPLETA (tutti i mezzi accumulati fino alla
+    // chiusura, col codice paziente di ognuno), non solo il cambio di stato.
     const sparite = [...visti].filter(id => !ora.has(id) && !chiuse.has(id));
     try{
       if(daScrivere.length){
@@ -140,13 +168,23 @@ window.COEULIVE = (() => {
         moveCount += daScrivere.length;
       }
       for(const id of sparite){
-        const { error } = await client.from("missioni_live").update({ stato: "chiusa" }).eq("missione_id", id);
-        if(error) throw error;
+        const last = righe[id];
+        if(last){
+          const fin = Object.assign({}, last, { stato: "chiusa" });
+          const { error } = await client.from("missioni_live").upsert(fin, { onConflict: "missione_id" });
+          if(error) throw error;
+          moveCount++;
+        }else{
+          const { error } = await client.from("missioni_live").update({ stato: "chiusa" }).eq("missione_id", id);
+          if(error) throw error;
+        }
         chiuse.add(id);
         cache.delete(id);
+        delete righe[id];
       }
       saveSet(LS_VISTE, new Set([...ora, ...[...visti].filter(id => ora.has(id))])); // tiene solo le attive
       saveSet(LS_CHIUSE, chiuse);
+      saveRighe(righe);
       lastError = "";
       const d = new Date();
       lastSync = "sync " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0") + ":" + String(d.getSeconds()).padStart(2, "0");
@@ -178,18 +216,19 @@ window.COEULIVE = (() => {
         loggato = !!(r && r.data && r.data.session);
       }
     }catch(_){ loggato = false; }
-    const prima = snap.length ? snap[0] : null;
-    return {
-      configurato: configurato(),
-      host: hostPubblico(),
-      loggato,
-      pubblica: pubblicaOn(),
-      missioni: snap.length,
-      prima: prima ? {
-        codice: prima.codice || "SENZA CODICE",
-        mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
-        tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : ""
-      } : null,
+      const prima = snap.length ? snap[0] : null;
+      return {
+        configurato: configurato(),
+        host: hostPubblico(),
+        loggato,
+        pubblica: pubblicaOn(),
+        missioni: snap.length,
+        prima: prima ? {
+          codice: prima.codice || "SENZA CODICE",
+          mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
+          tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : "",
+          tpaz: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.tr ? (m.tpaz || "non ancora a bordo") : "non trasporta")) || "?").join("+") : ""
+        } : null,
       errore: lastError || "",
       sync: lastSync || "",
       scritture: moveCount
@@ -225,13 +264,23 @@ window.COEULIVE = (() => {
       const ora = new Set(snap.map(m => String(m.id)));
       const { data } = await client.auth.getSession();
       if(data && data.session){
+        const righe = loadRighe();
         for(const id of [...visti]){
           if(!ora.has(id) && !chiuse.has(id)){
-            const { error } = await client.from("missioni_live").update({ stato: "chiusa" }).eq("missione_id", id);
-            if(!error){ chiuse.add(id); }
+            const last = righe[id];
+            let error = null;
+            if(last){
+              const res = await client.from("missioni_live").upsert(Object.assign({}, last, { stato: "chiusa" }), { onConflict: "missione_id" });
+              error = res.error;
+            }else{
+              const res = await client.from("missioni_live").update({ stato: "chiusa" }).eq("missione_id", id);
+              error = res.error;
+            }
+            if(!error){ chiuse.add(id); delete righe[id]; }
           }
         }
         saveSet(LS_CHIUSE, chiuse);
+        saveRighe(righe);
       }
       saveSet(LS_VISTE, ora);
     }catch(_){ /* il gioco non deve mai bloccarsi per la sync */ }
@@ -316,6 +365,7 @@ window.COEULIVE = (() => {
         const d = await diagnostica();
         const prima = d.prima
           ? ("prima missione: " + d.prima.codice + " + " + d.prima.mezzi + " mezzi" + (d.prima.tipi ? " (" + d.prima.tipi + ")" : ""))
+          + (d.prima.tpaz ? " · trasporto: " + d.prima.tpaz : "")
           : "nessuna missione aperta";
         if(st) st.textContent = "🧪 config: " + (d.configurato ? "sì" : "no") +
           " · login: " + (d.loggato ? "sì" : "no") +
@@ -325,6 +375,17 @@ window.COEULIVE = (() => {
           (d.errore ? " · errore: " + d.errore : "") +
           (d.sync ? " · " + d.sync : "");
       }catch(e){ if(st) st.textContent = "⚠️ verifica non riuscita"; }
+      statoUI();
+    };
+    const chiudiBtn = $("liveChiudiBtn");
+    if(chiudiBtn) chiudiBtn.onclick = async () => {
+      if(st) st.textContent = "⏳ chiusura bloccate in corso…";
+      try{
+        const r = await chiudiBloccate();
+        if(st) st.textContent = r.ok
+          ? ("✅ chiuse " + r.chiuse + " missioni bloccate (spariscono dal filtro Aperte)")
+          : ("⚠️ " + (r.msg || "chiusura non riuscita"));
+      }catch(e){ if(st) st.textContent = "⚠️ chiusura non riuscita"; }
       statoUI();
     };
     try{
@@ -343,7 +404,53 @@ window.COEULIVE = (() => {
     }catch(_){ lbl.textContent = "stato sconosciuto (errore rete)"; }
   }
 
-  return { init, tick, configurato, mappaStato, buildRow, diagnostica };
+  // Chiude le righe rimaste bloccate su "attiva/in_corso" (es. dopo un reset
+  // senza sync): tutto ciò che è aperto in tabella ma non è più nel gioco
+  // viene marcato 'chiusa' e sparisce dal filtro "Aperte" del pannello live.
+  async function chiudiBloccate(){
+    if(!client || !configurato()) return { ok:false, msg:"live non configurato" };
+    let session = null;
+    try{ const r = await client.auth.getSession(); session = r.data && r.data.session; }catch(_){}
+    if(!session) return { ok:false, msg:"login operatore richiesto" };
+    let snap = [];
+    try{ snap = (window.COEUSIM && COEUSIM.missioniLive) ? (COEUSIM.missioniLive() || []) : []; }catch(_){ snap = []; }
+    const ora = new Set(snap.map(m => String(m.id)));
+    let aperte = [];
+    try{
+      const res = await client.from("missioni_live").select("missione_id").in("stato", ["attiva", "in_corso"]).limit(500);
+      if(res.error) throw res.error;
+      aperte = res.data || [];
+    }catch(e){ return { ok:false, msg:String((e && e.message) || e).slice(0, 160) }; }
+    const chiuse = loadSet(LS_CHIUSE);
+    const mem = loadRighe();
+    let n = 0;
+    for(const r of aperte){
+      const id = String(r.missione_id);
+      if(ora.has(id)) continue; // ancora aperta nel gioco: non toccare
+      try{
+        let error = null;
+        const last = mem[id];
+        if(last){
+          const res = await client.from("missioni_live").upsert(Object.assign({}, last, { stato: "chiusa" }), { onConflict: "missione_id" });
+          error = res.error;
+        }else{
+          const res = await client.from("missioni_live").update({ stato: "chiusa" }).eq("missione_id", id);
+          error = res.error;
+        }
+        if(error) throw error;
+        chiuse.add(id);
+        cache.delete(id);
+        delete mem[id];
+        n++;
+      }catch(e){ return { ok:false, msg:String((e && e.message) || e).slice(0, 160), chiuse:n }; }
+    }
+    saveSet(LS_CHIUSE, chiuse);
+    saveRighe(mem);
+    tick();
+    return { ok:true, chiuse:n };
+  }
+
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate };
 })();
 /* =====================================================================
  * MIGRAZIONE (una sola volta, in Supabase Dashboard > SQL Editor).
