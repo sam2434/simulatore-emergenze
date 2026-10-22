@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🔴 Missioni live — Simulatore Emergenze</title>
+<meta name="description" content="Missioni in corso del Simulatore Emergenze, aggiornate in tempo reale. Pagina pubblica di sola lettura.">
+<style>
+  :root{
+    --bg:#0f141b; --card:#1a2230; --card2:#222d42; --txt:#eef2f7; --mut:#9fb0c7;
+    --red:#ff4d4d; --yel:#ffb020; --grn:#35c759; --wht:#c8d2e0; --acc:#4da3ff;
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--txt);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; }
+  header{ position:sticky; top:0; z-index:10; background:#0b0f16f0; backdrop-filter:blur(6px);
+    border-bottom:1px solid #2a3648; padding:12px 16px; }
+  .wrap{ max-width:1100px; margin:0 auto; }
+  h1{ font-size:20px; margin:0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .live-dot{ width:12px; height:12px; border-radius:50%; background:var(--red);
+    box-shadow:0 0 0 0 #ff4d4d88; animation:pulse 1.6s infinite; display:inline-block; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 #ff4d4d88;} 70%{box-shadow:0 0 0 10px #ff4d4d00;} 100%{box-shadow:0 0 0 0 #ff4d4d00;} }
+  .sub{ color:var(--mut); font-size:13px; margin-top:4px; }
+  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .toolbar input,.toolbar select{ background:var(--card); color:var(--txt);
+    border:1px solid #2f3d55; border-radius:8px; padding:8px 10px; font-size:14px; }
+  .toolbar input{ flex:1 1 200px; }
+  main{ padding:16px; }
+  #statoRiga{ color:var(--mut); font-size:13px; margin-bottom:12px; }
+  #griglia{ display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px; }
+  .card{ background:var(--card); border:1px solid #2a3648; border-left:6px solid var(--wht);
+    border-radius:12px; padding:12px 14px; }
+  .card.attiva{ border-left-color:var(--red); }
+  .card.in_corso{ border-left-color:var(--yel); }
+  .card.chiusa{ border-left-color:var(--grn); opacity:.75; }
+  .card h2{ font-size:16px; margin:0 0 6px; }
+  .meta{ font-size:13px; color:var(--mut); line-height:1.7; }
+  .meta b{ color:var(--txt); }
+  .badge{ display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
+    border-radius:20px; margin-left:6px; vertical-align:middle; }
+  .badge.attiva{ background:#ff4d4d22; color:var(--red); border:1px solid var(--red); }
+  .badge.in_corso{ background:#ffb02022; color:var(--yel); border:1px solid var(--yel); }
+  .badge.chiusa{ background:#35c75922; color:var(--grn); border:1px solid var(--grn); }
+  .pz{ font-size:13px; margin-top:6px; }
+  .ora{ font-size:12px; color:var(--mut); margin-top:4px; }
+  .centro{ text-align:center; color:var(--mut); padding:40px 10px; font-size:15px; }
+  .errore{ background:#3a1414; border:1px solid var(--red); border-radius:12px;
+    padding:16px; margin-bottom:12px; }
+  .errore button{ background:var(--red); color:#fff; border:0; border-radius:8px;
+    padding:8px 16px; font-size:14px; cursor:pointer; margin-top:8px; }
+  footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
+  footer a{ color:var(--acc); }
+  .spinner{ width:34px; height:34px; border:4px solid #2a3648; border-top-color:var(--red);
+    border-radius:50%; margin:30px auto 10px; animation:gira 0.9s linear infinite; }
+  @keyframes gira{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1><span class="live-dot"></span> Missioni live <span id="conto" style="font-size:13px;color:var(--mut)"></span></h1>
+    <div class="sub">Quadro pubblico in tempo reale delle missioni del simulatore. Pagina di sola lettura: mostra solo le missioni pubblicate.</div>
+    <div class="toolbar">
+      <input id="cerca" type="search" placeholder="🔍 Cerca tipologia, luogo, comune…" autocomplete="off">
+      <select id="filtroStato">
+        <option value="attive">Aperte (attive + in corso)</option>
+        <option value="tutte">Tutte (incluse chiuse)</option>
+        <option value="attiva">Solo attive</option>
+        <option value="in_corso">Solo in corso</option>
+        <option value="chiusa">Solo chiuse</option>
+      </select>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  <div id="statoRiga">Connessione in corso…</div>
+  <div id="errBox" class="errore" hidden></div>
+  <div id="caricamento"><div class="spinner"></div><div class="centro">Caricamento missioni…</div></div>
+  <div id="griglia"></div>
+  <div id="vuoto" class="centro" hidden>Nessuna missione pubblicata al momento. 🚑</div>
+</main>
+<footer>Solo lettura — i dati si aggiornano da soli. <a href="index.html">Apri il simulatore</a></footer>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+  "use strict";
+  // >>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI (gli stessi del simulatore) >>>>>>>>>>>
+  var SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
+  // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
+
+  var POLL_MS = 20000, LIMITE = 100;
+  var righe = [], canale = null, client = null, pronte = false;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function statoIT(s){
+    return s === "attiva" ? "ATTIVA" : s === "in_corso" ? "IN CORSO" : s === "chiusa" ? "CHIUSA" : String(s).toUpperCase();
+  }
+  function oraIT(ts){
+    try{
+      var d = new Date(ts), now = new Date(), diff = Math.max(0, now - d);
+      var m = Math.floor(diff / 60000);
+      var h = String(d.getHours()).padStart(2, "0"), mi = String(d.getMinutes()).padStart(2, "0");
+      if(m < 1) return "adesso";
+      if(m < 60) return m + " min fa (" + h + ":" + mi + ")";
+      return h + ":" + mi + (d.toDateString() === now.toDateString() ? "" : " · " + d.toLocaleDateString("it-IT"));
+    }catch(_){ return ""; }
+  }
+
+  function disegna(){
+    var q = ($("cerca").value || "").toLowerCase();
+    var f = $("filtroStato").value;
+    var vis = righe.filter(function(r){
+      if(f === "attive" && !(r.stato === "attiva" || r.stato === "in_corso")) return false;
+      if(f !== "attive" && f !== "tutte" && r.stato !== f) return false;
+      if(!q) return true;
+      return ((r.tipologia || "") + " " + (r.localita || "") + " " + (r.comune || "")).toLowerCase().indexOf(q) >= 0;
+    });
+    var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
+    $("conto").textContent = "· " + aperte + " aperte";
+    $("statoRiga").textContent = pronte
+      ? ("Aggiornato " + new Date().toLocaleTimeString("it-IT") + " · " + righe.length + " missioni · aggiornamento automatico attivo 🟢")
+      : "Connessione in corso…";
+    $("vuoto").hidden = vis.length > 0;
+    $("griglia").innerHTML = vis.map(function(r){
+      var st = r.stato === "in_corso" ? "in_corso" : r.stato;
+      return '<article class="card ' + esc(st) + '">' +
+        "<h2>" + esc(r.tipologia || "?") + '<span class="badge ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span></h2>" +
+        '<div class="meta">📍 <b>' + esc(r.localita || "?") + "</b>" +
+        (r.comune ? "<br>🏘️ " + esc(r.comune) + (r.provincia ? " (" + esc(r.provincia) + ")" : "") : "") + "</div>" +
+        '<div class="pz">👤 Pazienti: <b>' + esc(r.num_pazienti) + "</b></div>" +
+        '<div class="ora">🕐 ' + esc(oraIT(r.updated_at)) + " · #" + esc(r.missione_id) + "</div>" +
+        "</article>";
+    }).join("");
+  }
+
+  function mostraErrore(msg, riprova){
+    var b = $("errBox");
+    b.hidden = false;
+    b.innerHTML = "⚠️ <b>Problema di connessione.</b><br>" + esc(msg) +
+      (riprova ? '<br><button id="riprovaBtn">🔄 Riprova ora</button>' : "");
+    var btn = $("riprovaBtn");
+    if(btn) btn.onclick = function(){ b.hidden = true; ricarica(); };
+  }
+
+  async function ricarica(){
+    if(!client) return;
+    try{
+      var q = client.from("missioni_live")
+        .select("missione_id,tipologia,localita,comune,provincia,num_pazienti,stato,updated_at")
+        .eq("pubblica", true)
+        .order("updated_at", { ascending: false })
+        .limit(LIMITE);
+      var res = await q;
+      if(res.error) throw res.error;
+      righe = res.data || [];
+      pronte = true;
+      $("caricamento").hidden = true;
+      disegna();
+    }catch(e){
+      $("caricamento").hidden = true;
+      mostraErrore("impossibile caricare le missioni (" + String((e && e.message) || e).slice(0, 180) + "). Il gioco non è toccato: riprova tra poco.", true);
+    }
+  }
+
+  function avvia(){
+    if(SUPABASE_URL.indexOf("INSERISCI-IL-TUO") >= 0 || SUPABASE_ANON_KEY.indexOf("INCOLLA-QUI") >= 0){
+      $("caricamento").hidden = true;
+      mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
+      return;
+    }
+    if(!window.supabase || !window.supabase.createClient){
+      $("caricamento").hidden = true;
+      mostraErrore("libreria Supabase non caricata: serve la connessione a internet (unpkg.com).", true);
+      return;
+    }
+    try{
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }catch(e){
+      $("caricamento").hidden = true;
+      mostraErrore("configurazione non valida: controlla i 2 valori CONFIG.", false);
+      return;
+    }
+    ricarica();
+    try{
+      canale = client.channel("missioni-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "missioni_live" }, function(){ ricarica(); })
+        .subscribe(function(stato){
+          if(stato === "SUBSCRIBED"){ $("statoRiga").textContent += ""; }
+        });
+    }catch(_){ /* il polling sotto copre comunque gli aggiornamenti */ }
+    setInterval(ricarica, POLL_MS); // rete di sicurezza se il Realtime salta
+    $("cerca").addEventListener("input", disegna);
+    $("filtroStato").addEventListener("change", disegna);
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", avvia);
+  else avvia();
+})();
+</script>
+</body>
+</html>

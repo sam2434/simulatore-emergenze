@@ -1,0 +1,317 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+  /* ===== LSTSim clone - tema chiaro classico ===== */
+  *{ box-sizing:border-box; }
+  body{ text-align:left; background:#c9c9c9; color:#111; font-family:Verdana,Tahoma,Arial,sans-serif; font-size:12px; margin:0; }
+  #app{ max-width:none; margin:0; padding:6px; min-height:100vh; display:flex; flex-direction:column; }
+  #lstTop{ background:linear-gradient(#fdfdfd,#d9d9d9); border:1px solid #7a7a7a; padding:5px 8px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  #lstTop .title{ font-weight:bold; font-size:13px; }
+  #lstTop .title span{ font-weight:normal; color:#444; font-size:11px; }
+  #lstTop .spacer{ flex:1; }
+  .lstBtn{ background:linear-gradient(#ffffff,#d4d0c8); border:1px solid #808080; padding:3px 10px; font-size:12px; cursor:pointer; color:#111; border-radius:2px; font-family:inherit; }
+  .lstBtn:hover{ background:linear-gradient(#fffbe0,#e8e0a0); }
+  .lstBtn.primary{ font-weight:bold; border-color:#555; background:linear-gradient(#fff,#b9d1f0); }
+  .lstBtn.small{ font-size:11px; padding:2px 6px; }
+  .lstBtn.active{ background:linear-gradient(#ffe0a0,#ffb060); }
+  .lstBtn.on{ background:linear-gradient(#fffbe0,#ffd080); font-weight:bold; }
+  #lstStats{ font-size:11px; background:#fff; border:1px solid #808080; padding:2px 8px; }
+  #lstStats b{ font-size:12px; }
+  #lstGridTop{ display:grid; grid-template-columns:1fr 220px 360px; gap:6px; margin-top:6px; }
+  #lstGridBot{ display:grid; grid-template-columns:1fr 520px; gap:6px; margin-top:6px; flex:1 1 auto; }
+  #lstGridBot .lstPanel{ display:flex; flex-direction:column; }
+  @media(max-width:1000px){ #lstGridTop{ grid-template-columns:1fr 1fr; } #pIncident{ grid-column:1/-1; } #lstGridBot{ grid-template-columns:1fr; } }
+  @media(max-width:640px){ #lstGridTop{ grid-template-columns:1fr; } }
+  .lstPanel{ background:#f2f2f2; border:1px solid #7a7a7a; }
+  .lstHead{ background:linear-gradient(#f7f7f7,#dcdcdc); border-bottom:1px solid #7a7a7a; padding:4px 6px; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; }
+  .lstHead .right{ margin-left:auto; font-weight:normal; font-size:11px; display:flex; gap:4px; align-items:center; }
+  .lstHead .tab{ border:1px solid #808080; background:#fff; padding:1px 8px; cursor:pointer; font-weight:normal; }
+  .lstHead .tab.on{ background:#fdf0c0; font-weight:bold; }
+  #lstGridTop .lstPanel:first-child{ display:flex; flex-direction:column; }
+  #mapWrap{ position:relative; flex:1 1 auto; display:flex; flex-direction:column; min-height:300px; }
+  #mapEl{ flex:1 1 auto; height:auto; min-height:300px; width:100%; background:#e8e4d8; }
+  #mapToggle{ position:absolute; top:8px; left:50%; transform:translateX(-50%); z-index:600; display:flex; gap:0; border:1px solid #808080; }
+  #mapToggle button{ border:0; padding:2px 12px; font-size:11px; cursor:pointer; background:#fff; font-family:inherit; }
+  #mapToggle button.on{ background:#ffe9a8; font-weight:bold; }
+  /* status list */
+  #mzList{ height:300px; overflow:auto; background:#fff; }
+  .mzCard{ display:flex; justify-content:space-between; align-items:center; padding:2px 6px; border-bottom:1px solid #ddd; cursor:pointer; font-size:12px; background:#fff; }
+  .mzCard:nth-child(even){ background:#f7f7f7; }
+  .mzCard:hover{ background:#e8f0ff; }
+  .mzCard.selMz{ background:#c0d8ff; }
+  .mzCard .code{ color:#0645ad; }
+  .stBox{ display:inline-block; min-width:16px; text-align:center; font-weight:bold; font-size:11px; border:1px solid #555; padding:0 3px; margin-left:6px; color:#fff; }
+  .st-disponibile{ background:#35a835; } .st-viaggio{ background:#e6a100; } .st-sul_posto{ background:#d00000; } .st-pronto{ background:#ff7b00; }
+  .st-trasporto{ background:#d00000; } .st-ospedale{ background:#7a00c0; } .st-rientro{ background:#888; } .st-fuori_servizio{ background:#555; }
+  #mzDetail{ border-top:1px solid #7a7a7a; background:#ffffe1; border:1px solid #808080; margin:6px; padding:6px; font-size:11px; height:124px; overflow:auto; }
+  /* incident */
+  #incIcons{ display:flex; gap:10px; padding:4px 6px; background:#fff; border-bottom:1px solid #ccc; font-size:12px; }
+  #detailBox{ background:#fff; padding:6px; height:270px; overflow:auto; }
+  #lstGridTop .lstPanel:nth-child(3){ display:flex; flex-direction:column; }
+  #intTopList{ flex:1 1 auto; min-height:60px; overflow:auto; background:#fff; border-bottom:1px solid #ccc; }
+  #intTopList .intRow{ display:flex; gap:6px; align-items:center; padding:3px 6px; border-bottom:1px solid #eee; cursor:pointer; font-size:11px; }
+  #intTopList .intRow:hover{ background:#e8f0ff; }
+  #intTopList .intRow.sel{ background:#c0d8ff; }
+  #intTopList .intH{ font-size:10px; color:#0645ad; line-height:1.3; }
+  #intTopList .caret{ margin-left:auto; color:#666; font-size:10px; flex:none; }
+ .detDrop{ background:#fff; border-bottom:2px solid #7a7a7a; padding:6px; font-size:11px; }
+  #detailBox .hint{ color:#555; }
+  .detTitle{ font-weight:bold; font-size:12px; border-bottom:1px solid #ccc; padding-bottom:4px; margin-bottom:4px; }
+  .detBtns{ display:flex; flex-direction:column; gap:4px; margin:6px 0; }
+  .detBtns .lstBtn{ width:100%; text-align:left; font-size:11px; padding:1px 6px; }
+  .kv{ margin:3px 0; } .kv b{ display:inline-block; min-width:0; }
+  .manualGrid{ display:flex; flex-wrap:wrap; gap:4px; margin:4px 0; }
+  .selGrid{ max-height:150px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; }
+  .callMz{ max-height:120px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; }
+  .callMz label{ display:block; font-size:11px; padding:2px 0; cursor:pointer; }
+  #incaricoOverlay{ position:fixed; inset:0; background:#0009; z-index:3000; display:none; align-items:center; justify-content:center; }
+  #incaricoWin{ width:420px; max-width:94vw; max-height:86vh; display:flex; flex-direction:column; background:#f4f4f4; border:2px solid #555; box-shadow:5px 5px 14px #000b; }
+  #incaricoHead{ background:linear-gradient(#f7f7f7,#dcdcdc); border-bottom:1px solid #7a7a7a; padding:4px 8px; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; cursor:move; user-select:none; }
+  #incaricoHead button{ margin-left:auto; }
+  #incaricoBody{ padding:6px 8px; overflow:auto; font-size:11px; }
+  #incaricoBody .callMz{ max-height:40vh; }
+  #assistOverlay{ position:fixed; inset:0; background:#0009; z-index:3000; display:none; align-items:center; justify-content:center; }
+  #assistWin{ width:430px; max-width:94vw; max-height:86vh; display:flex; flex-direction:column; background:#f4f4f4; border:2px solid #555; box-shadow:5px 5px 14px #000b; }
+  #assistHead{ background:linear-gradient(#f7f7f7,#dcdcdc); border-bottom:1px solid #7a7a7a; padding:4px 8px; font-weight:bold; font-size:12px; display:flex; align-items:center; gap:6px; cursor:move; user-select:none; }
+  #assistHead button{ margin-left:auto; }
+  #assistBody{ padding:6px 8px; overflow:auto; font-size:11px; }
+  #assistBody .selGrid{ max-height:38vh; }
+  .selGrid label{ display:block; font-size:11px; padding:2px 0; cursor:pointer; }
+  .selGrid label:hover{ background:#e8f0ff; }
+  #sendSelBtn{ width:100%; font-weight:bold; font-size:13px; padding:6px; margin-top:2px; }
+  .vvfSec{ margin-top:6px; border:1px solid #b33; background:#fff5f5; border-radius:6px; padding:4px 6px; }
+  .vvfSec summary{ cursor:pointer; font-weight:bold; font-size:12px; padding:2px 0; }
+  #vvfGrid{ max-height:170px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; }
+  #vvfGrid label{ display:block; font-size:11px; padding:2px 0 2px 14px; cursor:pointer; }
+  #vvfGrid label:hover{ background:#ffe8e8; }
+  .vvfGroup{ font-size:11px; margin:5px 0 1px; padding-top:4px; border-top:1px dashed #c99; }
+  .vvfGroup:first-child{ border-top:none; padding-top:0; margin-top:0; }
+  #sendVvfBtn{ width:100%; font-weight:bold; font-size:13px; padding:6px; margin-top:2px; }
+  .onSceneRow{ display:flex; gap:4px; align-items:center; padding:1px 4px; margin-bottom:2px; font-size:12px; }
+  .onSceneRow svg{ width:26px; height:auto; }
+  /* funk + calls */
+  #funkHead{ display:flex; gap:8px; align-items:center; }
+  #logBox{ flex:1 1 auto; height:auto; min-height:120px; overflow:auto; background:#fff; padding:4px 6px; font-size:14px; line-height:1.5; }
+  #logBox .lt{ color:#666; font-family:monospace; }
+  #logBox div{ border-left:4px solid transparent; padding:1px 4px; }
+  #logBox .alarm{ border-left-color:#d00000; background:#ffe9e9; font-weight:bold; }
+  #logBox .ok{ border-left-color:#35a835; }
+  #logBox .status{ border-left-color:#0645ad; }
+  #logBox .crit{ background:#ffd9d9; border-left:4px solid #d00000; padding:1px 4px; font-weight:bold; }
+  .funkS{ display:inline-block; font-weight:bold; color:#fff; font-size:10px; padding:0 4px; border:1px solid #555; margin:0 2px; }
+  #intList{ height:190px; overflow:auto; background:#fff; padding:0; display:block; }
+  #callQueue{ flex:1 1 auto; min-height:120px; max-height:none; overflow:auto; background:#fff8e1; border-bottom:1px solid #7a7a7a; }
+  .callCard{ padding:5px 6px; border-bottom:2px solid #e6a100; background:#fffbe8; }
+  .callLST{ display:flex; align-items:center; gap:8px; }
+  .callLST .callTime{ color:#555; font-variant-numeric:tabular-nums; }
+  .callLST .callText{ flex:1; }
+  .callCard.flash{ outline:3px solid #e6a100; }
+  .callBtns{ display:flex; gap:4px; margin-top:4px; }
+  .dialogo{ background:#ffffe1; border:1px solid #999; border-left:4px solid #0645ad; padding:5px 7px; margin:5px 0; font-style:italic; font-size:12px; }
+  .colorBtns{ display:grid; grid-template-columns:1fr 1fr; gap:4px; margin:4px 0; }
+  .colorBtns .lstBtn{ text-align:left; font-weight:bold; }
+  .codeRow{ margin-top:4px; font-size:11px; }
+  .codeInput{ font-family:monospace; font-size:12px; border:1px solid #808080; padding:2px 6px; width:110px; }
+  .callDot{ width:22px; height:22px; border-radius:50%; background:#ffdf60; border:3px solid #a07000; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:1px 1px 3px #0009; }
+  .callDot.pulse{ animation:pulse 1s infinite; }
+  .intCard{ padding:4px 6px; border-bottom:1px solid #ddd; cursor:pointer; background:#fff; border-left:6px solid #888; }
+  .intCard:nth-child(even){ background:#f6f6f6; }
+  .intCard:hover{ background:#e8f0ff; }
+  .intCard.sel{ background:#c0d8ff; }
+  .intCard.p1{ border-left-color:#d00000; } .intCard.p2{ border-left-color:#e6a100; }
+  .intCard.p3{ border-left-color:#35a835; } .intCard.p4{ border-left-color:#888; }
+  .intTop{ font-size:12px; } .intTop .cod{ float:right; color:#666; font-family:monospace; font-size:11px; }
+  .prioBadge{ color:#fff; font-weight:bold; font-size:10px; padding:0 4px; border:1px solid #555; }
+  .prioDot{ display:inline-block; width:12px; height:12px; border:1px solid #555; vertical-align:middle; flex:none; }
+  .trasQ{ display:inline-block; min-width:13px; height:13px; line-height:13px; font-size:10px; font-weight:bold; color:#fff; text-align:center; border-radius:2px; margin-left:3px; padding:0 2px; vertical-align:middle; }
+  .addrLink{ cursor:pointer; }
+  .addrLink:hover{ text-decoration:underline; }
+  .intAddr{ font-size:11px; } .intMeta{ font-size:10px; color:#555; }
+  .mzType{ font-size:10px; color:#555; }
+  #toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#ffffe1; border:1px solid #808080; padding:8px 16px; z-index:9999; font-size:12px; box-shadow:2px 2px 6px #0008; }
+  .small{ font-size:11px; color:#333; }
+  /* marker */
+  .intPin{ width:26px; height:32px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 2px 2px #0009); }
+  .intPin.pulse{ animation:pulse 1.2s infinite; }
+  @keyframes pulse{ 0%{ box-shadow:0 0 0 0 #d0000088; } 70%{ box-shadow:0 0 0 10px #d0000000; } 100%{ box-shadow:0 0 0 0 #d0000000; } }
+  .mzDot{ width:68px; height:68px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; font-size:26px; filter:drop-shadow(1px 1px 1px #000b); }
+  .mzDot.viaggio{ filter:drop-shadow(1px 1px 1px #000b); } .mzDot.sul_posto,.mzDot.pronto,.mzDot.trasporto{ filter:drop-shadow(1px 1px 2px #d00000); } .mzDot.ospedale{ filter:drop-shadow(1px 1px 2px #7a00c0); }
+  .mzPic{ text-align:center; margin:0 0 3px; } .mzPic img,.mzPic svg{ filter:drop-shadow(1px 1px 1px #000b); }
+  .sedeDot{ width:20px; height:20px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 1px 1px #000b); }
+  .ospDot{ width:14px; height:14px; background:#fff; color:#d00000; font-weight:bold; border-radius:2px; display:flex; align-items:center; justify-content:center; border:2px solid #d00000; font-size:8px; }
+  .pmaDot{ width:22px; height:22px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #e8720c; font-size:13px; }
+  .vvfDot{ width:22px; height:22px; background:transparent; border:none; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 1px 1px #000b); }
+  .leaflet-popup-content{ font-family:Verdana,Tahoma,Arial,sans-serif; font-size:12px; line-height:1.5; }
+  .leaflet-popup-content a{ color:#0645ad; }
+  dialog{ font-family:inherit; }
+  #statDlg{ position:fixed; inset:0; margin:auto; width:min(560px,94vw); height:fit-content; max-height:92vh; padding:8px; }
+  #statBody{ overflow:auto; max-height:60vh; padding:2px; font-size:12px; }
+  table.stTab{ border-collapse:collapse; font-size:11px; width:100%; background:#fff; }
+  table.stTab th, table.stTab td{ border:1px solid #999; padding:2px 5px; text-align:left; }
+  table.stTab th{ background:#e4e4e4; }
+</style>
+
+<div id="app">
+  <div id="lstTop">
+    <div class="title">🚨 Simulatore Emergenze - soreu dei laghi - Il soccorso non si ferma mai!- mezzi reali</div>
+    <div class="spacer"></div>
+    <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span style="position:relative"><button class="lstBtn small" id="oraBtn" title="Scegli l'orario"><span id="clockEl">08:00</span> ▾</button><span id="oraMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:180px"><div class="small" style="margin-bottom:2px">Orario di gioco:</div><div><button class="lstBtn small" data-h="0">00</button> <button class="lstBtn small" data-h="4">04</button> <button class="lstBtn small" data-h="8">08</button> <button class="lstBtn small" data-h="12">12</button> <button class="lstBtn small" data-h="16">16</button> <button class="lstBtn small" data-h="20">20</button></div><div style="margin-top:3px"><input type="time" id="oraInput" value="08:00" style="font:inherit"> <button class="lstBtn small primary" id="oraVai">Vai</button></div></span></span></div>
+    <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
+    <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
+    <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
+    <button class="lstBtn" id="pmaBtn" onclick="COEUSIM.togglePMA()" title="Piazza un ospedale da campo (si attiva con missioni da 10+ pazienti)">⛑️ PMA</button>
+    <button class="lstBtn" onclick="COEUSTATS.open()">📊 Statistiche</button>
+    <button class="lstBtn" onclick="COEUGLOB.open()">📊 Statistiche globali</button>
+    <span id="liveSyncBox" class="small" title="Sincronizzazione pagina live pubblica (Supabase)">⚪ live</span>
+    <button class="lstBtn small" id="liveLoginBtn" title="Login operatore: abilita l'invio delle missioni alla pagina live pubblica">🔑 Live: off</button>
+  </div>
+
+  <div id="fascePanel" class="lstPanel" hidden style="margin-top:6px; padding:6px 8px;">
+    <b>⏰ Fasce orarie</b> <span class="small">— cosa esce di più in ogni fascia (ora di gioco in alto nella Radio). Ambulanza, Maxiemergenza e MANV: numero da <b>0,5</b> a <b>10</b> (<b>1</b> rarissima, <b>10</b> molto frequente); le automediche restano a probabilità base</span>
+    <table style="font-size:11px; margin-top:4px; border-collapse:collapse;" cellpadding="3">
+      <tr style="text-align:left;"><th style="padding:2px 10px 2px 0;"></th><th style="padding:2px 10px 2px 0;">Ambulanza</th><th style="padding:2px 10px 2px 0;">Maxiemergenza</th><th style="padding:2px 10px 2px 0;">MANV</th></tr>
+      <tr><td><b>00–06 notte</b></td><td><input id="fas0amb" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti"></td><td><input id="fas0maxi" type="number" min="0.5" max="10" step="0.5" value="4" style="width:44px" title="1 rarissima – 10 molto frequente"></td><td><input id="fas0manv" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissima – 10 molto frequente"></td></tr>
+      <tr><td><b>06–12 mattina</b></td><td><input id="fas1amb" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti"></td><td><input id="fas1maxi" type="number" min="0.5" max="10" step="0.5" value="4" style="width:44px" title="1 rarissima – 10 molto frequente"></td><td><input id="fas1manv" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissima – 10 molto frequente"></td></tr>
+      <tr><td><b>12–18 pomeriggio</b></td><td><input id="fas2amb" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti"></td><td><input id="fas2maxi" type="number" min="0.5" max="10" step="0.5" value="4" style="width:44px" title="1 rarissima – 10 molto frequente"></td><td><input id="fas2manv" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissima – 10 molto frequente"></td></tr>
+      <tr><td><b>18–24 sera</b></td><td><input id="fas3amb" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissime – 10 molto frequenti"></td><td><input id="fas3maxi" type="number" min="0.5" max="10" step="0.5" value="4" style="width:44px" title="1 rarissima – 10 molto frequente"></td><td><input id="fas3manv" type="number" min="0.5" max="10" step="0.5" value="5" style="width:44px" title="1 rarissima – 10 molto frequente"></td></tr>
+    </table>
+    <div style="margin-top:6px; text-align:right;"><span class="small">i valori valgono dopo la conferma — </span><button class="lstBtn primary" onclick="COEUSIM.applicaFasce()">✅ Applica</button></div>
+  </div>
+
+  <div id="lstGridTop">
+    <div class="lstPanel">
+      <div id="mapWrap">
+        <div id="mapEl"></div>
+        <div id="mapToggle"><button id="karteBtn" class="on" onclick="switchBase('karte')">Mappa</button><button id="satBtn" onclick="switchBase('sat')">Satellite</button></div>
+      </div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">Stato, Mezzi <span class="right" id="mzCount"></span></div>
+      <div id="mzList"></div>
+      <div id="mzDetail"><span class="small">Seleziona un mezzo per i dettagli (destinazione / posizione).</span></div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">📋 Interventi in corso <span id="intFold" style="font-size:13px;">⬇</span> <span class="right"><b style="color:#d00000">🔴 <span id="statC1">0</span></b> <b style="color:#b87f00">🟡 <span id="statC2">0</span></b> <b style="color:#1d7d1d">🟢 <span id="statC3">0</span></b> <b style="color:#666">⚪ <span id="statC4">0</span></b> <span id="incTimer"></span></span></div>
+      <div id="intTopList"></div>
+      <div id="detailBox"><div class="hint">Seleziona un intervento...</div></div>
+    </div>
+  </div>
+
+  <div id="lstGridBot">
+    <div class="lstPanel">
+      <div class="lstHead"><span id="funkClock">14:45:50</span><span style="flex:1"></span><span style="position:relative"><button class="lstBtn small" id="meteoBtn" title="Scegli il meteo"><span id="wetter">Nuvoloso, 14 °C ☁️</span> ▾</button><span id="meteoMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:150px"></span></span></div>
+      <div id="logBox"></div>
+    </div>
+    <div class="lstPanel">
+      <div class="lstHead">📞 Chiamate <span class="right"><button class="lstBtn small spdBtn on" onclick="setSpeedX(1,this)">1x</button><button class="lstBtn small spdBtn" onclick="setSpeedX(5,this)">5x</button><button class="lstBtn small spdBtn" onclick="setSpeedX(10,this)">10x</button><button class="lstBtn small spdBtn" onclick="setSpeedX(30,this)">30x</button><button class="lstBtn small" onclick="COEUSIM.nuovaChiamata()">Extra</button><button class="lstBtn small" id="pauseBtn" onclick="togglePause(this)">Pausa</button></span></div>
+      <div id="callQueue"></div>
+    </div>
+  </div>
+  <div class="small" style="margin:6px 2px">Grafica ispirata a LSTSim (Leitstellensimulator): mappa + Stato/Mezzi + Intervento sopra, Radio + Chiamate sotto. Mappa Google come LSTSim. Mezzi 118 e VVF reali (nominativi radio veri).</div>
+</div>
+
+<div id="assistOverlay" style="display:none"><div id="assistWin"><div id="assistHead"><span id="assistTitle">🆘 Assistenza</span><button class="lstBtn small" id="assistX">✖</button></div><div id="assistBody"></div></div></div>
+<div id="incaricoOverlay" style="display:none"><div id="incaricoWin"><div id="incaricoHead"><span id="incaricoTitle">📋 Nuovo incarico</span><button class="lstBtn small" id="incaricoX">✖</button></div><div id="incaricoBody"></div></div></div>
+<div id="toast" hidden></div>
+
+<dialog id="statDlg">
+  <div class="lstHead">📊 Statistiche di centrale <span class="right"><span id="statOra" class="small"></span> <button class="lstBtn small" onclick="COEUSTATS.close()">✖</button></span></div>
+  <div id="statBody"></div>
+  <div class="small" style="margin:4px 0">Dati reali del motore, aggiornati ogni 2 secondi. N/D = dato non ancora disponibile.</div>
+  <div style="margin-top:6px; text-align:right; display:flex; gap:6px; justify-content:flex-end;"><button class="lstBtn" onclick="COEUSTATS.csv()">📥 Esporta CSV</button><button class="lstBtn primary" onclick="COEUSTATS.close()">Chiudi</button></div>
+</dialog>
+
+<dialog id="statGlobDlg" style="max-width:560px;">
+  <div class="lstHead">📊 Statistiche globali <span class="right"><span id="globUpd" class="small"></span> <button class="lstBtn small" onclick="COEUGLOB.close()">✖</button></span></div>
+  <div id="globBody"></div>
+  <div style="margin-top:6px; text-align:right; display:flex; gap:6px; justify-content:flex-end;"><button class="lstBtn" onclick="COEUGLOB.render()">🔄 Aggiorna</button><button class="lstBtn primary" onclick="COEUGLOB.close()">Chiudi</button></div>
+</dialog>
+
+<dialog id="liveLoginDlg" style="max-width:420px;">
+  <div class="lstHead">🔑 Operatore pagina live <span class="right"><button class="lstBtn small" id="liveCloseBtn">✖</button></span></div>
+  <div style="padding:8px;font-size:12px;line-height:1.6">
+    <div class="small" id="liveWho">non collegato (il gioco funziona comunque)</div>
+    <div style="margin-top:6px">Email operatore<br><input id="liveEmail" type="email" autocomplete="username" style="width:100%;font:inherit"></div>
+    <div style="margin-top:4px">Password<br><input id="livePass" type="password" autocomplete="current-password" style="width:100%;font:inherit"></div>
+    <div style="margin-top:6px"><label><input type="checkbox" id="livePubblica" checked> Invia le missioni alla pagina live pubblica</label></div>
+    <div class="small" id="liveStatus" style="margin-top:6px"></div>
+    <div class="small" style="margin-top:6px">La password non viene mai salvata nel codice: resta solo la sessione nel browser. Senza login il simulatore funziona normalmente.</div>
+    <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveDoLogout">Esci</button><button class="lstBtn primary" id="liveDoLogin">Accedi</button></div>
+  </div>
+</dialog>
+
+<dialog id="helpDlg">
+  <h3 style="margin-top:0">Come si gioca (stile LSTSim)</h3>
+  <div style="font-size:12px; line-height:1.6">
+    1. Premi <b>📞 Nuova chiamata</b> (quante volte vuoi, senza limiti di coda): squilla il telefono nel pannello Chiamate — si vede solo il luogo, NON il motivo.<br>
+    2. Quando squilla premi <b>Rispondi</b>: il richiedente racconta. Con <b>🗺️ Mostra su mappa</b> la centri subito sulla mappa. Poi premi <b>📋 Crea nuovo incarico</b>: spunti i mezzi da inviare (i più vicini, 118 e/o VVF — anche mezzi già impegnati o in rientro: vengono <b>dirottati subito</b>, ripartono da dove sono senza attesa) e scegli il codice: 🔴🟡🟢⚪ (per i VVF puoi anche tenere <b>🚒 senza codice</b>). <b>✅ Crea intervento</b> fa partire tutto e chiude il blocco. Se è un falso allarme puoi premere <b>✖ Rifiuta</b> anche dopo aver risposto. Chi chiama non sempre dice la verità (c'è chi minimizza: "sarà la digestione"...), arrivano anche <b>trasporti programmati</b> (dialisi, visite, terapie) e chiamate dal <b>112/113</b>.<br>
+    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). In scheda vedi capacità e orario di arrivo di ogni mezzo. I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano — dal dettaglio del mezzo (i VVF attivati compaiono nella lista Stato/Mezzi col 🚒, i CNSAS attivati col ⛰️ e i PMA col ⛺); un mezzo che sta rientrando dal PS può anche <b>tornare sulla stessa scena</b>. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); dall'invio l'equipaggio impiega <b>30''–1' di gioco a uscire dalla sede</b> (30'' sul rosso, 1' sul bianco, in base alla gravità) e le <b>medicalizzate</b> (MSA/automediche) dirette sull'intervento sono <b>più veloci</b> (+25%); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (<b>un mezzo = un paziente</b>: ogni ambulanza segue un solo ferito, MSA/MSI solo quello per cui è stato richiesto con salute sotto il 35% (regola universale: sotto il 35% la scena aspetta l'arrivo effettivo del medicalizzato e intanto la salute scende molto lentamente finché non arriva — a 0 il paziente decede e non serve più il trasporto; il mezzo avanzato prende in carico il paziente più critico tra quelli in attesa e gli altri restano in coda finché non tocca a loro, senza interrompere chi è già assistito) — segnato <b style="color:#d40000">MSA</b> in rosso solo sotto il 35% (sopra il 35% la scritta sparisce; sparisce anche quando un medicalizzato lo prende in carico); MSA ed elisoccorso sono più veloci, l'automedica aiuta; sotto il 35% la salute risale più lentamente, ×0,4) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e parte da solo per il <b>PS più vicino</b>; <b>1 paziente = 1 ambulanza, senza eccezioni</b>: ogni paziente (P1, P2…) è preso in carico da un solo mezzo e il mezzo che lo carica risulta <b>occupato</b> (non dirottabile, non rientrabile) finché non lo consegna in PS e rientra in servizio; con più feriti servono più ambulanze (una diversa per paziente, i feriti senza mezzo restano <b>⏳ in attesa di ambulanza</b>: mai eliminati, mai duplicati, mai due sullo stesso mezzo) e la missione non si chiude finché l'ultimo non è consegnato; chi è pronto dopo, senza pazienti liberi, <b>rientra in sede</b> invece di andare in ospedale a vuoto. Le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare — aspetta l'arrivo effettivo, senza limiti di tempo (se non resta più nessun paziente sotto il 35% si procede con l'equipaggio sul posto). Le richieste di rinforzi (ambulanza, VVF) si sentono solo via <b>Radio</b>, col nome del mezzo che le chiede (nella scheda intervento non si vedono); il mezzo medicalizzato si chiede una sola volta via radio, per il primo paziente sotto il 35%. All'arrivo l'equipaggio fa <b>sopralluogo</b> e solo dopo <b>riferisce via radio</b> cosa ha trovato e quanti sono i feriti <b>finora individuati</b>; il numero è <b>dinamico</b>: se il chiamante non sapeva dire si parte da <b>sconosciuto</b> e le squadre <b>scoprono gli altri via radio</b> (ognuno con la sua scheda, la sua ambulanza e le statistiche aggiornate — mai duplicati, mai sparizioni) oppure <b>confermano che non ce ne sono altri</b>; sulle missioni <b>🚒 VVF il numero di feriti dipende dalla tipologia</b> (crollo di palazzina 0–6, incendio in casa 0–3, edificio pubblico fino a 8, stradale 0–3, moto/incastrato/soccorso a persona di solito 1 solo, intervento tecnico 0) e se i VVF trovano feriti <b>chiedono subito l'ambulanza</b> (e un mezzo medicalizzato se c'è un critico sotto il 30%); i <b>🚒 VVF restano sul posto finché non decidi tu di farli rientrare</b> (↩️ Rientra nella scheda del mezzo, o Chiudi intervento: la missione resta aperta finché sono lì) con aggiornamenti radio sull'evoluzione (se un ferito resta senza ambulanza, la radio lo sollecita finché non arriva un mezzo — un solo sollecito alla volta, senza duplicati). La Radio mostra solo gli arrivi sul posto, i trasporti in ospedale (col numero di stato accanto al nome del mezzo: 4 sul posto, 7 in trasporto) e le richieste di un mezzo medicalizzato — arrivi dei rinforzi, rientri completati, meteo e orologio restano solo in scheda e mappa, senza messaggi. Se l'intervento è dei VVF ma ci sono feriti, la scena chiede subito un'ambulanza (missione congiunta: i VVF chiudono la loro parte e il 118 prosegue, o viceversa) e finché i feriti non sono in PS la missione non si chiude (né da sola né col tasto Chiudi). Ogni missione genera tanti pazienti quante sono le persone coinvolte nell'evento (solo maxiemergenze e MANV ne hanno di più), ognuno col suo profilo (età, sesso, coscienza, quadro clinico, vitali); gli incastrati (🔒) fanno chiedere i VVF per l'estricazione. Ogni evento ha anche una <b>variante di gravità</b> (lieve/media/grave/critica, più probabile grave se il codice vero è rosso): sposta solo la salute dei feriti, mai il loro numero, e le risorse seguono da sole (più pazienti → più ambulanze, salute sotto il 30% → MSA). Ogni paziente ha il suo <b>triage colorato</b> (🔴🟡🟢⚪ dalla salute) e i più gravi stanno in cima alla lista.<br>
+    4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). Premi sull'<b>orologio</b> in alto per cambiare l'ora di gioco (presets o ora esatta: cambiano missioni, fasce e pesi notte/giorno). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto, con la via reale del punto cliccato; <b>click su un mezzo</b> = i suoi dettagli (stato FMS 1-8: da libero in sede puoi metterlo <b>🔧 6 fuori servizio</b> e rimetterlo <b>✅ 1 in servizio</b>; i mezzi <b>a turno</b>, come le NEF di Magenta ⏰ 8:00-20:00 / 20:00-8:00, lavorano solo nella loro fascia oraria ed escono dal servizio da soli). Con <b>Afflusso ON</b> le chiamate arrivano da sole con un <b>ritmo vivo</b>: momenti di calma si alternano a <b>raffiche</b> di più chiamate a pochi secondi di distanza, il passo cambia con l'<b>ora di gioco</b> (di notte quasi niente, nelle ore di punta di più) e col <b>carico della centrale</b> (satura = rallenta da solo, mai missioni ingestibili); accettare o chiudere non azzera mai il conto alla rovescia della prossima. Il <b>meteo</b> in alto evolve da solo (ogni qualche ora di gioco, mai più di una volta ogni 3 minuti reali anche ad alta velocità) e <b>picchia davvero</b> — premi sul <b>riquadro meteo</b> per sceglierlo tu (sereno, nuvoloso, nebbia, pioggia, pioggia intensa, temporale, vento forte; poi evolve da solo): col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, con la <b>pioggia intensa</b> i danni sono più frequenti, col <b>vento forte</b> volano antenne, ponteggi e gonfiabili, con la <b>nebbia</b> i mezzi vanno più piano e aumentano gli incidenti stradali. Sulla mappa, col <b>Satellite</b>, vedi <b>— tutte le strade</b> mappate (bianche, posizioni reali): gli incidenti in autostrada/tangenziale/superstrada nascono esattamente sul tratto vero le missioni ferroviarie nascono sui binari veri (stazione, galleria o passaggio a livello), i mezzi raggiungono l'accesso più vicino senza mai entrare sui binari e la circolazione viene sospesa (i binari non si disegnano sulla mappa); le 27 missioni infrastrutturali (folgorati, fughe di gas, esondazioni, dispersi sui sentieri, crolli in galleria…) nascono sul punto vero della rete (i livelli grafici non si disegnano sulla mappa); e i mezzi tengono velocità contenute (90% del limite, automediche 95%) e la velocità reale in autostrada, con spinta gameplay (più rapidi già a 1x, ancora più rapidi a 5x/10x/30x). Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
+    5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). La Situazione con l'elenco dei pazienti (salute % colorata, scritta <b style="color:#d40000">MSA</b> in rosso di fianco alla % se richiede un medicalizzato — solo sotto il 35% (sopra la scritta sparisce), e sparisce anche quando il medicalizzato lo prende in carico — e, per ognuno, la sigla H … della destinazione quando è in trasporto o in PS) si vede sotto la registrazione quando il primo mezzo arriva sul posto (l'elenco cresce da solo se vengono scoperti altri feriti; gli incidenti con 3+ veicoli, più rari, mostrano da 0 a 6 feriti di qualsiasi gravità già da subito). Ogni paziente segue i <b>14 stati</b> (segnalato → da valutare → attesa soccorso → valutazione sanitaria → eventuale attesa liberazione/ambulanza → preso in carico → caricato → trasporto → ospedale → missione conclusa; oppure concluso sul posto, rifiuto o decesso): un solo stato alla volta, ogni passaggio con orario registrato, i terminali non si riaprono. Il lieve (≥70%) valutato può <b>✋ rifiutare il trasporto</b> (bottone nella riga). Sulla mappa lo <b>spillo è grigio solo per le missioni VVF senza codice</b>: se dai un codice a una missione VVF, lo spillo prende quel colore. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, quando il mezzo è PRONTO parte da solo per il PS più vicino. <b>🆘 Richiedi assistenza</b> = apre la finestra per mandare altri mezzi. I 36 PS sulla mappa (H) hanno scheda con reparti verificati e fonti (🚁 = elisuperficie); passando il cursore sopra si vedono i mezzi al momento in PS. Gli elisoccorsi trasportano SOLO agli hub con elisuperficie (Bergamo, Brescia, Como S.Anna, Lecco, Legnano, Milano, Monza, Pavia, Varese): partono da PRONTO per l'hub più vicino (mai PMA né PS minori). Con <b>⛺ PMA</b> piazzi un ospedale da campo dove vuoi (click sul tasto, poi click sulla mappa; ESC annulla, click sul marker per rimuoverlo): con una missione da <b>10+ pazienti</b> in corso accoglie i feriti come un PS (sigla H PMA), altrimenti resta inattivo; se lo rimuovi mentre ambulanze ci sono dirette, vengono rirottate al PS più vicino.<br>
+    6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
+    7. Con <b>📊 Statistiche</b> apri il riepilogo essenziale della centrale (dati reali, aggiornati ogni 2 secondi): tempo reale trascorso nella sessione, giorno e ora di gioco, chiamate e missioni, pazienti (attivi, consegnati in PS, deceduti), mezzi 118 liberi/impegnati e missioni VVF in corso; <b>📥 Esporta CSV</b> e <b>Chiudi</b> in fondo. Lo storico sopravvive al reload (Reset lo azzera per un nuovo turno, il tempo di sessione riparte solo ricaricando la pagina). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.
+  </div>
+  <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
+</dialog>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="src/data.js"></script>
+<script src="src/strade-all.js"></script>
+<script src="src/ferrovie.js"></script>
+<script src="src/infra.js"></script>
+<script src="src/ai-liv3.js"></script>
+<script src="src/app.js"></script>
+<script src="src/stats.js"></script>
+<script src="src/globalstats.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="src/supabase-live.js"></script>
+<script>
+  window.__coeuErrs = [];
+  window.addEventListener("error", function(e){
+    try{
+      window.__coeuErrs.push(String((e && e.message) || e));
+      var b = document.getElementById("coeuErrBanner");
+      if(!b){
+        b = document.createElement("div");
+        b.id = "coeuErrBanner";
+        b.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#b00020;color:#fff;font:13px sans-serif;padding:8px 12px;white-space:pre-wrap;";
+        document.body ? document.body.prepend(b) : document.documentElement.appendChild(b);
+      }
+      b.textContent = "⚠️ Errore COEU SIM: " + window.__coeuErrs.join(" | ").slice(0, 2000);
+    }catch(_){}
+  }, true);
+  function setSpeedX(v, btn){
+    COEUSIM.setSpeed(v);
+    document.querySelectorAll(".spdBtn").forEach(b=>b.classList.toggle("on", b===btn));
+  }
+  function togglePause(btn){
+    const p = COEUSIM.togglePause();
+    btn.textContent = p ? "Riprendi" : "Pausa";
+    btn.classList.toggle("active", p);
+  }
+  function toggleInflow(btn){
+    const on = COEUSIM.toggleInflow();
+    btn.textContent = on ? "Afflusso: ON" : "Afflusso: OFF";
+  }
+  function toggleFasce(){
+    const p = document.getElementById("fascePanel");
+    p.hidden = !p.hidden;
+    document.getElementById("fasceBtn").classList.toggle("active", !p.hidden);
+    if(!p.hidden && window.COEUSIM && COEUSIM.syncFasce) COEUSIM.syncFasce();
+  }
+  function switchBase(which){
+    if(window.COEUSIM && COEUSIM.switchBase) COEUSIM.switchBase(which);
+    document.getElementById("karteBtn").classList.toggle("on", which==="karte");
+    document.getElementById("satBtn").classList.toggle("on", which==="sat");
+  }
+  window.addEventListener("load", ()=>{
+    if(typeof L === "undefined"){
+      document.body.innerHTML = '<div style="font:14px sans-serif;padding:30px;max-width:600px;margin:auto;">⚠️ <b>COEU SIM non si avvia: libreria mappa (Leaflet) non caricata.</b><br><br>Serve la connessione a internet (i file vengono da unpkg.com). Controlla la rete e ricarica la pagina.</div>';
+      return;
+    }
+    COEUSIM.setSpeed(1); COEUSIM.boot();
+    if(window.COEULIVE) COEULIVE.init();
+  });
+</script>
