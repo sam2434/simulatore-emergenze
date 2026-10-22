@@ -70620,13 +70620,10 @@ window.COEULIVE = (() => {
   function loadSet(k){ try{ return new Set(JSON.parse(localStorage.getItem(k) || "[]")); }catch(_){ return new Set(); } }
   function saveSet(k, s){ try{ localStorage.setItem(k, JSON.stringify([...s].slice(-500))); }catch(_){} }
 
-  
-function configurato(){
-  return SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") < 0 &&
-         SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") < 0 &&
-         SUPABASE_URL.indexOf("https://") === 0;
-}
-
+  function configurato(){
+    return SUPABASE_URL.indexOf("INSERISCI-IL-TUO") < 0 &&
+           SUPABASE_ANON_KEY.indexOf("INCOLLA-QUI") < 0 &&
+           SUPABASE_URL.indexOf("http") === 0;
   }
 
   // attesa/viaggio -> 'attiva' (appena creata / mezzi in arrivo)
@@ -70857,6 +70854,3 @@ function configurato(){
     if(window.COEULIVE) COEULIVE.init();
   });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./src/supabase-live.js"></script>
