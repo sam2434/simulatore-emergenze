@@ -78,6 +78,14 @@
   .errore details{ margin-top:8px; font-size:13px; }
   .errore code{ display:block; margin-top:4px; padding:8px; background:#fff;
     border:1px solid #e3b7b4; border-radius:6px; word-break:break-all; }
+  .setup{ margin-top:10px; background:#fff; border:1px solid #c9d4de;
+    border-radius:6px; padding:10px; color:var(--txt); }
+  .setup label{ display:block; font-size:13px; font-weight:700; margin:8px 0 4px; }
+  .setup input{ width:100%; border:1px solid #9fb0bf; border-radius:6px;
+    padding:8px 10px; font-size:14px; }
+  .setup .riga{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+  .setup .nota{ font-size:12px; color:var(--mut); margin-top:8px; }
+  .setup .stato{ font-size:13px; margin-top:8px; min-height:18px; }
 footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   footer a{ color:var(--link); }
   .spinner{ width:34px; height:34px; border:4px solid #b9c6d2; border-top-color:var(--areu);
@@ -105,6 +113,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         <option value="in_corso">Solo in corso</option>
         <option value="chiusa">Solo chiuse</option>
       </select>
+      <button id="cfgBtn" type="button" title="Configura connessione">⚙️ Connessione</button>
     </div>
   </div>
 </header>
@@ -122,13 +131,35 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
 (function(){
   "use strict";
   // >>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI (gli stessi del simulatore) >>>>>>>>>>>
-  var SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
-  var SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
+  var SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
+  var SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
 
   var POLL_MS = 20000, LIMITE = 100;
   var righe = [], canale = null, client = null, pronte = false;
+
+  var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
+
+  function leggiCfgSalvata(){
+    try{
+      var cfg = JSON.parse(localStorage.getItem(LS_CFG) || "null");
+      if(cfg && typeof cfg.url === "string" && typeof cfg.key === "string"){
+        return { url: cfg.url, key: cfg.key };
+      }
+    }catch(_){}
+    return { url: "", key: "" };
+  }
+
+  function salvaCfg(url, key){
+    try{ localStorage.setItem(LS_CFG, JSON.stringify({ url: url, key: key })); }
+    catch(_){}
+  }
+
+  function pulisciCfg(){
+    try{ localStorage.removeItem(LS_CFG); }
+    catch(_){}
+  }
 
   function $(id){ return document.getElementById(id); }
   function esc(s){
@@ -241,6 +272,63 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(btn) btn.onclick = function(){ b.hidden = true; ricarica(); };
   }
 
+  function mostraSetup(){
+    var b = $("errBox");
+    var salvata = leggiCfgSalvata();
+    var urlIn = salvata.url ||
+      (SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co/rest/v1/") < 0 ? SUPABASE_URL : "");
+    var keyIn = salvata.key ||
+      (SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") < 0 ? SUPABASE_ANON_KEY : "");
+    b.hidden = false;
+    b.innerHTML = "⚠️ <b>Connessione da configurare su questo browser.</b><br>" +
+      "Incolla qui i due valori del tuo progetto Supabase. Restano salvati solo su questo dispositivo." +
+      '<div class="setup">' +
+      '<label for="cfgUrl">Project URL</label>' +
+      '<input id="cfgUrl" type="text" autocomplete="off" spellcheck="false" placeholder="https://xxxx.supabase.co">' +
+      '<label for="cfgKey">Publishable key</label>' +
+      '<input id="cfgKey" type="password" autocomplete="off" spellcheck="false" placeholder="sb_publishable_...">' +
+      '<div class="riga"><button id="cfgSaveBtn" type="button">💾 Salva e connetti</button>' +
+      '<button id="cfgClearBtn" type="button">🧹 Cancella</button></div>' +
+      '<div class="stato" id="cfgStato"></div>' +
+      '<div class="nota">Non usare password né chiavi che iniziano con <b>sb_secret_</b>.</div>' +
+      "</div>";
+    var urlEl = $("cfgUrl"), keyEl = $("cfgKey"), statoEl = $("cfgStato");
+    urlEl.value = urlIn;
+    keyEl.value = keyIn;
+    $("cfgSaveBtn").onclick = function(){
+      var url = String(urlEl.value || "").trim();
+      while(url.slice(-1) === "/") url = url.slice(0, -1);
+      var key = String(keyEl.value || "").trim();
+      if(!url || !key){
+        statoEl.textContent = "Inserisci entrambi i valori e riprova.";
+        return;
+      }
+      if(url.indexOf("sb_secret_") >= 0 || key.indexOf("sb_secret_") === 0){
+        statoEl.textContent = "Hai incollato una chiave riservata sb_secret_: usa la Publishable key.";
+        return;
+      }
+      try{
+        var u = new URL(url);
+        if(u.protocol !== "https:" || u.hostname.toLowerCase().indexOf(".supabase.co") < 0){
+          throw new Error("URL non valido");
+        }
+      }catch(_){
+        statoEl.textContent = "Project URL non valido: deve essere https://xxxx.supabase.co.";
+        return;
+      }
+      salvaCfg(url, key);
+      statoEl.textContent = "Salvato. Connessione in corso…";
+      b.hidden = true;
+      avvia();
+    };
+    $("cfgClearBtn").onclick = function(){
+      pulisciCfg();
+      urlEl.value = "";
+      keyEl.value = "";
+      statoEl.textContent = "Configurazione cancellata da questo browser.";
+    };
+  }
+
   function mostraErroreRete(msg){
     var b = $("errBox");
     var host = hostContattato();
@@ -284,16 +372,21 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   }
 
   function avvia(){
+    var salvata = leggiCfgSalvata();
+    if(salvata.url && salvata.key){
+      SUPABASE_URL = salvata.url;
+      SUPABASE_ANON_KEY = salvata.key;
+    }
     SUPABASE_URL = urlPulita();
     SUPABASE_ANON_KEY = String(SUPABASE_ANON_KEY || "").trim();
-    if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
+    if(SUPABASE_URL.indexOf("INSERISCI-IL-TUO") >= 0 || SUPABASE_ANON_KEY.indexOf("INCOLLA-QUI") >= 0){
       $("caricamento").hidden = true;
-      mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
+      mostraSetup();
       return;
     }
     if(SUPABASE_URL.indexOf("sb_secret_") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_secret_") === 0){
       $("caricamento").hidden = true;
-      mostraErrore("hai incollato una chiave riservata sb_secret_: sostituiscila con la Publishable key e non pubblicare mai la chiave riservata.", false);
+      mostraSetup();
       return;
     }
     if(!window.supabase || !window.supabase.createClient){
@@ -309,7 +402,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }catch(e){
       $("caricamento").hidden = true;
-      mostraErrore("configurazione non valida: controlla i 2 valori CONFIG.", false);
+      mostraSetup();
       return;
     }
     ricarica();
@@ -321,6 +414,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     setInterval(ricarica, POLL_MS); // rete di sicurezza se il Realtime salta
     $("cerca").addEventListener("input", disegna);
     $("filtroStato").addEventListener("change", disegna);
+    $("cfgBtn").addEventListener("click", mostraSetup);
     $("searchBtn").addEventListener("click", function(){
       var t = $("toolbar");
       t.style.display = (t.style.display === "none") ? "flex" : "none";
