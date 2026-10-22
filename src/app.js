@@ -5684,9 +5684,10 @@ window.COEUSIM = (() => {
         nPaz: (iv.pazienti||[]).length,
         stato: iv.stato||"attesa",
         codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
-        mezzi: (iv.mezziIds||[]).map(function(cd){
-          const m = mezzi.find(function(x){ return x.codice===cd; });
-          return { c: cd, n: nomem(m), s: m ? m.stato : "?" };
+        mezzi: (iv.mezziIds||[]).map(c=>{
+          const m = mezzi.find(x=>x&&x.codice===c);
+          if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:""};
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||""};
         })
       }));
     },
