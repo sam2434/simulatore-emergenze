@@ -142,6 +142,39 @@ window.COEULIVE = (() => {
     try{ return localStorage.getItem(LS_PUBBLICA) !== "off"; }catch(_){ return true; }
   }
 
+  function hostPubblico(){
+    try{ return new URL(String(SUPABASE_URL || "").trim()).hostname; }
+    catch(_){ return ""; }
+  }
+
+  async function diagnostica(){
+    let snap = [];
+    try{ snap = (window.COEUSIM && COEUSIM.missioniLive) ? (COEUSIM.missioniLive() || []) : []; }catch(_){ snap = []; }
+    let loggato = false;
+    try{
+      if(client){
+        const r = await client.auth.getSession();
+        loggato = !!(r && r.data && r.data.session);
+      }
+    }catch(_){ loggato = false; }
+    const prima = snap.length ? snap[0] : null;
+    return {
+      configurato: configurato(),
+      host: hostPubblico(),
+      loggato,
+      pubblica: pubblicaOn(),
+      missioni: snap.length,
+      prima: prima ? {
+        codice: prima.codice || "SENZA CODICE",
+        mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
+        tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : ""
+      } : null,
+      errore: lastError || "",
+      sync: lastSync || "",
+      scritture: moveCount
+    };
+  }
+
   async function init(){
     if(booted) return;
     booted = true;
@@ -208,6 +241,24 @@ window.COEULIVE = (() => {
       if(st) st.textContent = "operatore scollegato (gioco invariato)";
       statoUI();
     };
+    const diagBtn = $("liveDiagBtn");
+    if(diagBtn) diagBtn.onclick = async () => {
+      if(st) st.textContent = "⏳ verifica in corso…";
+      try{
+        const d = await diagnostica();
+        const prima = d.prima
+          ? ("prima missione: " + d.prima.codice + " + " + d.prima.mezzi + " mezzi" + (d.prima.tipi ? " (" + d.prima.tipi + ")" : ""))
+          : "nessuna missione aperta";
+        if(st) st.textContent = "🧪 config: " + (d.configurato ? "sì" : "no") +
+          " · login: " + (d.loggato ? "sì" : "no") +
+          " · invio: " + (d.pubblica ? "on" : "off") +
+          " · missioni: " + d.missioni +
+          " · " + prima +
+          (d.errore ? " · errore: " + d.errore : "") +
+          (d.sync ? " · " + d.sync : "");
+      }catch(e){ if(st) st.textContent = "⚠️ verifica non riuscita"; }
+      statoUI();
+    };
     try{
       client.auth.onAuthStateChange(() => { statoUI(); refreshDlg(); });
     }catch(_){}
@@ -224,7 +275,7 @@ window.COEULIVE = (() => {
     }catch(_){ lbl.textContent = "stato sconosciuto (errore rete)"; }
   }
 
-  return { init, tick, configurato, mappaStato, buildRow };
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica };
 })();
 /* =====================================================================
  * MIGRAZIONE (una sola volta, in Supabase Dashboard > SQL Editor).

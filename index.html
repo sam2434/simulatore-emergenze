@@ -238,6 +238,7 @@
     <div class="small" id="liveStatus" style="margin-top:6px"></div>
     <div class="small" style="margin-top:6px">La password non viene mai salvata nel codice: resta solo la sessione nel browser. Senza login il simulatore funziona normalmente.</div>
     <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveDoLogout">Esci</button><button class="lstBtn primary" id="liveDoLogin">Accedi</button></div>
+    <div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveDiagBtn">🧪 Verifica invio</button></div>
   </div>
 </dialog>
 
@@ -70205,7 +70206,13 @@ window.COEUSIM = (() => {
         comune: iv.comune||"",
         prov: iv.prov||"",
         nPaz: (iv.pazienti||[]).length,
-        stato: iv.stato||"attesa"
+        stato: iv.stato||"attesa",
+        codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
+        mezzi: (iv.mezziIds||[]).map(c=>{
+          const m = mezzi.find(x=>x&&x.codice===c);
+          if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:""};
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||""};
+        })
       }));
     },
     chiamateIds(){ return chiamate.map(c=>c.callId); },
@@ -70603,8 +70610,8 @@ window.COEUSTATS = (() => {
  * ===================================================================== */
 window.COEULIVE = (() => {
   // >>>>>>>>>>>>>>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI <<<<<<<<<<<<<<<<<<<<<<<
-  const SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
+  const SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
+  const SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   const LS_VISTE = "coeulive_viste";     // missione_id mai visti (per chiudere dopo un reload)
@@ -70636,6 +70643,8 @@ window.COEULIVE = (() => {
     const loc = (m.indirizzo || "") +
       ((m.comune && (m.indirizzo || "").indexOf(m.comune) < 0) ? " - " + m.comune : "") +
       (m.prov ? " (" + m.prov + ")" : "");
+    // NOTA: richiede le colonne `codice` (text) e `mezzi` (jsonb) in tabella.
+    // Esegui una volta in SQL Editor: vedi MIGRAZIONE in fondo al file.
     return {
       missione_id: String(m.id),
       tipologia: m.tipo || "?",
@@ -70644,12 +70653,14 @@ window.COEULIVE = (() => {
       provincia: m.prov || null,
       num_pazienti: Math.max(0, m.nPaz | 0),
       stato: mappaStato(m.stato),
-      pubblica: true
+      pubblica: true,
+      codice: m.codice || "SENZA CODICE",
+      mezzi: Array.isArray(m.mezzi) ? m.mezzi : []
     };
   }
 
   function hashRow(r){
-    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica].join("|");
+    return [r.tipologia, r.localita, r.comune, r.provincia, r.num_pazienti, r.stato, r.pubblica, r.codice, JSON.stringify(r.mezzi)].join("|");
   }
 
   function setBox(txt){
@@ -70720,6 +70731,39 @@ window.COEULIVE = (() => {
     try{ return localStorage.getItem(LS_PUBBLICA) !== "off"; }catch(_){ return true; }
   }
 
+  function hostPubblico(){
+    try{ return new URL(String(SUPABASE_URL || "").trim()).hostname; }
+    catch(_){ return ""; }
+  }
+
+  async function diagnostica(){
+    let snap = [];
+    try{ snap = (window.COEUSIM && COEUSIM.missioniLive) ? (COEUSIM.missioniLive() || []) : []; }catch(_){ snap = []; }
+    let loggato = false;
+    try{
+      if(client){
+        const r = await client.auth.getSession();
+        loggato = !!(r && r.data && r.data.session);
+      }
+    }catch(_){ loggato = false; }
+    const prima = snap.length ? snap[0] : null;
+    return {
+      configurato: configurato(),
+      host: hostPubblico(),
+      loggato,
+      pubblica: pubblicaOn(),
+      missioni: snap.length,
+      prima: prima ? {
+        codice: prima.codice || "SENZA CODICE",
+        mezzi: Array.isArray(prima.mezzi) ? prima.mezzi.length : 0,
+        tipi: Array.isArray(prima.mezzi) ? prima.mezzi.map(m => (m && (m.t || m.cat)) || "?").join("+") : ""
+      } : null,
+      errore: lastError || "",
+      sync: lastSync || "",
+      scritture: moveCount
+    };
+  }
+
   async function init(){
     if(booted) return;
     booted = true;
@@ -70786,6 +70830,24 @@ window.COEULIVE = (() => {
       if(st) st.textContent = "operatore scollegato (gioco invariato)";
       statoUI();
     };
+    const diagBtn = $("liveDiagBtn");
+    if(diagBtn) diagBtn.onclick = async () => {
+      if(st) st.textContent = "⏳ verifica in corso…";
+      try{
+        const d = await diagnostica();
+        const prima = d.prima
+          ? ("prima missione: " + d.prima.codice + " + " + d.prima.mezzi + " mezzi" + (d.prima.tipi ? " (" + d.prima.tipi + ")" : ""))
+          : "nessuna missione aperta";
+        if(st) st.textContent = "🧪 config: " + (d.configurato ? "sì" : "no") +
+          " · login: " + (d.loggato ? "sì" : "no") +
+          " · invio: " + (d.pubblica ? "on" : "off") +
+          " · missioni: " + d.missioni +
+          " · " + prima +
+          (d.errore ? " · errore: " + d.errore : "") +
+          (d.sync ? " · " + d.sync : "");
+      }catch(e){ if(st) st.textContent = "⚠️ verifica non riuscita"; }
+      statoUI();
+    };
     try{
       client.auth.onAuthStateChange(() => { statoUI(); refreshDlg(); });
     }catch(_){}
@@ -70802,8 +70864,17 @@ window.COEULIVE = (() => {
     }catch(_){ lbl.textContent = "stato sconosciuto (errore rete)"; }
   }
 
-  return { init, tick, configurato, mappaStato, buildRow };
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica };
 })();
+/* =====================================================================
+ * MIGRAZIONE (una sola volta, in Supabase Dashboard > SQL Editor).
+ * Aggiunge le 2 colonne usate per codice colore e mezzi assegnati.
+ * Non tocca dati, RLS o policy esistenti.
+ * =====================================================================
+ * alter table public.missioni_live
+ *   add column if not exists codice text not null default 'SENZA CODICE',
+ *   add column if not exists mezzi jsonb not null default '[]';
+ */
 
 </script>
 <script>
