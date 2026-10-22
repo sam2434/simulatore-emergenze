@@ -265,10 +265,14 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     var trCod = trasportoDaCodice(cod);
     return '<div class="mezzi">' + arr.map(function(v){
       var inTrasporto = v.s === "trasporto" || v.s === "ospedale";
+      // il bollino segue il codice del PAZIENTE trasportato (triage), mai quello della missione
+      var pazCod = String((v && v.tpaz) || "").toUpperCase();
+      var pazCls = ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pazCod) >= 0 ? pazCod : "";
+      var pazLet = trasportoDaCodice(pazCls);
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>" +
-        ((v.tr && trCod && inTrasporto) ? '<span class="trDot ' + cod + '" title="Codice di trasporto: ' + esc(String(cod || "").toUpperCase()) + '">' + trCod + "</span>" : "") +
+        ((v.tr && pazLet && inTrasporto) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '">' + pazLet + "</span>" : "") +
         ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
         '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
         esc(statoMezzoIT(v.s)) + "</span></div>";

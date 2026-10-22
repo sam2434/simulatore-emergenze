@@ -70215,7 +70215,13 @@ window.COEUSIM = (() => {
         mezzi: (iv.mezziIds||[]).map(c=>{
           const m = mezzi.find(x=>x&&x.codice===c);
           if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:""};
-          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||""};
+          // codice di trasporto = triage del paziente a bordo (profili[k].t), non il codice missione
+          let tpaz = "";
+          const k = (m.pazIdx!=null ? m.pazIdx : m.affido);
+          if(m.trasporto && k!=null && iv.profili && iv.profili[k] && iv.profili[k].t>0){
+            tpaz = COLORI_NOME(iv.profili[k].t);
+          }
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz};
         })
       }));
     },
