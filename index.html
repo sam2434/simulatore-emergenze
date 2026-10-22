@@ -232,6 +232,10 @@
   <div class="lstHead">🔑 Operatore pagina live <span class="right"><button class="lstBtn small" id="liveCloseBtn">✖</button></span></div>
   <div style="padding:8px;font-size:12px;line-height:1.6">
     <div class="small" id="liveWho">non collegato (il gioco funziona comunque)</div>
+    <div style="margin-top:6px">Project URL<br><input id="liveCfgUrl" type="text" autocomplete="off" spellcheck="false" placeholder="https://xxxx.supabase.co" style="width:100%;font:inherit"></div>
+    <div style="margin-top:4px">Publishable key<br><input id="liveCfgKey" type="password" autocomplete="off" spellcheck="false" placeholder="sb_publishable_..." style="width:100%;font:inherit"></div>
+    <div style="margin-top:4px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveCfgSave">💾 Salva configurazione</button><button class="lstBtn" id="liveCfgClear">🧹</button></div>
+    <div class="small" id="liveCfgStato" style="margin-top:4px"></div>
     <div style="margin-top:6px">Email operatore<br><input id="liveEmail" type="email" autocomplete="username" style="width:100%;font:inherit"></div>
     <div style="margin-top:4px">Password<br><input id="livePass" type="password" autocomplete="current-password" style="width:100%;font:inherit"></div>
     <div style="margin-top:6px"><label><input type="checkbox" id="livePubblica" checked> Invia le missioni alla pagina live pubblica</label></div>
@@ -70610,9 +70614,30 @@ window.COEUSTATS = (() => {
  * ===================================================================== */
 window.COEULIVE = (() => {
   // >>>>>>>>>>>>>>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI <<<<<<<<<<<<<<<<<<<<<<<
-  const SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
-  const SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
+  let SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
+  let SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+  const FILE_URL = SUPABASE_URL;
+  const FILE_KEY = SUPABASE_ANON_KEY;
+
+  const LS_CFG = "coeulive_config"; // stessi 2 valori della pagina live, solo su questo browser
+
+  function cfgSalvata(){
+    try{
+      const cfg = JSON.parse(localStorage.getItem(LS_CFG) || "null");
+      if(cfg && typeof cfg.url === "string" && typeof cfg.key === "string") return cfg;
+    }catch(_){}
+    return { url: "", key: "" };
+  }
+
+  function applicaCfgSalvata(){
+    const s = cfgSalvata();
+    if(s.url && s.key){
+      SUPABASE_URL = s.url;
+      SUPABASE_ANON_KEY = s.key;
+    }
+  }
 
   const LS_VISTE = "coeulive_viste";     // missione_id mai visti (per chiudere dopo un reload)
   const LS_CHIUSE = "coeulive_chiuse";   // missione_id gia marcati 'chiusa' (evita riscritture)
@@ -70767,6 +70792,7 @@ window.COEULIVE = (() => {
   async function init(){
     if(booted) return;
     booted = true;
+    applicaCfgSalvata();
     // ripristina toggle + collega il dialog SEMPRE (anche non configurato:
     // il gioco non deve mai accorgersi della sync)
     const tgl = $("livePubblica");
@@ -70808,13 +70834,59 @@ window.COEULIVE = (() => {
 
   function wireDialog(){
     const dlg = $("liveLoginDlg"), formE = $("liveEmail"), formP = $("livePass"), st = $("liveStatus");
+    const cfgUrl = $("liveCfgUrl"), cfgKey = $("liveCfgKey"), cfgSt = $("liveCfgStato");
+    const salvata = cfgSalvata();
+    if(cfgUrl) cfgUrl.value = salvata.url || (SUPABASE_URL.indexOf("INSERISCI-IL-TUO") < 0 ? SUPABASE_URL : "");
+    if(cfgKey) cfgKey.value = salvata.key || (SUPABASE_ANON_KEY.indexOf("INCOLLA-QUI") < 0 ? SUPABASE_ANON_KEY : "");
+    const riavviaConnessione = () => {
+      try{ if(timer){ clearInterval(timer); timer = null; } }catch(_){}
+      client = null;
+      try{ cache.clear(); }catch(_){}
+      lastError = "";
+      booted = false;
+      init();
+    };
+    const cfgSave = $("liveCfgSave");
+    if(cfgSave) cfgSave.onclick = () => {
+      if(!cfgUrl || !cfgKey) return;
+      let url = String(cfgUrl.value || "").trim();
+      while(url.slice(-1) === "/") url = url.slice(0, -1);
+      const key = String(cfgKey.value || "").trim();
+      if(!url || !key){ if(cfgSt) cfgSt.textContent = "Inserisci entrambi i valori e riprova."; return; }
+      if(url.indexOf("sb_secret_") >= 0 || key.indexOf("sb_secret_") === 0){
+        if(cfgSt) cfgSt.textContent = "Hai incollato una chiave riservata sb_secret_: usa la Publishable key.";
+        return;
+      }
+      try{
+        const u = new URL(url);
+        if(u.protocol !== "https:" || u.hostname.toLowerCase().indexOf(".supabase.co") < 0) throw new Error("URL non valido");
+      }catch(_){
+        if(cfgSt) cfgSt.textContent = "Project URL non valido: deve essere https://xxxx.supabase.co.";
+        return;
+      }
+      try{ localStorage.setItem(LS_CFG, JSON.stringify({ url, key })); }catch(_){}
+      if(cfgSt) cfgSt.textContent = "Salvata. Riavvio la connessione…";
+      riavviaConnessione();
+      refreshDlg();
+    };
+    const cfgClear = $("liveCfgClear");
+    if(cfgClear) cfgClear.onclick = () => {
+      try{ localStorage.removeItem(LS_CFG); }catch(_){}
+      SUPABASE_URL = FILE_URL;
+      SUPABASE_ANON_KEY = FILE_KEY;
+      if(cfgUrl) cfgUrl.value = "";
+      if(cfgKey) cfgKey.value = "";
+      if(cfgSt) cfgSt.textContent = "Configurazione cancellata da questo browser.";
+      riavviaConnessione();
+      refreshDlg();
+    };
     const openBtn = $("liveLoginBtn");
     if(openBtn) openBtn.onclick = () => { if(dlg && dlg.showModal) dlg.showModal(); refreshDlg(); };
     const closeBtn = $("liveCloseBtn");
     if(closeBtn) closeBtn.onclick = () => { if(dlg && dlg.close) dlg.close(); };
     const loginBtn = $("liveDoLogin");
     if(loginBtn) loginBtn.onclick = async () => {
-      if(!client){ if(st) st.textContent = "⚠️ incolla prima Project URL e Publishable key in src/supabase-live.js"; return; }
+      if(!client){ if(st) st.textContent = "⚠️ salva prima Project URL e Publishable key qui sopra"; return; }
       if(st) st.textContent = "⏳ accesso in corso…";
       try{
         const { error } = await client.auth.signInWithPassword({ email: formE.value.trim(), password: formP.value });
