@@ -67038,7 +67038,7 @@ window.COEUSIM = (() => {
      vit = "FC"+fc+" Sat"+Math.max(70,sat-(disp?5:0))+"% PA"+pa;
    }
    // priorità di soccorso (triage) dalla salute: il colore si vede nella scheda (mai bianco: i lievi sono verdi)
-   const t = s<25 ? 1 : s<50 ? 2 : 3; // lievi = VERDI (il bianco resta solo come codice missione)
+   const t = s<10 ? 1 : s<50 ? 2 : 3; // rosso solo sotto il 10% (il bianco resta solo come codice missione)
    return { s:sesso, e:eta, c:cosc, q:quadro, v:vit, intr, t };
   }
   // ---------- NUMERO DINAMICO DEI PAZIENTI: la centrale parte da info incomplete ----------
