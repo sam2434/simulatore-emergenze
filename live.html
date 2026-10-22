@@ -122,8 +122,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
 (function(){
   "use strict";
   // >>>>>>>>>>> CONFIG — INCOLLA QUI I TUOI 2 VALORI (gli stessi del simulatore) >>>>>>>>>>>
-  var SUPABASE_URL = "https://kqtmfinowljajxowtzdl.supabase.co";
-  var SUPABASE_ANON_KEY = "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z";
+  var SUPABASE_URL = "https://INSERISCI-IL-TUO-PROJECT-URL.supabase.co";
+  var SUPABASE_ANON_KEY = "INCOLLA-QUI-LA-TUA-PUBLISHABLE-KEY";
   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
 
@@ -286,24 +286,11 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   function avvia(){
     SUPABASE_URL = urlPulita();
     SUPABASE_ANON_KEY = String(SUPABASE_ANON_KEY || "").trim();
-<<<<<<< HEAD
-    if(
-  !SUPABASE_URL ||
-  SUPABASE_URL === "https://kqtmfinowljajxowtzdl.supabase.co/rest/v1/" ||
-  !SUPABASE_ANON_KEY ||
-  SUPABASE_ANON_KEY === "sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z"
-){
-  $("caricamento").hidden = true;
-  mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
-  return;
-}
-=======
     if(SUPABASE_URL.indexOf("https://kqtmfinowljajxowtzdl.supabase.co") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_publishable_cof3SAPRwDWXkHrCs7CiPQ_CAqnh00Z") >= 0){
       $("caricamento").hidden = true;
       mostraErrore("pagina non configurata: incolla Project URL e Publishable key nei 2 campi CONFIG in alto nel file live.html.", false);
       return;
     }
->>>>>>> 845583e944c3f6ceed519e674124946a85c4bc50
     if(SUPABASE_URL.indexOf("sb_secret_") >= 0 || SUPABASE_ANON_KEY.indexOf("sb_secret_") === 0){
       $("caricamento").hidden = true;
       mostraErrore("hai incollato una chiave riservata sb_secret_: sostituiscila con la Publishable key e non pubblicare mai la chiave riservata.", false);
