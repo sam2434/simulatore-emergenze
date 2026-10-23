@@ -32,8 +32,6 @@
   .pannello .leg{ color:var(--mut); font-size:12px; line-height:1.7; }
   .pannello .comp{ font-weight:700; }
   .pannello .sub{ color:var(--mut); font-size:12px; }
-  .pannello .catlist{ color:var(--mut); font-size:11px; line-height:1.55; }
-  .pannello .catlist b{ color:var(--txt); }
   @media (min-width:1280px){
     main.wrap{ max-width:1560px; }
     .side{ position:sticky; top:132px; }
@@ -392,14 +390,21 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     aggiornaLati();
   }
 
-  var TOP5 = ["🚗 Incidenti stradali", "🫀 Malori", "🔥 Incendi", "🤕 Cadute", "🔍 Ricerche persona"];
-  function gruppoTop(tip){
+  var TOP11 = ["🚗 Incidenti stradali", "🩺 Malori", "🔥 Incendi", "🤕 Cadute", "🩹 Infortunio", "👥 Eventi di massa", "🌪️ Calamità naturali", "☠️ Intossicazione", "⛰️ Incidente in montagna", "🚨 Maxiemergenze", "💥 Maxi-incidenti"];
+  function gruppoTop(tip, numPaz){
     var n = String(tip || "").toLowerCase();
-    if(/incendio|incendi|fuoco|fiamme|rogo|esplosione|esplode|brucia|ustione/.test(n)) return TOP5[2];
-    if(/dispers|scompars|ricerc|smarrit|allontan|non rientr|perso nel/.test(n)) return TOP5[4];
-    if(/caduta|caduto|scivola|scivolone|inciamp|precipit|dirupo|scarpata|burrone/.test(n)) return TOP5[3];
-    if(/scontro|tamponamento|tampona|investi|frontale|schianto|ribalta|fuori strada|uscita di strada|stradale|contro |carambola|svincolo|rotatoria|guardrail|spartitraffico|tir\b|camion|autoarticolato|monopattino|bicicletta|pedone|furgone|\bmoto\b|\bauto\b|veicolo|automobile/.test(n) && !/moto d'acqua|motoslitta|motosega|pedal[oò]|sup\b|piscina|in acqua|nel lago/.test(n)) return TOP5[0];
-    if(/malore|infarto|ictus|arresto|sincope|lipotimia|svenimento|collasso|coma|toracico|dispnea|dolore|febbre|vomito|nausea|vertigin|emicrania|panico|ansia|psich|parto|gravid|diabet|ipertens|aritmia|palpit|asma|convuls|epiless|shock anafil|intossicazione|avvelen|colica|reazione allerg|trasporto|dialisi|calo di|pressione|insufficienza|overdose|lomb|soffocamento|boccone|crisi /.test(n)) return TOP5[1];
+    var np = +numPaz || 0;
+    if(np >= 8) return TOP11[10];
+    if(np >= 5) return TOP11[9];
+    if(/incendio|incendi|fuoco|fiamme|rogo|esplosione|esplode|brucia|ustione/.test(n)) return TOP11[2];
+    if(/amputa|anneg|ferita|folgor|fulmine|incastr|ribaltamento/.test(n)) return TOP11[4];
+    if(/crollo|crolla|fuga di gas|fuga gas|nube tossica|nucleare|schiacciamento|calca/.test(n)) return TOP11[5];
+    if(/esondazione|frana|nubifragio|terremoto|tromba|valanga/.test(n)) return TOP11[6];
+    if(/intossica|avvelen|overdose|etilic|monossido|farmac/.test(n)) return TOP11[7];
+    if(/caduta|caduto|scivola|scivolone|inciamp|precipit|dirupo|scarpata|burrone/.test(n)) return TOP11[3];
+    if(/sciator|snowboard|slittin|ferrata|falesia|rifugio|funivia|seggiovia|cabinovia|alpeggio|all'alpe|malga|baita|vetta|cresta|parete|cordata|bivacco|ghiacciaio|crepaccio|seracco|morena|nevaio|bufera|tormenta|valico|mulattiera|forra|grotta|speleo|motoslitta|\bsci\b/.test(n) && !/sci nautico|pattini|tenda|monopattino|motosega/.test(n)) return TOP11[8];
+    if(/malore|infarto|ictus|arresto|sincope|lipotimia|svenimento|collasso|coma|toracico|dispnea|dolore|febbre|vomito|nausea|vertigin|emicrania|panico|ansia|psich|parto|gravid|diabet|ipertens|aritmia|palpit|asma|convuls|epiless|shock anafil|colica|reazione allerg|trasporto|dialisi|calo di|pressione|insufficienza|lomb|soffocamento|boccone|crisi/.test(n)) return TOP11[1];
+    if(/scontro|tamponamento|tampona|investi|frontale|schianto|ribalta|fuori strada|uscita di strada|stradale|contro |carambola|svincolo|rotatoria|guardrail|spartitraffico|tir\b|camion|autoarticolato|monopattino|bicicletta|pedone|furgone|\bmoto\b|\bauto\b|veicolo|automobile/.test(n) && !/moto d'acqua|motoslitta|motosega|pedal[oò]|sup\b|piscina|in acqua|nel lago|parto in auto|malore alla guida|alla guida/.test(n)) return TOP11[0];
     return null;
   }
   function listaMezzi(r){
@@ -412,25 +417,26 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   }
   function aggiornaLati(){
     var cor = 0, chi = 0, nMSB = 0, nVVF = 0, nELI = 0, nMSA = 0;
-    var top = {}; TOP5.forEach(function(k){ top[k] = 0; });
+    var visti = {}; // codice mezzo -> già contato (un mezzo uscito 2 volte conta 1)
+    var top = {}; TOP11.forEach(function(k){ top[k] = 0; });
     var comp = null, best = -1, dec = 0;
     righe.forEach(function(r){
       if(r.stato === "attiva" || r.stato === "in_corso") cor++;
       else if(r.stato === "chiusa") chi++;
       var mz = listaMezzi(r);
-      if(r.stato !== "chiusa"){
-        mz.forEach(function(v){
-          var s = String((v && v.s) || "");
-          if(s !== "viaggio" && s !== "sul_posto" && s !== "pronto" && s !== "trasporto" && s !== "ospedale") return;
-          var t = String((v && v.t) || "").toUpperCase();
-          var cat = String((v && v.cat) || "").toUpperCase();
-          if(t === "ELI") nELI++;
-          else if(t === "VVF" || cat === "VVF") nVVF++;
-          else if(t === "MSA" || t === "AUTOMEDICA" || cat === "MSI_MSA") nMSA++;
-          else nMSB++;
-        });
-      }
-      var g = gruppoTop(r.tipologia);
+      // tutti i mezzi usciti oggi, anche dalle chiuse: niente gate su stato riga/mezzo
+      mz.forEach(function(v){
+        var cod = String((v && (v.c || v.n)) || "");
+        if(!cod || visti[cod]) return;
+        visti[cod] = true;
+        var t = String((v && v.t) || "").toUpperCase();
+        var cat = String((v && v.cat) || "").toUpperCase();
+        if(t === "ELI") nELI++;
+        else if(t === "VVF" || cat === "VVF") nVVF++;
+        else if(t === "MSA" || t === "AUTOMEDICA" || cat === "MSI_MSA") nMSA++;
+        else nMSB++;
+      });
+      var g = gruppoTop(r.tipologia, r.num_pazienti);
       if(g) top[g]++;
       var score = (+r.num_pazienti || 0) + mz.length;
       if(score > best){ best = score; comp = r; }
@@ -441,35 +447,19 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       '<div class="riga"><span>Chiuse</span><b>' + chi + "</b></div>" +
       '<div class="riga"><span>🚑 mezzi 118</span><b>' + nMSB + "</b></div>" +
       '<div class="riga"><span>🚒 mezzi vvf</span><b>' + nVVF + "</b></div>" +
-      '<div class="riga"><span>🚁 eli</span><b>' + nELI + "</b></div>" +
-      '<div class="riga"><span>🚓 msa/msi</span><b>' + nMSA + "</b></div></div>";
-    var orde = TOP5.slice().sort(function(a, b){ return top[b] - top[a]; });
-    var t = '<div class="pannello"><h3>🏆 Top 5 tipologie</h3>' +
-      orde.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
+      '<div class="riga"><span>🚓 msa/msi</span><b>' + nMSA + "</b></div>" +
+      '<div class="riga"><span>🚁 eli</span><b>' + nELI + "</b></div></div>";
+    var t = '<div class="pannello"><h3>🏆 Top tipologie</h3>' +
+      TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
-      var mnomi = listaMezzi(comp).map(function(v){ return (v && v.n) || "?"; });
+      var mnomi = listaMezzi(comp).map(function(v){ return esc((v && v.n) || "?"); });
       t += '<div class="pannello"><h3>🧩 Intervento più complesso</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
         (+comp.num_pazienti || 0) + " pazienti · " + listaMezzi(comp).length + " mezzi</div>" +
-        (mnomi.length ? '<div class="sub">🚑 ' + esc(mnomi.join(" · ")) + "</div>" : "") + "</div>";
+        (mnomi.length ? '<div class="sub">🚑 ' + mnomi.join("<br>") + "</div>" : "") + "</div>";
     }
     t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
-    t += '<div class="pannello"><h3>🗂️ Categorie</h3><div class="catlist">' +
-      "<b>Medico Acuto</b>: prevalente patologia medica.<br>" +
-      "<b>Caduta</b>: si intendono la cadute accidentali.<br>" +
-      "<b>Evento Violento</b>: aggressione, rissa, sparatoria.<br>" +
-      "<b>Incidente Stradale</b>: incidente stradale.<br>" +
-      "<b>Incidente in Acqua</b>: incidente in acqua.<br>" +
-      "<b>Incidente in Montagna</b>: incidente in montagna.<br>" +
-      "<b>Incidente Speleo/Forra</b>: speleologico o in forra.<br>" +
-      "<b>Infortunio</b>: amputazione, annegamento, precipitato, esplosione, ferita, folgorato, incastrato, ribaltamento, ustione, schiacciamento.<br>" +
-      "<b>Intossicazione</b>: alimentare, farmaci, sostanze pericolose, etilica.<br>" +
-      "<b>Animali</b>: morso, puntura.<br>" +
-      "<b>Calamit&agrave; Naturali</b>: esondazione, frana, nubifragio, terremoto, tromba d&rsquo;aria, valanga, incendio.<br>" +
-      "<b>Evento di Massa</b>: crollo, esplosione, fuga gas, incendio, panico/schiacciamento, nube tossica, inc. nucleare.<br>" +
-      "<b>Soccorso Persona</b>: intervento in luogo non accessibile con vittima dubbia o certa.<br>" +
-      "<b>Altro/Non noto</b>: tutto ci&ograve; che non &egrave; classificabile a causa di una carenza di informazioni.</div></div>";
     $("latoDX").innerHTML = t;
   }
 
