@@ -140,7 +140,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       <input id="cerca" type="search" placeholder="🔍 Cerca tipologia, luogo, comune…" autocomplete="off">
       <select id="filtroStato">
         <option value="attive">Aperte (attive + in corso)</option>
-        <option value="tutte">Tutte le ultime 24h</option>
+        <option value="tutte">Tutte quelle di oggi</option>
         <option value="attiva">Solo attive</option>
         <option value="in_corso">Solo in corso</option>
         <option value="chiusa">Solo chiuse</option>
@@ -175,7 +175,6 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
 
   var POLL_MS = 20000, LIMITE = 100;
-  var ORE24_MS = 24 * 60 * 60 * 1000; // finestra live: solo le ultime 24 ore
   var righe = [], canale = null, client = null, pronte = false;
 
   var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
@@ -239,12 +238,13 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   function origineBadge(o){
     return o === "ia" ? ' <span title="Generata e gestita dalla centrale IA autonoma">🤖</span>' : "";
   }
-  // true se la riga è delle ultime 24 ore (per data creazione); senza data valida resta visibile
-  function dentro24h(r){
+  // true se la riga è di OGGI (giorno di calendario, ora locale); senza data valida resta visibile
+  function diOggi(r){
     try{
-      var t = new Date((r && r.created_at) || "").getTime();
-      if(!isFinite(t)) return true;
-      return (Date.now() - t) <= ORE24_MS;
+      var d = new Date((r && r.created_at) || "");
+      if(!isFinite(d.getTime())) return true;
+      var o = new Date();
+      return d.getFullYear() === o.getFullYear() && d.getMonth() === o.getMonth() && d.getDate() === o.getDate();
     }catch(_){ return true; }
   }
   function cronologiaHTML(cr){
@@ -550,8 +550,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         .limit(LIMITE);
       var res = await q;
       if(res.error) throw res.error;
-      // finestra 24h: righe più vecchie nascoste ovunque (tabella + pannelli)
-      righe = (res.data || []).filter(dentro24h);
+      // solo oggi: a mezzanotte il tabellone riparte da zero (tabella + pannelli)
+      righe = (res.data || []).filter(diOggi);
       pronte = true;
       $("caricamento").hidden = true;
       disegna();
