@@ -540,14 +540,14 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
                 String((v && v.cat) || "").toUpperCase() === "VVF") && v.s !== "rientro";
       });
       var vvNomi = vvMz.map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
-      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF (oggi e ieri)</h3>' +
+      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF (48h)</h3>' +
         '<div class="comp">' + esc((compV.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((compV.comune || "") + (compV.provincia ? " (" + compV.provincia + ")" : "")) + " · " +
         bestV + " mezzi VVF</div>" +
         (vvNomi.length ? '<div class="sub">' + vvNomi.join("<br>") + "</div>" : "") + "</div>";
     }
     $("latoSX").innerHTML = sx;
-    var t = '<div class="pannello"><h3>🏆 Top tipologie (oggi e ieri)</h3>' +
+    var t = '<div class="pannello"><h3>🏆 Top tipologie (48h)</h3>' +
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
       var compChiusa = comp.stato === "chiusa";
@@ -561,7 +561,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
           dot = ' <span class="trDot ' + pc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
-      t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi (oggi e ieri)</h3>' +
+      t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi (48h)</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
         (+comp.num_pazienti || 0) + " pazienti · " + listaMezzi(comp).length + " mezzi</div>" +
@@ -569,7 +569,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     }
     if(topOsp){
       var ospBreve = String(topOsp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "");
-      t += '<div class="pannello"><h3>🏥 PS più usata (oggi e ieri)</h3>' +
+      t += '<div class="pannello"><h3>🏥 PS più usata (48h)</h3>' +
         '<div class="comp">' + esc(ospBreve) + "</div>" +
         '<div class="sub">' + topOspN + " trasporti</div></div>";
     } else {
