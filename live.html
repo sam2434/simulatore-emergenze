@@ -27,6 +27,9 @@
     margin-bottom:10px; box-shadow:0 1px 3px #0003; font-size:13px; }
   .pannello h3{ margin:0 0 6px; font-size:12px; text-transform:uppercase;
     letter-spacing:.5px; color:var(--mut); }
+  .pannello.mini{ font-size:12px; padding:8px 10px; }
+  .pannello.mini .comp{ font-size:13px; }
+  .pannello.mini .sub{ font-size:11px; }
   .pannello .riga{ display:flex; justify-content:space-between; gap:8px; padding:2px 0; }
   .pannello .riga b{ font-variant-numeric:tabular-nums; }
   .pannello .leg{ color:var(--mut); font-size:12px; line-height:1.7; }
@@ -451,6 +454,12 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   }
 
   var TOP11 = ["🩺 Malori", "🚗 Incidenti stradali", "🔥 Incendi", "🤕 Cadute", "🩹 Infortunio", "👥 Eventi di massa", "🌪️ Calamità naturali", "☠️ Intossicazione", "⛰️ Incidente in montagna", "🚨 Maxiemergenze", "💥 Maxi-incidenti"];
+  var BIZZARRE = ["mucca","cigno","parapendio","mongolfiera","deltaplano","aquilone","calabron","pitone","ragno violino","vespa in lattina","tasso","cervo","capriolo","gabbiano","castoro","istrice","marmotta","giostra","circo","apicoltore","sciame","nido di vespe","sommozzatore","motoscafo in avaria","pedalo","tromba d'aria"];
+  function bizzarra(tip){
+    var n = String(tip || "").toLowerCase();
+    for(var i = 0; i < BIZZARRE.length; i++) if(n.indexOf(BIZZARRE[i]) >= 0) return true;
+    return false;
+  }
   function gruppoTop(tip, numPaz){
     var n = String(tip || "").toLowerCase();
     var np = +numPaz || 0;
@@ -511,10 +520,16 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     // pannelli di destra: oggi + ieri (giorni di calendario)
     var top = {}; TOP11.forEach(function(k){ top[k] = 0; });
     var comp = null, best = -1, dec = 0, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
+    var freqTip = {}, biz = null, bizFreq = 1e9, bizTime = "", comCount = {}, comTop = "", comTopN = 0;
     righe48.forEach(function(r){
       var mz = listaMezzi(r);
       var g = gruppoTop(r.tipologia, r.num_pazienti);
       if(g) top[g]++;
+      var tk = String(r.tipologia || "?");
+      freqTip[tk] = (freqTip[tk] || 0) + 1;
+      var cck = String(r.comune || "?") + (r.provincia ? " (" + r.provincia + ")" : "");
+      comCount[cck] = (comCount[cck] || 0) + 1;
+      if(comCount[cck] > comTopN){ comTopN = comCount[cck]; comTop = cck; }
       var haVVF = mz.some(function(v){
         return String((v && v.t) || "").toUpperCase() === "VVF" ||
                String((v && v.cat) || "").toUpperCase() === "VVF";
@@ -528,9 +543,15 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         if(oo) ospCount[oo] = (ospCount[oo] || 0) + 1;
       });
       if(nvv > bestV || (nvv === bestV && totvv > bestVtot)){ bestV = nvv; bestVtot = totvv; compV = r; }
-      var score = (+r.num_pazienti || 0) + mz.length;
+      var score = mz.length;
       if(score > best){ best = score; comp = r; }
       listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) dec++; });
+    });
+    righe48.forEach(function(r){
+      if(!bizzarra(r.tipologia)) return;
+      var f = freqTip[String(r.tipologia || "?")] || 1e9;
+      var t = String(r.updated_at || "");
+      if(f < bizFreq || (f === bizFreq && t > bizTime)){ biz = r; bizFreq = f; bizTime = t; }
     });
     var topOsp = "", topOspN = 0;
     for(var ok in ospCount){ if(ospCount[ok] > topOspN){ topOspN = ospCount[ok]; topOsp = ok; } }
@@ -546,7 +567,35 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         bestV + " mezzi VVF</div>" +
         (vvNomi.length ? '<div class="sub">' + vvNomi.join("<br>") + "</div>" : "") + "</div>";
     }
-    $("latoSX").innerHTML = sx;
+    var bz = "";
+    if(biz){
+      var bzmz = listaMezzi(biz).map(function(v){
+        var dot = "";
+        var pc = String((v && v.tpaz) || "").toUpperCase();
+        var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
+        var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
+                    String((v && v.cat) || "").toUpperCase() !== "VVF";
+        var bizChiusa = biz.stato === "chiusa";
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0 && (inTr || bizChiusa))
+          dot = ' <span class="trDot ' + pc + '"></span>';
+        return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
+      });
+      bz = '<div class="pannello mini"><h3>🦆 Missione più bizzarra (48h)</h3>' +
+        '<div class="comp">' + esc((biz.tipologia || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc((biz.comune || "") + (biz.provincia ? " (" + biz.provincia + ")" : "")) + " · " +
+        esc(quando(biz.updated_at)) + "</div>" +
+        (bzmz.length ? '<div class="sub">' + bzmz.join("<br>") + "</div>" : "") + "</div>";
+    } else {
+      bz = '<div class="pannello mini"><h3>🦆 Missione più bizzarra (48h)</h3>' +
+        '<div class="sub">Nessuna segnalazione bizzarra nelle ultime 48h.</div></div>';
+    }
+    var cm = "";
+    if(comTop){
+      cm = '<div class="pannello mini"><h3>🏘️ Comune più colpito (48h)</h3>' +
+        '<div class="comp">' + esc(comTop.toUpperCase()) + "</div>" +
+        '<div class="sub">' + comTopN + " missioni</div></div>";
+    }
+    $("latoSX").innerHTML = sx + bz + cm;
     var t = '<div class="pannello"><h3>🏆 Top tipologie (48h)</h3>' +
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
@@ -564,7 +613,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi (48h)</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
-        (+comp.num_pazienti || 0) + " pazienti · " + listaMezzi(comp).length + " mezzi</div>" +
+        listaMezzi(comp).length + " mezzi</div>" +
         (mrighe.length ? '<div class="sub">' + mrighe.join("<br>") + "</div>" : "") + "</div>";
     }
     if(topOsp){
