@@ -68759,6 +68759,7 @@ window.COEUSIM = (() => {
       const prio = r.codice==="ROSSO"?1:r.codice==="GIALLO"?2:r.codice==="VERDE"?3:r.codice==="BIANCO"?4:0;
       const pazArr = Array.isArray(r.pazienti) ? r.pazienti : [];
       const salute = pazArr.map(p=>{ const v = +((p && p.s) ?? 70); return Math.max(3, Math.min(99, Math.round(v))); });
+      const iaStabili = salute.length ? salute.every(s=>s>=100) : true; // salute reale: niente "stabili al 100%" né "a bordo" se non è vero
       const profili = pazArr.map(p=>({ s:"?", e:"?", c:"cosciente", q:"quadro in verifica", v:"—", intr:false, t:(+((p && p.t) ?? 3)) || 3 }));
       let passatoMin = 0;
       try{ const ca = new Date(r.created_at).getTime(); if(ca>0) passatoMin = Math.max(0, Math.round((Date.now()-ca)/60000)); }catch(_){}
@@ -68780,7 +68781,7 @@ window.COEUSIM = (() => {
         tempoSulPosto: (r.stato==="in_corso") ? passatoMin : 0,
         trasporto: salute.length>0,
         daTrasportare: salute.length,
-        stabilizzato: true, valutato: true, reportFatto: true, gestito: true,
+        stabilizzato: iaStabili, valutato: true, reportFatto: true, gestito: true,
         dialogo: r.descrizione||"", muta: false, visto: [],
         profili, illesi: 0, evac: 0, variante: "ia",
         t0, attesa: passatoMin,
@@ -68804,6 +68805,8 @@ window.COEUSIM = (() => {
       // mezzi: ricollega quelli locali liberi, nello stato IA (viaggio libero,
       // sul posto fermi sul punto, trasporto/ospedale -> PRONTO a bordo)
       let kTr = 0;
+      const iaPronti = []; // mezzi davvero pronti (paziente al 100%): partono subito
+      let iaRipresi = 0, iaRipresiMin = 100;
       for(const vm of (Array.isArray(r.mezzi) ? r.mezzi : [])){
         if(!vm || !vm.c) continue;
         const st = String(vm.s||"");
@@ -68817,11 +68820,21 @@ window.COEUSIM = (() => {
         mz.lat = jx; mz.lng = jy;
         if(st==="sul_posto"){ mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy; }
         else if(st==="trasporto" || st==="ospedale" || st==="pronto"){
-          mz.stato="pronto"; mz.targetLat=jx; mz.targetLng=jy;
-          if(kTr<salute.length){ mz.trasportaPz=true; mz.pazIdx=kTr; kTr++; }
+          if(iaStabili){
+            mz.stato="pronto"; mz.targetLat=jx; mz.targetLng=jy;
+            if(kTr<salute.length){ mz.trasportaPz=true; mz.pazIdx=kTr; kTr++; }
+            iaPronti.push(mz.codice);
+          } else {
+            // salute incompleta: niente "a bordo" fasullo — resta sul posto a curare,
+            // poi il flusso normale (cura al 100% → affido → carico → partenza) riprende da solo
+            mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy;
+            iaRipresi++; if(salute.length) iaRipresiMin = Math.min(iaRipresiMin, ...salute);
+          }
         }
         // "viaggio": resta in viaggio dalla sede con il flusso normale
       }
+      if(iaRipresi>0) log(`🔄 Presa in carico IA a <b>${iv.comune}</b>: ${iaRipresi} paziente(i) da stabilizzare (min ${Math.round(iaRipresiMin)}%) — si riprende la cura`, "status");
+      for(const cod of iaPronti) mandaOspedale(cod); // davvero al 100%: parte subito, niente stallo in PRONTO
       // stadi pazienti coerenti con i mezzi ricollegati
       for(let k=0;k<salute.length;k++){
         const m = mezzi.find(x=>x && x.interventoId===iv.id && x.pazIdx===k && x.trasportaPz);
