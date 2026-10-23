@@ -398,7 +398,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     aggiornaLati();
   }
 
-  var TOP11 = ["🚗 Incidenti stradali", "🩺 Malori", "🔥 Incendi", "🤕 Cadute", "🩹 Infortunio", "👥 Eventi di massa", "🌪️ Calamità naturali", "☠️ Intossicazione", "⛰️ Incidente in montagna", "🚨 Maxiemergenze", "💥 Maxi-incidenti"];
+  var TOP11 = ["🩺 Malori", "🚗 Incidenti stradali", "🔥 Incendi", "🤕 Cadute", "🩹 Infortunio", "👥 Eventi di massa", "🌪️ Calamità naturali", "☠️ Intossicazione", "⛰️ Incidente in montagna", "🚨 Maxiemergenze", "💥 Maxi-incidenti"];
   function gruppoTop(tip, numPaz){
     var n = String(tip || "").toLowerCase();
     var np = +numPaz || 0;
@@ -411,8 +411,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(/intossica|avvelen|overdose|etilic|monossido|farmac/.test(n)) return TOP11[7];
     if(/caduta|caduto|scivola|scivolone|inciamp|precipit|dirupo|scarpata|burrone/.test(n)) return TOP11[3];
     if(/sciator|snowboard|slittin|ferrata|falesia|rifugio|funivia|seggiovia|cabinovia|alpeggio|all'alpe|malga|baita|vetta|cresta|parete|cordata|bivacco|ghiacciaio|crepaccio|seracco|morena|nevaio|bufera|tormenta|valico|mulattiera|forra|grotta|speleo|motoslitta|\bsci\b/.test(n) && !/sci nautico|pattini|tenda|monopattino|motosega/.test(n)) return TOP11[8];
-    if(/malore|infarto|ictus|arresto|sincope|lipotimia|svenimento|collasso|coma|toracico|dispnea|dolore|febbre|vomito|nausea|vertigin|emicrania|panico|ansia|psich|parto|gravid|diabet|ipertens|aritmia|palpit|asma|convuls|epiless|shock anafil|colica|reazione allerg|trasporto|dialisi|calo di|pressione|insufficienza|lomb|soffocamento|boccone|crisi/.test(n)) return TOP11[1];
-    if(/scontro|tamponamento|tampona|investi|frontale|schianto|ribalta|fuori strada|uscita di strada|stradale|contro |carambola|svincolo|rotatoria|guardrail|spartitraffico|tir\b|camion|autoarticolato|monopattino|bicicletta|pedone|furgone|\bmoto\b|\bauto\b|veicolo|automobile/.test(n) && !/moto d'acqua|motoslitta|motosega|pedal[oò]|sup\b|piscina|in acqua|nel lago|parto in auto|malore alla guida|alla guida/.test(n)) return TOP11[0];
+    if(/malore|infarto|ictus|arresto|sincope|lipotimia|svenimento|collasso|coma|toracico|dispnea|dolore|febbre|vomito|nausea|vertigin|emicrania|panico|ansia|psich|parto|gravid|diabet|ipertens|aritmia|palpit|asma|convuls|epiless|shock anafil|colica|reazione allerg|trasporto|dialisi|calo di|pressione|insufficienza|lomb|soffocamento|boccone|crisi/.test(n)) return TOP11[0];
+    if(/scontro|tamponamento|tampona|investi|frontale|schianto|ribalta|fuori strada|uscita di strada|stradale|contro |carambola|svincolo|rotatoria|guardrail|spartitraffico|tir\b|camion|autoarticolato|monopattino|bicicletta|pedone|furgone|\bmoto\b|\bauto\b|veicolo|automobile/.test(n) && !/moto d'acqua|motoslitta|motosega|pedal[oò]|sup\b|piscina|in acqua|nel lago|parto in auto|malore alla guida|alla guida/.test(n)) return TOP11[1];
     return null;
   }
   function listaMezzi(r){
