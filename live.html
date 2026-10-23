@@ -95,6 +95,7 @@
   .trDot.GIALLO{ background:var(--yel); }
   .trDot.VERDE{ background:var(--grn); }
   .trDot.BIANCO{ background:#9aa7b2; }
+  .miniDots .trDot{ width:11px; height:11px; font-size:7px; }
   .mz .cod{ color:var(--mut); font-family:monospace; font-size:12px; }
   .mz .osp{ font-size:10px; color:var(--mut); white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis; max-width:220px; }
@@ -522,6 +523,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     var top = {}; TOP11.forEach(function(k){ top[k] = 0; });
     var comp = null, best = -1, dec = 0, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
     var freqTip = {}, biz = null, bizFreq = 1e9, bizTime = "", comCount = {}, comTop = "", comTopN = 0;
+    var usoMezzi = {}, topV = null, topVN = 0;
     righe48.forEach(function(r){
       var mz = listaMezzi(r);
       var g = gruppoTop(r.tipologia, r.num_pazienti);
@@ -531,6 +533,13 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var cck = String(r.comune || "?") + (r.provincia ? " (" + r.provincia + ")" : "");
       comCount[cck] = (comCount[cck] || 0) + 1;
       if(comCount[cck] > comTopN){ comTopN = comCount[cck]; comTop = cck; }
+      for(var vi = 0; vi < mz.length; vi++){
+        var vv = mz[vi];
+        var vk = String((vv && (vv.c || vv.n)) || "");
+        if(!vk) continue;
+        if(!usoMezzi[vk]) usoMezzi[vk] = { v: vv, n: 0 };
+        usoMezzi[vk].n++;
+      }
       var haVVF = mz.some(function(v){
         return String((v && v.t) || "").toUpperCase() === "VVF" ||
                String((v && v.cat) || "").toUpperCase() === "VVF";
@@ -596,7 +605,14 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="comp">' + esc(comTop.toUpperCase()) + "</div>" +
         '<div class="sub">' + comTopN + " missioni</div></div>";
     }
-    $("latoSX").innerHTML = sx + bz + cm;
+    for(var uk in usoMezzi){ if(usoMezzi[uk].n > topVN){ topVN = usoMezzi[uk].n; topV = usoMezzi[uk].v; } }
+    var vm = "";
+    if(topV){
+      vm = '<div class="pannello mini"><h3>🚑 Mezzo più utilizzato (48h)</h3>' +
+        '<div class="comp">' + iconaMezzo(topV) + " " + esc(((topV && (topV.n || topV.c)) || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc(tipoMezzo(topV)) + " · " + topVN + " missioni</div></div>";
+    }
+    $("latoSX").innerHTML = sx + bz + cm + vm;
     var t = '<div class="pannello"><h3>🏆 Top tipologie (48h)</h3>' +
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
@@ -615,7 +631,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
         listaMezzi(comp).length + " mezzi</div>" +
-        (mrighe.length ? '<div class="sub">' + mrighe.join("<br>") + "</div>" : "") + "</div>";
+        (mrighe.length ? '<div class="sub miniDots">' + mrighe.join("<br>") + "</div>" : "") + "</div>";
     }
     if(topOsp){
       var ospBreve = String(topOsp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "");
