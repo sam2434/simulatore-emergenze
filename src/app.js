@@ -2509,8 +2509,8 @@ window.COEUSIM = (() => {
      const pa = s<40 ? rndi(80,100) : s<=70 ? rndi(100,120) : rndi(110,140);
      vit = "FC"+fc+" Sat"+Math.max(70,sat-(disp?5:0))+"% PA"+pa;
    }
-   // priorità di soccorso (triage) dalla salute: il colore si vede nella scheda
-   const t = s<25 ? 1 : s<50 ? 2 : s<75 ? 3 : 4;
+   // priorità di soccorso (triage) dalla salute: il colore si vede nella scheda (mai bianco: i lievi sono verdi)
+   const t = s<10 ? 1 : s<50 ? 2 : 3; // rosso solo sotto il 10% (il bianco resta solo come codice missione)
    return { s:sesso, e:eta, c:cosc, q:quadro, v:vit, intr, t };
   }
   // ---------- NUMERO DINAMICO DEI PAZIENTI: la centrale parte da info incomplete ----------
@@ -2630,7 +2630,19 @@ window.COEUSIM = (() => {
     if(!p) return null;
     return `quadro peggiore: ${p.q} (${p.c}, salute ${Math.round(Lq[bi])}%)`;
   }
-  // scheda intervento stile LSTSim: una riga per paziente con % colorata + stato trasporto a destra
+  // riga età/sesso dei pazienti noti (al posto del Luogo nel dettaglio)
+  function etaSessoHTML(iv){
+    const Lq = iv.pazienti||[];
+    const parts = [];
+    for(let k=0;k<Lq.length;k++){
+      if(Lq[k]==null) continue;
+      const p = (iv.profili||[])[k];
+      if(!p) continue;
+      parts.push(p.s+" "+p.e);
+    }
+    if(!parts.length) return `👤 Nessun ferito`;
+    return "👤 "+parts.join(" · ");
+  }
   function saluteCol(s){
     const v = Math.round(s);
     if(v<30) return "#d40000";
@@ -2649,9 +2661,13 @@ window.COEUSIM = (() => {
   }
  function codQuad(prio){
   if(!(prio>0)) return "";
-  const L = prio===1?"R":prio===2?"G":prio===3?"V":"B";
   const N = prio===1?"ROSSO":prio===2?"GIALLO":prio===3?"VERDE":"BIANCO";
-  return `<span class="trasQ" style="background:${prioColor(prio)}" title="Codice trasporto: ${N}">${L}</span>`;
+  return `<span class="trasQ" style="background:${prioColor(prio)}" title="Codice trasporto: ${N}"></span>`;
+ }
+ // quadratino trasporto del PAZIENTE (triage profili[k].t), mai il codice missione
+ function codQuadPaz(iv, k){
+  const p = iv && iv.profili && iv.profili[k];
+  return codQuad((p && p.t) || 3);
  }
  function pazientiHTML(iv){
     const list = (iv.pazienti||[]).filter(x=>x!=null);
@@ -2659,20 +2675,20 @@ window.COEUSIM = (() => {
     const claimedIdx = new Set(claimants(iv.id).map(m=>(m.pazIdx!=null?m.pazIdx:m.affido)));
     const righe = list.map((s,k)=>{
       const p = (iv.profili||[])[k];
-      const tcol = prioColor((p&&p.t)||4);
-      const dot = p ? `<span class="prioDot" style="background:${tcol}" title="triage P${p.t||4}"></span> ` : "";
+      const tcol = prioColor((p&&p.t)||3);
+      const dot = p ? `<span class="prioDot" style="background:${tcol}" title="triage P${p.t||3}"></span> ` : "";
       const _crit = !!((s!=null && s<SOGLIA_MSA && pazAttivo(iv,k)) && !msaAssegnatoA(iv,k)); // scritta MSA solo sotto il 35%: sopra sparisce (anche col flag di gestione ancora attivo); alla presa in carico sparisce
       const base = `Paziente ${k+1}: <b style="color:${saluteCol(s)}">${Math.round(s)}%</b>${_crit?' <b style="color:#d40000">MSA</b>':""}`;
       const bis = bisognoPaziente(iv,k);
       const st = statoPaziente(iv,k);
       const _rifOk = iv.trasporto && iv.reportFatto && (st===4||st===6) && Math.round(s)>=70;
       let tag = "";
-      if(st===10) tag = `<span style="color:#2e8b57">✅ ${ospShort((iv.pazDest&&iv.pazDest[k])||"")}${codQuad(iv.prio)}</span>`;
+      if(st===10) tag = `<span style="color:#2e8b57">✅ ${ospShort((iv.pazDest&&iv.pazDest[k])||"")}${codQuadPaz(iv,k)}</span>`;
       else if(st===11) tag = `<span style="color:#2e8b57">✅ concluso sul posto</span>`;
       else if(st===12) tag = `✋ rifiuto registrato`;
       else if(st===13) tag = `🕊 deceduto`;
       else if(st===14) tag = `✅ concluso`;
-      else if(st===9){ const _d=(iv.pazDest&&iv.pazDest[k])||""; tag = _d?("🚑 "+ospShort(_d)+codQuad(iv.prio)):"🚑 in trasporto"; }
+      else if(st===9){ const _d=(iv.pazDest&&iv.pazDest[k])||""; tag = _d?("🚑 "+ospShort(_d)+codQuadPaz(iv,k)):"🚑 in trasporto"; }
       else if(st===8){ const _cm=mezzi.find(m=>m.interventoId===iv.id&&m.pazIdx===k&&m.trasportaPz); tag = _cm?("🚑 a bordo ("+nomem(_cm)+")"):"🚑 a bordo"; }
       else if(st===7){ const _am=(iv.affidi&&iv.affidi[k])?mezzi.find(m=>m.codice===iv.affidi[k]):null; tag = _am?("👨‍⚕️ in carico ("+nomem(_am)+")"):"👨‍⚕️ preso in carico"; }
       else if(st===5) tag = `🔒 in attesa di liberazione`;
@@ -3495,7 +3511,7 @@ window.COEUSIM = (() => {
   function mezziInPS(nome){ return mezzi.filter(m=>m.stato==="ospedale"&&m.ospedale===nome); }
   function ospPSHTML(nome){
     const inPS = mezziInPS(nome);
-    return inPS.length ? `<br><b>In PS:</b> ${inPS.map(m=>{ const v=(m.interventoId!=null)?interventi.find(x=>x.id===m.interventoId):null; return nomem(m)+(v?codQuad(v.prio):""); }).join(", ")}` : "";
+    return inPS.length ? `<br><b>In PS:</b> ${inPS.map(m=>{ const v=(m.interventoId!=null)?interventi.find(x=>x.id===m.interventoId):null; const kk=(m.pazIdx!=null?m.pazIdx:m.affido); return nomem(m)+(v?codQuadPaz(v,kk):""); }).join(", ")}` : "";
   }
   function ospTooltipHTML(o){ return `<b>${o.nomeUff||o.nome}</b>${ospPSHTML(o.nome)}`; }
   function mostraOspedale(nome){
@@ -5274,7 +5290,7 @@ window.COEUSIM = (() => {
         div.className = "intRow" + (iv.id===selectedId?" sel":"");
         div.id = "introw-" + iv.id;
        const badge = iv.prio>0 ? `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>` : `<span title="Senza codice — VVF">🚒</span>`;
-        const hList = [...new Set(iv.mezziIds.map(c=>mezzi.find(x=>x.codice===c)).filter(m=>m&&m.ospedale&&(m.stato==="trasporto"||m.stato==="ospedale")).map(m=>ospShort(m.ospedale)+codQuad(iv.prio)))];
+        const hList = [...new Set(iv.mezziIds.map(c=>mezzi.find(x=>x.codice===c)).filter(m=>m&&m.ospedale&&(m.stato==="trasporto"||m.stato==="ospedale")).map(m=>ospShort(m.ospedale)+codQuadPaz(iv,(m.pazIdx!=null?m.pazIdx:m.affido))))];
         div.innerHTML = badge + `<span style="flex:1;min-width:0">📍 ${luogoIV(iv,true)}${hList.length?`<div class="intH">${hList.join(" · ")}</div>`:""}</span><span class="caret">${iv.id===selectedId?"▾":"▸"}</span>`;
         div.title=`#${iv.id} — ${statoLabel(iv.stato)} — ${iv.mezziIds.map(c=>nomem(mezzi.find(x=>x.codice===c))).join(", ")||"nessun mezzo"}`;
         div.onclick = ()=>selectIntervento(iv.id);
@@ -5357,7 +5373,7 @@ window.COEUSIM = (() => {
       <div class="kv"><b>Posizione:</b> ${mz.sede} ${mz.stato!=="disponibile"&&iv?"→ #"+iv.id:""}</div>
       ${mz.uscita>0?`<div class="kv">🚪 In uscita dalla sede…</div>`:""}
       <div class="kv"><b>Ospedale:</b> ${mz.ospedale||"—"}</div>
-      <div class="kv"><b>Paziente a bordo:</b> ${(mz.trasportaPz&&mz.pazIdx!=null&&iv)?("P"+(mz.pazIdx+1)+" \u2192 "+(mz.ospedale||"PS")+codQuad(iv.prio)):"— occupato: no"}</div>
+      <div class="kv"><b>Paziente a bordo:</b> ${(mz.trasportaPz&&mz.pazIdx!=null&&iv)?("P"+(mz.pazIdx+1)+" \u2192 "+(mz.ospedale||"PS")+codQuadPaz(iv,mz.pazIdx)):"— occupato: no"}</div>
       <div style="margin-top:4px; display:flex; gap:4px;">
         <button class="lstBtn small" id="mzReBtn">↩️ Rientra</button>
         ${mz.stato==="disponibile"&&mz.interventoId==null?`<button class="lstBtn small" id="mzFsBtn" title="Stato FMS 6: non riceve più missioni">🔧 6 Fuori servizio</button>`:""}
@@ -5386,7 +5402,7 @@ window.COEUSIM = (() => {
         <button class="lstBtn" id="assistBtn">🆘 Richiedi assistenza</button>
         <button class="lstBtn" id="editBtn">Chiudi intervento</button>
       </div>
-      <div class="kv"><b>Luogo:</b> ${luogoIV(iv,false)}</div>
+      ${iv.reportFatto?`<div class="kv small">${etaSessoHTML(iv)}</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&!iv.stabilizzato?`<div class="kv">🩺 Stabilizzazione in corso: trasporto al 100% di salute</div>`:""}
       ${msaAtteso(iv)?`<div class="kv">⏳ In attesa di MSA</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&iv.stabilizzato&&(iv.daTrasportare||0)>0?`<div class="kv">💚 Pazienti stabili al 100%: pronti per il trasporto</div>`:""}
@@ -5421,7 +5437,7 @@ window.COEUSIM = (() => {
       const mz=mezzi.find(x=>x.codice===c);
       if(!mz) continue;
       const row=document.createElement("div"); row.className="onSceneRow";
-      const htag = (mz.ospedale&&(mz.stato==="trasporto"||mz.stato==="ospedale"))?` <span class="small" style="color:#0645ad">${ospShort(mz.ospedale)}${codQuad(iv.prio)}</span>`:"";
+      const htag = (mz.ospedale&&(mz.stato==="trasporto"||mz.stato==="ospedale"))?` <span class="small" style="color:#0645ad">${ospShort(mz.ospedale)}${codQuadPaz(iv,(mz.pazIdx!=null?mz.pazIdx:mz.affido))}</span>`:"";
       const ptag = (mz.trasportaPz&&mz.pazIdx!=null&&iv) ? ` <span class="small" style="color:#d00000">🚑 P${mz.pazIdx+1}</span>` : "";
       const mcol = mz.tipo==="CNSAS" ? "#e6a100" : mz.tipo==="PMA" ? "#0e7c86" : mz.cat==="VVF" ? "#555" : (mz.cat==="AMBULANZA" ? "#0645ad" : "#d00000");
       row.innerHTML=`<span style="flex:1"><span style="color:${mcol}">${nomem(mz)}</span>${htag}${ptag}</span><span class="stBox st-${mz.stato}">${stNum(mz.stato)}</span>`;
@@ -5677,21 +5693,149 @@ window.COEUSIM = (() => {
     missioniLive(){
       return interventi.filter(iv=>iv&&iv.stato!=="chiuso").map(iv=>({
         id: iv.id,
+        midEsterno: iv.midEsterno || null,
+        daIA: !!iv.daIA,
         tipo: iv.tipoNome||"?",
         indirizzo: iv.indirizzo||"",
         comune: iv.comune||"",
         prov: iv.prov||"",
+        lat: iv.lat||null,
+        lng: iv.lng||null,
         nPaz: (iv.pazienti||[]).length,
+        salute: (iv.pazienti||[]).map(s=>s==null?null:Math.round(s)),
+        sessoEta: (iv.profili||[]).map(p=>({sx:p?p.s:"?", e:p?p.e:"?", t:p?p.t:3})),
         stato: iv.stato||"attesa",
         codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
         mezzi: (iv.mezziIds||[]).map(c=>{
           const m = mezzi.find(x=>x&&x.codice===c);
-          if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:""};
-          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||""};
+          if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:"", osp:""};
+          // codice di trasporto = triage del paziente a bordo (profili[k].t), non il codice missione
+          let tpaz = "";
+          const k = (m.pazIdx!=null ? m.pazIdx : m.affido);
+          if(m.trasporto && k!=null && iv.profili && iv.profili[k] && iv.profili[k].t>0){
+            tpaz = COLORI_NOME(iv.profili[k].t);
+          }
+          // ospedale di destinazione, solo mentre ci va o è lì (mandaOspedale lo scrive in m.ospedale)
+          const osp = (m.stato==="trasporto"||m.stato==="ospedale") ? (m.ospedale||"") : "";
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz, osp};
         })
       }));
     },
     chiamateIds(){ return chiamate.map(c=>c.callId); },
+    missioneCaricata(mid){ return interventi.some(x=>x.midEsterno===String(mid)); },
+    // presa in carico di una missione IA da Supabase: ricostruisce l'intervento
+    // nello stato esatto (posizione, mezzi, pazienti, stadi) e lascia che il
+    // motore locale prosegua da lì (cura, PRONTO, scelta PS, chiusura)
+    caricaMissioneIA(r){
+      if(!r || r.missione_id == null) return null;
+      const mid = String(r.missione_id);
+      if(interventi.some(x=>x.midEsterno===mid)) return null; // già caricata
+      const prio = r.codice==="ROSSO"?1:r.codice==="GIALLO"?2:r.codice==="VERDE"?3:r.codice==="BIANCO"?4:0;
+      const pazArr = Array.isArray(r.pazienti) ? r.pazienti : [];
+      const salute = pazArr.map(p=>{ const v = +((p && p.s) ?? 70); return Math.max(3, Math.min(99, Math.round(v))); });
+      const iaStabili = salute.length ? salute.every(s=>s>=100) : true; // salute reale: niente "stabili al 100%" né "a bordo" se non è vero
+      const profili = pazArr.map(p=>({ s:(p&&p.sx)||"?", e:(p&&p.e!=null)?p.e:"?", c:"cosciente", q:"quadro in verifica", v:"—", intr:false, t:(+((p && p.t) ?? 3)) || 3 }));
+      let passatoMin = 0;
+      try{ const ca = new Date(r.created_at).getTime(); if(ca>0) passatoMin = Math.max(0, Math.round((Date.now()-ca)/60000)); }catch(_){}
+      const t0 = Math.max(0, clockMin - passatoMin);
+      const iv = {
+        id: idCounter++,
+        midEsterno: mid, daIA: true,
+        callId: "IA-"+mid, tipo: "IA", tipoNome: r.tipologia||"?",
+        col: { nome: r.codice||"SENZA CODICE" },
+        prio,
+        lat: +r.lat || 0, lng: +r.lng || 0,
+        accLa: +r.lat || 0, accLng: +r.lng || 0,
+        zona: "misto",
+        indirizzo: r.localita||"", comune: r.comune||"?", prov: r.provincia||"?",
+        stato: (r.stato==="in_corso") ? "sul_posto" : "attesa",
+        mezziIds: [],
+        richiesti: [],
+        durata: 0,
+        tempoSulPosto: (r.stato==="in_corso") ? passatoMin : 0,
+        trasporto: salute.length>0,
+        daTrasportare: salute.length,
+        stabilizzato: iaStabili, valutato: true, reportFatto: true, gestito: true,
+        dialogo: r.descrizione||"", muta: false, visto: [],
+        profili, illesi: 0, evac: 0, variante: "ia",
+        t0, attesa: passatoMin,
+        pazienti: salute.slice(),
+        pazientiNascosti: [],
+        profiliNascosti: [],
+        pazIgnoti: false, pazDaVerificare: false, scopTra: null,
+        emoji: "🤖", desc: r.descrizione||"",
+        ospedale: null,
+        pazDest: {},
+        pazConsegnati: {},
+        supporti: null,
+        fuoco: null,
+      };
+      iv.pazIds = (iv.pazienti||[]).map((_,k)=>"M"+iv.id+"-P"+(k+1));
+      iv.pazS = {}; iv.affidi = {}; iv.liberati = {}; iv.avvisi = {}; iv.libTimer = 0; iv.noVVFTimer = 0;
+      if(iv.prio>0) contaColori[iv.prio]=(contaColori[iv.prio]||0)+1;
+      interventi.unshift(iv);
+      selectedId = iv.id;
+      initSupporti(iv);
+      // mezzi: ricollega quelli locali liberi, nello stato IA (viaggio libero,
+      // sul posto fermi sul punto, trasporto/ospedale -> PRONTO a bordo)
+      let kTr = 0;
+      const iaPronti = []; // mezzi davvero pronti (paziente al 100%): partono subito
+      let iaRipresi = 0, iaRipresiMin = 100;
+      for(const vm of (Array.isArray(r.mezzi) ? r.mezzi : [])){
+        if(!vm || !vm.c) continue;
+        const st = String(vm.s||"");
+        if(st==="rientro" || st==="disponibile" || st==="fuori_servizio") continue;
+        const mz = mezzi.find(m=>m && m.codice===vm.c);
+        if(!mz || mz.interventoId!=null) continue; // occupato altrove: resta nello storico cloud
+        if(mz.trasportaPz || mz.pazIdx!=null || mz.affido!=null) continue;
+        if(!["disponibile","viaggio","rientro","sul_posto"].includes(mz.stato)) continue;
+        if(!assegnaMezzo(mz.codice, iv.id, true)) continue;
+        const jx = (iv.lat || 0) + (Math.random()-0.5)*0.002, jy = (iv.lng || 0) + (Math.random()-0.5)*0.002;
+        mz.lat = jx; mz.lng = jy;
+        if(st==="sul_posto"){ mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy; }
+        else if(st==="trasporto" || st==="ospedale" || st==="pronto"){
+          if(iaStabili){
+            mz.stato="pronto"; mz.targetLat=jx; mz.targetLng=jy;
+            if(kTr<salute.length){ mz.trasportaPz=true; mz.pazIdx=kTr; kTr++; }
+            iaPronti.push(mz.codice);
+          } else {
+            // salute incompleta: niente "a bordo" fasullo — resta sul posto a curare,
+            // poi il flusso normale (cura al 100% → affido → carico → partenza) riprende da solo
+            mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy;
+            iaRipresi++; if(salute.length) iaRipresiMin = Math.min(iaRipresiMin, ...salute);
+          }
+        }
+        // "viaggio": resta in viaggio dalla sede con il flusso normale
+      }
+      if(iaRipresi>0) log(`🔄 Presa in carico IA a <b>${iv.comune}</b>: ${iaRipresi} paziente(i) da stabilizzare (min ${Math.round(iaRipresiMin)}%) — si riprende la cura`, "status");
+      for(const cod of iaPronti) mandaOspedale(cod); // davvero al 100%: parte subito, niente stallo in PRONTO
+      // stadi pazienti coerenti con i mezzi ricollegati
+      for(let k=0;k<salute.length;k++){
+        const m = mezzi.find(x=>x && x.interventoId===iv.id && x.pazIdx===k && x.trasportaPz);
+        let st;
+        if(m) st = 8;
+        else if(mezzi.some(x=>x && x.interventoId===iv.id && (x.stato==="sul_posto"||x.stato==="pronto"))) st = 4;
+        else if(mezzi.some(x=>x && x.interventoId===iv.id)) st = 3;
+        else st = iv.trasporto ? 6 : 2;
+        iv.pazS[k] = { st, dal: t0, log: [] };
+      }
+      // vvf se solo mezzi VVF ricollegati (il codice resta quello IA per coerenza live)
+      const Assegnati = mezzi.filter(m=>m && m.interventoId===iv.id);
+      iv.vvf = Assegnati.length>0 && Assegnati.every(m=>m.corpo==="VVF" || m.tipo==="VVF" || (m.cat||"")==="VVF");
+      if(iv.prio===0 && !iv.vvf) iv.prio = 3; // mai senza codice in lista
+      // cronologia IA nel radio (solo le ultime 5, il resto resta nel pannello live)
+      const crono = Array.isArray(r.cronologia) ? r.cronologia : [];
+      if(crono.length>5) log(`🤖 <b>${iv.comune}</b>: …${crono.length-5} aggiornamenti precedenti nel pannello Live`, "status");
+      for(const e of crono.slice(-5)){ if(e && e.e) log(`🤖 <b>${iv.comune}</b>: ${e.e}`, "status"); }
+      log(`🤖 Centrale IA: missione <b>${iv.tipoNome}</b> a <b>${iv.comune}</b> presa in carico — prosegui da qui`, "status");
+      refreshCallMarkers();
+      refreshMarkers();
+      renderCalls();
+      renderListe();
+      updateStats();
+      try{ statAccetta({ callId: iv.callId, tipoNome: iv.tipoNome }, iv); }catch(_){}
+      return iv.id;
+    },
     stPaz: statoPaziente,
     verificaStati,
     archivioPazienti(){ return storicoPazienti.slice(); },

@@ -92,6 +92,8 @@
   .mz .trDot.VERDE{ background:var(--grn); }
   .mz .trDot.BIANCO{ background:#9aa7b2; }
   .mz .cod{ color:var(--mut); font-family:monospace; font-size:12px; }
+  .mz .osp{ font-size:10px; color:var(--mut); white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; max-width:220px; }
   .mz .st{ margin-left:auto; font-size:11px; font-weight:700; white-space:nowrap; }
   .mz .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; }
   .stato-pill{ display:inline-block; font-size:11px; font-weight:700; padding:1px 8px;
@@ -327,6 +329,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var pazLet = trasportoDaCodice(pazCls);
       var isVVF = String((v && v.t) || "").toUpperCase() === "VVF" || String((v && v.cat) || "").toUpperCase() === "VVF";
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
+        (v.osp ? '<span class="osp" title="' + esc(v.osp) + '">→ ' + esc(v.osp) + '</span>' : "") +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
         ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
