@@ -302,8 +302,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
         ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
         ((isVVF || !(v.c && v.c !== v.n)) ? "" : '<span class="cod">' + esc(v.c) + "</span>") +
-        '<span class="st">' + (isVVF ? "" : '<span class="dot" style="background:' + dotMezzo(v.s) + '"></span>') +
-        esc(statoMezzoIT(v.s)) + "</span></div>";
+        '<span class="st">' + esc(statoMezzoIT(v.s)) + "</span></div>";
     }).join("") + "</div>";
   }
 
@@ -327,7 +326,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var codCls = ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(cod) >= 0 ? cod : "SENZA";
       var fine = (r.stato === "chiusa" && (r.chiusa_il || r.updated_at)) ? (r.chiusa_il || r.updated_at) : new Date().toISOString();
       var dur = r.created_at ? durataIT(r.created_at, fine) : "";
-      var descr = r.descrizione ? '<div class="rigaEnti">' + esc(r.descrizione) + "</div>" : "";
+      var descr = (r.origine === "ia" || !r.descrizione) ? "" : '<div class="rigaEnti">' + esc(r.descrizione) + "</div>";
       return '<article class="card">' +
         '<div class="badge cod-' + codCls + '" title="Codice di invio: ' + esc(cod) + '">✳</div>' +
         '<div class="cardBody">' +
