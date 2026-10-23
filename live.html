@@ -535,7 +535,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
                 String((v && v.cat) || "").toUpperCase() === "VVF") && v.s !== "rientro";
       });
       var vvNomi = vvMz.map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
-      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF</h3>' +
+      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF 48h</h3>' +
         '<div class="comp">' + esc((compV.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((compV.comune || "") + (compV.provincia ? " (" + compV.provincia + ")" : "")) + " · " +
         bestV + " mezzi VVF</div>" +
@@ -556,20 +556,21 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
           dot = ' <span class="trDot ' + pc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
-      t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi</h3>' +
+      t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi 48h</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
         (+comp.num_pazienti || 0) + " pazienti · " + listaMezzi(comp).length + " mezzi</div>" +
         (mrighe.length ? '<div class="sub">' + mrighe.join("<br>") + "</div>" : "") + "</div>";
     }
-    t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
-    t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     if(topOsp){
       var ospBreve = String(topOsp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "");
       t += '<div class="pannello"><h3>🏥 PS più usata 48h</h3>' +
         '<div class="comp">' + esc(ospBreve) + "</div>" +
         '<div class="sub">' + topOspN + " trasporti</div></div>";
+    } else {
+      t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
     }
+    t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     $("latoDX").innerHTML = t;
   }
 
