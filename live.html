@@ -283,7 +283,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(String((v && v.cat) || "").toUpperCase() === "VVF") return "vvf";
     return "";
   }
-  function mezziHTML(mz, cod){
+  function mezziHTML(mz, cod, chiusa){
     var arr = [];
     if(Array.isArray(mz)) arr = mz;
     else { try{ arr = JSON.parse(mz || "[]"); }catch(_){ arr = []; } }
@@ -298,7 +298,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>" +
-        ((v.tr && pazLet && inTrasporto) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
+        ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
         ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
         '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
         esc(statoMezzoIT(v.s)) + "</span></div>";
@@ -332,7 +332,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="rigaTitolo">' + esc(oraHM(r.created_at || r.updated_at)) + " " + esc(luogo) + " - " + esc((r.tipologia || "?").toUpperCase()) + ' - <span class="via">' + via + "</span>" +
         '<span class="stato-pill ' + esc(st) + '">' + esc(statoIT(r.stato)) + "</span>" + origineBadge(r.origine) + "</div>" +
         descr +
-        mezziHTML(r.mezzi, codCls === "SENZA" ? "SENZA CODICE" : codCls) +
+        mezziHTML(r.mezzi, codCls === "SENZA" ? "SENZA CODICE" : codCls, r.stato === "chiusa" && r.origine === "ia") +
         cronologiaHTML(r.cronologia) +
         '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · ⏱ " + esc(dur) + " · #" + esc(r.missione_id) + "</div>" +
         "</div></article>";
