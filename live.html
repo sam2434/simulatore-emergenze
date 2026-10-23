@@ -84,13 +84,13 @@
   .mz .tipo.msb{ background:#e3ecfb; color:#0645ad; }
   .mz .tipo.msa{ background:#fde7e5; color:#d00000; }
   .mz .tipo.vvf{ background:#e4eaee; color:#4d5862; }
-  .mz .trDot{ display:inline-flex; align-items:center; justify-content:center;
+  .trDot{ display:inline-flex; align-items:center; justify-content:center;
     width:16px; height:16px; border-radius:50%; font-size:10px; font-weight:900;
     color:#fff; flex:none; }
-  .mz .trDot.ROSSO{ background:var(--red); }
-  .mz .trDot.GIALLO{ background:var(--yel); }
-  .mz .trDot.VERDE{ background:var(--grn); }
-  .mz .trDot.BIANCO{ background:#9aa7b2; }
+  .trDot.ROSSO{ background:var(--red); }
+  .trDot.GIALLO{ background:var(--yel); }
+  .trDot.VERDE{ background:var(--grn); }
+  .trDot.BIANCO{ background:#9aa7b2; }
   .mz .cod{ color:var(--mut); font-family:monospace; font-size:12px; }
   .mz .osp{ font-size:10px; color:var(--mut); white-space:nowrap; overflow:hidden;
     text-overflow:ellipsis; max-width:220px; }
@@ -496,7 +496,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         else nMSB++;
       });
     });
-    $("latoSX").innerHTML = pannelloMeteo() + '<div class="pannello"><h3>📡 Oggi <small style="font-weight:normal">🔴 ' + cR + " 🟡 " + cG + " 🟢 " + cV + "</small></h3>" +
+    var sx = pannelloMeteo() + '<div class="pannello"><h3>📡 Oggi <small style="font-weight:normal">🔴 ' + cR + " 🟡 " + cG + " 🟢 " + cV + "</small></h3>" +
       '<div class="riga"><span>In corso</span><b>' + cor + "</b></div>" +
       '<div class="riga"><span>Chiuse</span><b>' + chi + "</b></div>" +
       '<div class="riga"><span>🚑 mezzi 118</span><b>' + nMSB + "</b></div>" +
@@ -505,7 +505,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       '<div class="riga"><span>🚁 eli</span><b>' + nELI + "</b></div></div>";
     // pannelli di destra: finestra ultime 48 ore
     var top = {}; TOP11.forEach(function(k){ top[k] = 0; });
-    var comp = null, best = -1, dec = 0, intVVF = 0;
+    var comp = null, best = -1, dec = 0, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
     righe48.forEach(function(r){
       var mz = listaMezzi(r);
       var g = gruppoTop(r.tipologia, r.num_pazienti);
@@ -515,14 +515,47 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
                String((v && v.cat) || "").toUpperCase() === "VVF";
       });
       if(haVVF) intVVF++;
+      var nvv = 0, totvv = 0;
+      mz.forEach(function(v){
+        var t2 = String((v && v.t) || "").toUpperCase(), c2 = String((v && v.cat) || "").toUpperCase();
+        if(t2 === "VVF" || c2 === "VVF"){ totvv++; if(v.s !== "rientro") nvv++; }
+        var oo = v && v.osp;
+        if(oo) ospCount[oo] = (ospCount[oo] || 0) + 1;
+      });
+      if(nvv > bestV || (nvv === bestV && totvv > bestVtot)){ bestV = nvv; bestVtot = totvv; compV = r; }
       var score = (+r.num_pazienti || 0) + mz.length;
       if(score > best){ best = score; comp = r; }
       listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) dec++; });
     });
+    var topOsp = "", topOspN = 0;
+    for(var ok in ospCount){ if(ospCount[ok] > topOspN){ topOspN = ospCount[ok]; topOsp = ok; } }
+    if(compV && bestV > 0){
+      var vvMz = listaMezzi(compV).filter(function(v){
+        return (String((v && v.t) || "").toUpperCase() === "VVF" ||
+                String((v && v.cat) || "").toUpperCase() === "VVF") && v.s !== "rientro";
+      });
+      var vvNomi = vvMz.map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
+      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF</h3>' +
+        '<div class="comp">' + esc((compV.tipologia || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc((compV.comune || "") + (compV.provincia ? " (" + compV.provincia + ")" : "")) + " · " +
+        bestV + " mezzi VVF</div>" +
+        (vvNomi.length ? '<div class="sub">' + vvNomi.join("<br>") + "</div>" : "") + "</div>";
+    }
+    $("latoSX").innerHTML = sx;
     var t = '<div class="pannello"><h3>🏆 Top tipologie 48h</h3>' +
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
-      var mrighe = listaMezzi(comp).map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
+      var compChiusa = comp.stato === "chiusa";
+      var mrighe = listaMezzi(comp).map(function(v){
+        var dot = "";
+        var pc = String((v && v.tpaz) || "").toUpperCase();
+        var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
+        var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
+                    String((v && v.cat) || "").toUpperCase() !== "VVF";
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0 && (inTr || compChiusa))
+          dot = ' <span class="trDot ' + pc + '"></span>';
+        return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
+      });
       t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
@@ -531,6 +564,12 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     }
     t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
     t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
+    if(topOsp){
+      var ospBreve = String(topOsp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "");
+      t += '<div class="pannello"><h3>🏥 PS più usata 48h</h3>' +
+        '<div class="comp">' + esc(ospBreve) + "</div>" +
+        '<div class="sub">' + topOspN + " trasporti</div></div>";
+    }
     $("latoDX").innerHTML = t;
   }
 
