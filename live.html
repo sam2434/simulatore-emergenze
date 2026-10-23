@@ -175,6 +175,49 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   // Usa SOLO Project URL + Publishable key. MAI password o chiavi riservate.
 
   var POLL_MS = 20000, LIMITE = 100;
+  // ===== Meteo sul territorio (reale di Milano, Open-Meteo, senza chiavi) =====
+  var METEO_WMO_LIVE = {0:["Sereno","☀️"],1:["Prevalentemente sereno","🌤️"],2:["Parzialmente nuvoloso","⛅"],3:["Coperto","☁️"],45:["Nebbia","🌫️"],48:["Nebbia con brina","🌫️❄️"],51:["Pioviggine debole","🌦️"],53:["Pioviggine moderata","🌦️"],55:["Pioviggine intensa","🌧️"],56:["Pioviggine gelata debole","🌧️❄️"],57:["Pioviggine gelata intensa","🌧️🧊"],61:["Pioggia debole","🌧️"],63:["Pioggia moderata","🌧️"],65:["Pioggia intensa","🌧️💧"],66:["Pioggia gelata debole","🌧️❄️"],67:["Pioggia gelata intensa","🌧️🧊"],71:["Neve debole","🌨️"],73:["Neve moderata","🌨️"],75:["Neve intensa","❄️"],77:["Granuli di neve","🌨️"],80:["Rovesci deboli","🌦️"],81:["Rovesci moderati","🌧️"],82:["Rovesci violenti","⛈️"],85:["Rovesci di neve deboli","🌨️"],86:["Rovesci di neve intensi","❄️🌨️"],95:["Temporale","⛈️"],96:["Temporale con grandine","⛈️🧊"],99:["Temporale con grandine intensa","⛈️🌨️"]};
+  var meteoLive = { emoji: "🌡️", txt: "rilevamento in corso…" };
+  function meteoLiveDaCodice(code, vento, temp){
+    var w = METEO_WMO_LIVE[+code];
+    var base = w ? w[0] : null;
+    if(!base) return null;
+    var v = +vento, t = +temp;
+    if((base === "Temporale" || base === "Temporale con grandine" || base === "Temporale con grandine intensa") && isFinite(v) && v >= 60) return "Tromba d'aria";
+    var cielo = (base === "Sereno" || base === "Prevalentemente sereno" || base === "Parzialmente nuvoloso" || base === "Coperto");
+    if(cielo && isFinite(v) && v >= 30) return "Vento forte";
+    if(isFinite(t) && t <= 0){
+      if(base === "Pioviggine debole" || base === "Pioviggine moderata") return "Pioggia gelata debole";
+      if(cielo) return "Gelo";
+    }
+    return base;
+  }
+  function meteoLiveEmoji(cond){
+    if(cond === "Vento forte") return "🌬️";
+    if(cond === "Tromba d'aria") return "🌪️";
+    if(cond === "Gelo") return "🥶";
+    for(var k in METEO_WMO_LIVE){ if(METEO_WMO_LIVE[k][0] === cond) return METEO_WMO_LIVE[k][1]; }
+    return "🌡️";
+  }
+  function pannelloMeteo(){
+    return '<div class="pannello"><h3>🌍 Meteo sul territorio</h3>' +
+      '<div style="text-align:center"><div id="meteoLiveEmoji" style="font-size:44px;line-height:1.2">' + meteoLive.emoji + "</div>" +
+      '<div class="sub" id="meteoLiveTxt">' + esc(meteoLive.txt) + "</div></div></div>";
+  }
+  function aggiornaMeteoLive(){
+    fetch("https://api.open-meteo.com/v1/forecast?latitude=45.4642&longitude=9.19&current=temperature_2m,weather_code,wind_speed_10m&timezone=Europe%2FRome")
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        var cur = j && j.current;
+        if(!cur || !isFinite(+cur.temperature_2m)) return;
+        var cond = meteoLiveDaCodice(cur.weather_code, cur.wind_speed_10m, cur.temperature_2m) || "Coperto";
+        meteoLive = { emoji: meteoLiveEmoji(cond), txt: cond + ", " + Math.round(+cur.temperature_2m) + " °C · Milano" };
+        var e1 = $("meteoLiveEmoji"), e2 = $("meteoLiveTxt");
+        if(e1) e1.textContent = meteoLive.emoji;
+        if(e2) e2.textContent = meteoLive.txt;
+      })
+      .catch(function(){ /* resta l'ultimo valore noto */ });
+  }
   var righe = [], righe48 = [], canale = null, client = null, pronte = false;
 
   var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
@@ -453,7 +496,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         else nMSB++;
       });
     });
-    $("latoSX").innerHTML = '<div class="pannello"><h3>📡 Oggi <small style="font-weight:normal">🔴 ' + cR + " 🟡 " + cG + " 🟢 " + cV + "</small></h3>" +
+    $("latoSX").innerHTML = pannelloMeteo() + '<div class="pannello"><h3>📡 Oggi <small style="font-weight:normal">🔴 ' + cR + " 🟡 " + cG + " 🟢 " + cV + "</small></h3>" +
       '<div class="riga"><span>In corso</span><b>' + cor + "</b></div>" +
       '<div class="riga"><span>Chiuse</span><b>' + chi + "</b></div>" +
       '<div class="riga"><span>🚑 mezzi 118</span><b>' + nMSB + "</b></div>" +
@@ -643,6 +686,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         .subscribe();
     }catch(_){ /* il polling sotto copre comunque gli aggiornamenti */ }
     setInterval(ricarica, POLL_MS); // rete di sicurezza se il Realtime salta
+    aggiornaMeteoLive();
+    setInterval(aggiornaMeteoLive, 600000); // meteo reale di Milano ogni 10 minuti
     $("cerca").addEventListener("input", disegna);
     $("filtroStato").addEventListener("change", disegna);
     $("cfgBtn").addEventListener("click", mostraSetup);

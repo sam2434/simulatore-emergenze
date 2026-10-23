@@ -44,7 +44,7 @@ window.COEUSIM = (() => {
   // scala col tempo di gioco e non cambia i km/h): per scheda/test
   function velEff(mz){
     if(!mz) return null;
-    const base = isEli(mz) ? 180 : (meteo.cond==="Nebbia" ? 50 : (mz.velKmh||50));
+    const base = isEli(mz) ? 180 : ((METEO_VEL[meteo.cond]!=null ? METEO_VEL[meteo.cond] : (mz.velKmh||50)));
     return Math.round(base*medMult(mz)*10)/10;
   }
   let paused = false;
@@ -275,7 +275,7 @@ window.COEUSIM = (() => {
   const MALPENSA_RE = /malpensa/i;
   const MALPENSA_MULT = 5;
   function plausTipo(x){
-    return ((x.meteo&&x.meteo[meteo.cond])||1)*oreMult(x.nome)*sensoMult(x.nome)*(meteo.cond==="Nebbia"&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*(x.vvf||x.pz!==1?1:PZ1_BOOST)*(TRE_VEICOLI_RE.test(x.nome||"")?TRE_VEICOLI_MULT:1)*(HWY_RE.test(x.nome||"")||x.nome==="Scontro tra camion"?HWY_MULT:1)*(MALPENSA_RE.test(x.nome||"")?MALPENSA_MULT:1);
+    return meteoPesoTipo(x)*oreMult(x.nome)*sensoMult(x.nome)*(METEO_STRADA_RISCHIO[meteo.cond]&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*(x.vvf||x.pz!==1?1:PZ1_BOOST)*(TRE_VEICOLI_RE.test(x.nome||"")?TRE_VEICOLI_MULT:1)*(HWY_RE.test(x.nome||"")||x.nome==="Scontro tra camion"?HWY_MULT:1)*(MALPENSA_RE.test(x.nome||"")?MALPENSA_MULT:1);
   }
    function tipoRandom(){
     // archivio in due livelli: categoria per pesi calibrati, scenario per plausibilita.
@@ -423,8 +423,15 @@ window.COEUSIM = (() => {
     if(maybe(0.3)) out.push(pick(["c'è gente attorno che prova ad aiutare","nessuno sa cosa fare, sono tutti agitati","un passante sta facendo da palo"]));
     const h = Math.floor(clockMin/60)%24;
     if((h<6 || h>=22) && maybe(0.6)) out.push("è buio, si vede poco");
-    if((meteo.cond==="Pioggia"||meteo.cond==="Temporale"||meteo.cond==="Pioggia intensa") && maybe(0.5))
-      out.push("piove forte e si vede poco");
+    const grm = METEO_GRUPPO[meteo.cond]||"";
+    if((grm==="pioggia"||grm==="intensa"||grm==="temporale"||grm==="grandine"||grm==="tromba") && maybe(0.5))
+      out.push(grm==="grandine" ? "sta grandinando forte" : "piove forte e si vede poco");
+    if((grm==="neve"||grm==="neveforte") && maybe(0.5))
+      out.push("nevica e la strada è scivolosa");
+    if((grm==="gelida"||meteo.cond==="Gelo") && maybe(0.5))
+      out.push("c'è ghiaccio per terra, si scivola");
+    if(meteo.cond==="Nebbia con brina" && maybe(0.5))
+      out.push("c'è una nebbia fittissima, non si vede a un metro");
     // 2-4 osservazioni al massimo: si taglia dalla fine (il contorno generico),
     // le righe importanti (persone, mezzo, pericolo) restano sempre
     while(out.length>4) out.pop();
@@ -696,10 +703,15 @@ window.COEUSIM = (() => {
     if(SENSO_NEVE.test(nome)){ // neve solo col freddo (la temperatura fa da stagione)
       if(temp>16) return 0;
       if(temp>12) m*=0.05;
+      const grn = METEO_GRUPPO[cond]||"";
+      if(grn==="neve"||grn==="neveforte"||grn==="gelo") m*=2; // con la neve vera si scia di piu
     }
     if(SENSO_ESTATE.test(nome) && !/cloro/i.test(nome)){ // piscina coperta col cloro: tutto l'anno
-      if(cond==="Pioggia"||cond==="Temporale"||cond==="Pioggia intensa") m*=0.1; // tuffi e pedalò col maltempo: quasi mai
+      const gre = METEO_GRUPPO[cond]||"";
+      if(gre==="pioggia"||gre==="intensa"||gre==="gelida"||gre==="temporale"||gre==="grandine"||gre==="tromba"||gre==="neve"||gre==="neveforte") m*=0.1; // tuffi e pedalo col maltempo: quasi mai
       if(cond==="Nebbia") m*=0.5; // lago e spiaggia nella nebbia: pochi
+      if(cond==="Nebbia con brina"||cond==="Gelo") m*=0.3;
+      if(gre==="pioviggine") m*=0.5;
       if(temp<5) return 0;
       if(temp<10) m*=0.05; else if(temp<15) m*=0.3;
     }
@@ -1415,25 +1427,29 @@ window.COEUSIM = (() => {
   }
   function nuovaChiamata(prov=null){ return makeChiamata(prov, true); }
 
-  // --- MALTEMPO CHE PICCHIA: durante temporale/pioggia/vento i danni arrivano davvero, in diretta ---
+  // --- MALTEMPO CHE PICCHIA: con pioggia, rovesci, temporali, grandine, vento e trombe i danni arrivano davvero, in diretta ---
   const STORM_TIPI = {
     Temporale:["Albero in carreggiata","Albero su auto occupata","Albero su auto vuota","Albero pericolante","Albero caduto sulla strada","Albero sui cavi","Albero sul tetto","Sottopasso allagato con auto","Sottopasso allagato","Garage interrato allagato","Garage allagato","Allagamento cantina","Roggia esondata","Roggia straripata","Esondazione torrente","Esondazione dell'argine","Colpito da fulmine","Fulmine vicino agli escursionisti","Albero incendiato da fulmine","Feriti dalla grandine","Grandine in alta quota","Albero su tenda con occupanti","Sottopasso ferroviario allagato","Albero su pista ciclabile","Tenda allagata al campeggio","Tromba d'aria","Traliccio caduto su auto","Traliccio alta tensione caduto","Cavi elettrici caduti","Cavi penzolanti sulla strada","Tenda da sole divelta","Antenna caduta sul tetto","Grondaia crollata in strada","Auto travolta da frana","Frana","Pensilina distributore pericolante","Albero caduto sul sentiero"],
     Pioggia:["Sottopasso allagato con auto","Garage interrato allagato","Roggia esondata","Sottopasso ferroviario allagato","Cabina elettrica allagata","Canile allagato","Sede canottieri allagata","Auto travolta da frana","Ciclista caduto in sottopasso allagato","Lago esondato"],
-    Vento:["Albero in carreggiata","Albero su auto vuota","Albero su auto occupata","Albero pericolante","Albero caduto sulla strada","Albero caduto sul sentiero","Albero sul tetto","Albero sui cavi","Siepe divelta dal vento","Antenna caduta sul tetto","Tenda da sole divelta","Ponteggio nel vento","Ponteggio crollato in strada","Ponteggio crollato su auto","Gonfiabile volato via col vento","Alveare caduto dal tetto","Sup trascinato dal vento","Albero su pista ciclabile","Albero su panchina al parco","Tromba d'aria","Traliccio pericolante","Traliccio caduto su auto","Traliccio alta tensione caduto","Cavi elettrici caduti","Grondaia crollata in strada","Grondaia caduta addosso","Pensilina distributore pericolante","Pensilina autogrill pericolante","Pensilina crollata"]
+    Vento:["Albero in carreggiata","Albero su auto vuota","Albero su auto occupata","Albero pericolante","Albero caduto sulla strada","Albero caduto sul sentiero","Albero sul tetto","Albero sui cavi","Siepe divelta dal vento","Antenna caduta sul tetto","Tenda da sole divelta","Ponteggio nel vento","Ponteggio crollato in strada","Ponteggio crollato su auto","Gonfiabile volato via col vento","Alveare caduto dal tetto","Sup trascinato dal vento","Albero su pista ciclabile","Albero su panchina al parco","Tromba d'aria","Traliccio pericolante","Traliccio caduto su auto","Traliccio alta tensione caduto","Cavi elettrici caduti","Grondaia crollata in strada","Grondaia caduta addosso","Pensilina distributore pericolante","Pensilina autogrill pericolante","Pensilina crollata"],
+    Grandine:["Feriti dalla grandine","Grandine in alta quota","Albero in carreggiata","Albero su auto occupata","Albero su auto vuota","Albero caduto sulla strada","Albero sui cavi","Albero sul tetto","Tenda da sole divelta","Antenna caduta sul tetto","Grondaia crollata in strada"],
+    "Tromba d'aria":["Tromba d'aria","Albero in carreggiata","Albero su auto occupata","Albero caduto sulla strada","Traliccio caduto su auto","Traliccio alta tensione caduto","Ponteggio crollato in strada","Ponteggio crollato su auto","Gonfiabile volato via col vento","Antenna caduta sul tetto","Grondaia crollata in strada","Cavi elettrici caduti"]
   };
   // danni tipici di temporale e vento forte: pescano con peso triplo rispetto agli altri della lista
   const STORM_TIPICI = {
     Temporale:new Set(["Albero in carreggiata","Albero su auto occupata","Albero su auto vuota","Albero caduto sulla strada","Albero sui cavi","Albero sul tetto","Colpito da fulmine","Fulmine vicino agli escursionisti","Albero incendiato da fulmine","Feriti dalla grandine","Grandine in alta quota","Sottopasso allagato con auto","Sottopasso allagato","Garage interrato allagato","Garage allagato","Roggia esondata","Roggia straripata","Tromba d'aria","Sottopasso ferroviario allagato"]),
-    Vento:new Set(["Albero in carreggiata","Albero su auto vuota","Albero su auto occupata","Albero caduto sulla strada","Albero pericolante","Albero sul tetto","Albero sui cavi","Antenna caduta sul tetto","Tenda da sole divelta","Ponteggio nel vento","Ponteggio crollato in strada","Tromba d'aria","Traliccio pericolante","Traliccio caduto su auto","Siepe divelta dal vento","Gonfiabile volato via col vento","Grondaia crollata in strada"])
+    Vento:new Set(["Albero in carreggiata","Albero su auto vuota","Albero su auto occupata","Albero caduto sulla strada","Albero pericolante","Albero sul tetto","Albero sui cavi","Antenna caduta sul tetto","Tenda da sole divelta","Ponteggio nel vento","Ponteggio crollato in strada","Tromba d'aria","Traliccio pericolante","Traliccio caduto su auto","Siepe divelta dal vento","Gonfiabile volato via col vento","Grondaia crollata in strada"]),
+    Grandine:new Set(["Feriti dalla grandine","Grandine in alta quota","Albero in carreggiata","Albero su auto vuota","Albero caduto sulla strada","Tenda da sole divelta","Antenna caduta sul tetto"]),
+    "Tromba d'aria":new Set(["Tromba d'aria","Traliccio caduto su auto","Traliccio alta tensione caduto","Ponteggio crollato in strada","Ponteggio crollato su auto","Albero su auto occupata","Albero caduto sulla strada","Gonfiabile volato via col vento"])
   };
-  function stormPeso(nome, cond){ const s = STORM_TIPICI[cond]; return (s && s.has(nome)) ? 3 : 1; }
-  const STORM_EVERY = { Temporale:4, Pioggia:12, "Pioggia intensa":6, Vento:5 }; // temporale e vento forte picchiano duro e spesso // game-min tra un danno e l'altro
+  function stormPeso(nome, chiave){ const s = STORM_TIPICI[chiave]; return (s && s.has(nome)) ? 3 : 1; }
+  // game-min tra un danno e l'altro (storico: STORM_EVERY, ora per gruppo in METEO_STORM_EVERY)
   let stormTimer = 0;
   function makeChiamataTipo(nome){
     if(chiamate.length>=3) return null;
     // danno da maltempo mai uguale a uno già aperto o appena uscito: se il nome è occupato se ne usa un altro della stessa lista
     if(tipiAperti().has(nome) || tipoBandito(nome)){
-      const alt = (STORM_TIPI[meteo.cond]||[]).filter(n=>n!==nome && D().TIPI.some(x=>x.nome===n) && !tipiAperti().has(n) && !tipoBandito(n));
+      const alt = stormLista().filter(n=>n!==nome && D().TIPI.some(x=>x.nome===n) && !tipiAperti().has(n) && !tipoBandito(n));
       if(alt.length) nome = alt[rndi(0,alt.length-1)];
     }
     const b = creaBozza(null, nome);
@@ -1442,32 +1458,38 @@ window.COEUSIM = (() => {
     statCall(call); // statistiche: diario chiamata pubblicata
     notaChiamata(call);
     iaArricchisciRemoto(call);
-    const emo = {Temporale:"⛈️",Pioggia:"🌦️","Pioggia intensa":"🌧️",Vento:"💨"}[meteo.cond]||"🔔";
-    log(`${emo} Danno da maltempo a <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm");
+    const emo = METEO_EMOJI[meteo.cond]||"🔔";
+    logRadio(`${emo} Danno da maltempo a <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm"); // radio: era log(), ora logRadio (log mostra solo avvio turno)
     blip(); toast(`${emo} Danno da maltempo in arrivo!`);
     refreshCallMarkers(); renderCalls(); updateStats();
    return call;
  }
 
- function stormTick(dtGameMin){
+  // lista danni della condizione in corso (per gruppo): senza gruppo da tempesta, niente danni
+ function stormLista(){
+   const k = METEO_STORM_LISTA[METEO_GRUPPO[meteo.cond]];
+   return (k && STORM_TIPI[k]) || null;
+ }
+function stormTick(dtGameMin){
  
-    const lista = STORM_TIPI[meteo.cond] || (meteo.cond==="Pioggia intensa" ? STORM_TIPI.Pioggia : null); // l’intensa fa gli stessi danni della pioggia
+    const lista = stormLista();
     if(!lista){ stormTimer = 0; return; }
+    const dmg = METEO_GRUPPO[meteo.cond];
     stormTimer += dtGameMin;
-    if(stormTimer < STORM_EVERY[meteo.cond]+rnd(0,4)) return;
+    if(stormTimer < (METEO_STORM_EVERY[dmg]||999)+rnd(0,4)) return;
     stormTimer = 0;
     if(chiamate.length>=3) return; // coda piena: salta questo giro
     // preferisce un danno non già aperto (tutti uguali solo se la lista è esaurita);
     // i danni tipici della condizione in corso pescano con peso triplo (stormPeso)
-    makeChiamataTipo(pescaStorm(lista, meteo.cond));
+    makeChiamataTipo(pescaStorm(lista, METEO_STORM_LISTA[METEO_GRUPPO[meteo.cond]]));
   }
-  function pescaStorm(lista, cond){
+  function pescaStorm(lista, chiave){
     const liberi = lista.filter(n=>D().TIPI.some(x=>x.nome===n) && !tipiAperti().has(n));
     const pool = liberi.length ? liberi : lista.filter(n=>D().TIPI.some(x=>x.nome===n));
     let totW = 0;
-    for(const n of pool) totW += stormPeso(n, cond);
+    for(const n of pool) totW += stormPeso(n, chiave);
     let rr = Math.random()*totW;
-    for(const n of pool){ rr -= stormPeso(n, cond); if(rr<=0) return n; }
+    for(const n of pool){ rr -= stormPeso(n, chiave); if(rr<=0) return n; }
     return pool[pool.length-1];
   }
 
@@ -1609,7 +1631,7 @@ window.COEUSIM = (() => {
             // squilla stile LSTSim: ora + "Nuova telefonata." + Rispondi (il motivo NON si vede)
             div.innerHTML = `
               <div class="callLST"><span class="callTime">${hhmmss(call.t0)}</span><span class="callText">Nuova telefonata.</span><button class="lstBtn small primary" data-act="ans">Rispondi</button><button class="lstBtn small" data-act="map" title="Mostra su mappa">🗺️</button><button class="lstBtn small" data-act="ref" title="Rifiuta">✖</button></div>`;
-            div.querySelector('[data-act="ans"]').onclick = ()=>{ call.answered = true; call.tAns = statClock; if(!(call.maxi||call.manv)) log(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); }; // tAns = orario risposta (statistiche)
+            div.querySelector('[data-act="ans"]').onclick = ()=>{ call.answered = true; call.tAns = statClock; if(!(call.maxi||call.manv)) logRadio(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); }; // tAns = orario risposta (statistiche), era log() ora logRadio
             div.querySelector('[data-act="map"]').onclick = ()=>{ highlightCall = call.callId; if(map) map.panTo([call.lat,call.lng]); renderCalls(); };
             div.querySelector('[data-act="ref"]').onclick = ()=>rifiutaChiamata(call.callId);
           } else {
@@ -2935,8 +2957,8 @@ window.COEUSIM = (() => {
     if(!mz.path || mz.path.length<2 || !mz.segLens){
       setPath(mz, [[mz.lat,mz.lng],[mz.targetLat,mz.targetLng]]);
     }
-    const uni = isEli(mz) ? 180 : (meteo.cond==="Nebbia" ? 50 : (mz.velKmh||50));
-    const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && meteo.cond!=="Nebbia" && !isEli(mz)) ? mz.segVel : null;
+    const uni = isEli(mz) ? 180 : ((METEO_VEL[meteo.cond]!=null ? METEO_VEL[meteo.cond] : (mz.velKmh||50)));
+    const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && (meteo.cond!=="Nebbia"&&meteo.cond!=="Nebbia con brina" && !isEli(mz))) ? mz.segVel : null;
     let guard = 0;
     if(sv){
       let tLeft = gameHours;
@@ -3798,48 +3820,112 @@ window.COEUSIM = (() => {
     }
   }
 
-  // ---------- METEO: evolve col tempo, sposta le probabilità di ogni tipo ----------
-  let meteo = {cond:"Nuvoloso", temp:14};
-  let meteoTimer = 0;
-  let meteoLastReal = Date.now(); // ultimo cambio effettivo (orologio reale)
+ // ---------- METEO: evolve col tempo, sposta le probabilità di ogni tipo ----------
+ let meteo = {cond:"Coperto", temp:14};
+ let meteoTimer = 0;
+ let meteoLastReal = Date.now(); // ultimo cambio effettivo (orologio reale)
+ let meteoAuto = true; // di default il meteo e quello reale di Milano (Open-Meteo, senza chiavi)
+ let meteoRealeOk = false; // true dopo il primo fetch riuscito: finche fallisce, evolve la simulazione
   const METEO_NEXT = {
-    Sereno:{temp:[18,28], next:{Sereno:60,Nuvoloso:24,Nebbia:6,Vento:10}},
-    Nuvoloso:{temp:[13,20], next:{Nuvoloso:45,Sereno:18,Pioggia:18,Nebbia:9,Vento:10}},
-    Nebbia:{temp:[8,15], next:{Nebbia:40,Nuvoloso:25,Sereno:20,Pioggia:15}},
-    Pioggia:{temp:[9,16], next:{Pioggia:43,"Pioggia intensa":12,Nuvoloso:20,Temporale:13,Vento:12}},
-    "Pioggia intensa":{temp:[8,14], next:{"Pioggia intensa":35,Pioggia:35,Temporale:15,Nuvoloso:15}},
-    Temporale:{temp:[11,18], next:{Temporale:28,Pioggia:35,"Pioggia intensa":14,Nuvoloso:15,Vento:8}},
-    Vento:{temp:[11,19], next:{Vento:35,Nuvoloso:28,Sereno:12,Temporale:12,Pioggia:13}},
-  };
-  const METEO_EMOJI = {Sereno:"☀️",Nuvoloso:"☁️",Nebbia:"🌫️",Pioggia:"🌦️","Pioggia intensa":"🌧️",Temporale:"⛈️",Vento:"💨"};
-  // selettore meteo manuale: il riquadro in alto diventa un tasto con le 7 condizioni;
-  // "Vento" si mostra come "Vento forte". La scelta vale subito, poi il meteo evolve da solo.
-  const METEO_SCELTE = ["Sereno","Nuvoloso","Nebbia","Pioggia","Pioggia intensa","Temporale","Vento"];
-  const METEO_NOME = {Vento:"Vento forte"};
-  function meteoNome(c){ return METEO_NOME[c]||c; }
-  function impostaMeteo(c){
-    if(!METEO_NEXT[c]) return false;
-    meteo.cond = c;
-    const lim = METEO_NEXT[c].temp;
-    if(lim) meteo.temp = rnd(lim[0],lim[1]);
-    meteoTimer = 0; meteoLastReal = Date.now(); meteoUpdate();
-    return true;
-  }
-  function wireMeteo(){
-    const btn = $("meteoBtn"), menu = $("meteoMenu");
-    if(!btn || !menu || btn._w) return; btn._w = true;
-    menu.innerHTML = "";
-    for(const c of METEO_SCELTE){
-      const b = document.createElement("button");
-      b.className = "lstBtn small"; b.style.cssText = "display:block;width:100%;text-align:left;margin:1px 0;";
-      b.textContent = (METEO_EMOJI[c]||"") + " " + meteoNome(c);
-      // scelta manuale: solo stato in header, niente radio (non e una comunicazione operativa)
-      b.onclick = e=>{ e.stopPropagation(); impostaMeteo(c); menu.hidden = true; };
-      menu.appendChild(b);
-    }
-    btn.onclick = e=>{ e.stopPropagation(); menu.hidden = !menu.hidden; };
-    document.addEventListener("click", ()=>{ menu.hidden = true; });
-  }
+    Sereno:{temp:[18,28], next:{Sereno:50,"Prevalentemente sereno":22,"Vento forte":10,Coperto:6,Gelo:4,"Parzialmente nuvoloso":8}},
+    "Prevalentemente sereno":{temp:[16,26], next:{"Prevalentemente sereno":38,Sereno:20,"Parzialmente nuvoloso":20,Coperto:8,"Vento forte":8,Gelo:2,"Pioviggine debole":4}},
+    "Parzialmente nuvoloso":{temp:[14,24], next:{"Parzialmente nuvoloso":32,"Prevalentemente sereno":14,Coperto:20,Sereno:8,"Pioviggine debole":8,"Pioviggine moderata":6,"Pioggia debole":6,"Vento forte":6}},
+    Coperto:{temp:[12,20], next:{Coperto:32,"Parzialmente nuvoloso":14,"Pioviggine debole":12,"Pioviggine moderata":8,"Pioggia debole":10,Nebbia:8,"Vento forte":8,"Rovesci deboli":6,"Neve debole":2}},
+    Nebbia:{temp:[8,15], next:{Nebbia:32,"Nebbia con brina":10,Coperto:22,"Parzialmente nuvoloso":14,"Pioviggine debole":12,Gelo:10}},
+    "Nebbia con brina":{temp:[5,12], next:{"Nebbia con brina":30,Nebbia:28,Coperto:14,"Pioviggine gelata debole":10,Gelo:12,"Pioviggine debole":6}},
+    "Pioviggine debole":{temp:[10,17], next:{"Pioviggine debole":30,"Pioviggine moderata":15,Coperto:18,"Pioggia debole":12,"Parzialmente nuvoloso":10,Nebbia:8,"Rovesci deboli":7}},
+    "Pioviggine moderata":{temp:[10,16], next:{"Pioviggine moderata":28,"Pioviggine debole":18,"Pioviggine intensa":12,"Pioggia debole":12,Coperto:14,"Rovesci deboli":8,Nebbia:8}},
+    "Pioviggine intensa":{temp:[9,15], next:{"Pioviggine intensa":25,"Pioviggine moderata":20,"Pioggia debole":18,"Pioggia moderata":12,"Rovesci moderati":10,Coperto:10,"Rovesci deboli":5}},
+    "Pioviggine gelata debole":{temp:[-2,2], next:{"Pioviggine gelata debole":30,"Pioviggine gelata intensa":15,"Neve debole":18,"Pioggia debole":12,"Nebbia con brina":10,Gelo:15}},
+    "Pioviggine gelata intensa":{temp:[-3,1], next:{"Pioviggine gelata intensa":28,"Pioviggine gelata debole":22,"Neve moderata":15,"Pioggia gelata debole":12,Gelo:13,"Vento forte":10}},
+    "Pioggia debole":{temp:[9,16], next:{"Pioggia debole":30,"Pioggia moderata":18,"Rovesci deboli":12,"Pioggia intensa":8,Coperto:12,Temporale:6,"Vento forte":6,"Pioviggine moderata":5,"Neve debole":3}},
+    "Pioggia moderata":{temp:[9,16], next:{"Pioggia moderata":28,"Pioggia debole":22,"Rovesci moderati":12,"Pioggia intensa":10,Temporale:8,Coperto:8,"Vento forte":8,"Pioviggine intensa":4}},
+    "Pioggia intensa":{temp:[8,14], next:{"Pioggia intensa":28,"Pioggia moderata":24,Temporale:14,"Rovesci violenti":12,"Temporale con grandine":6,"Vento forte":8,"Rovesci moderati":8}},
+    "Pioggia gelata debole":{temp:[-2,2], next:{"Pioggia gelata debole":30,"Pioggia gelata intensa":15,"Pioviggine gelata debole":12,"Neve debole":15,"Pioggia debole":13,Gelo:15}},
+    "Pioggia gelata intensa":{temp:[-3,1], next:{"Pioggia gelata intensa":28,"Pioggia gelata debole":22,"Pioviggine gelata intensa":12,"Neve moderata":14,Gelo:14,"Vento forte":10}},
+    "Neve debole":{temp:[-4,3], next:{"Neve debole":32,"Neve moderata":14,"Neve intensa":6,"Granuli di neve":10,"Rovesci di neve deboli":8,"Pioggia gelata debole":10,Coperto:10,Gelo:10}},
+    "Neve moderata":{temp:[-5,2], next:{"Neve moderata":30,"Neve debole":24,"Neve intensa":10,"Rovesci di neve deboli":8,"Pioggia gelata intensa":8,Gelo:10,"Vento forte":10}},
+    "Neve intensa":{temp:[-7,0], next:{"Neve intensa":32,"Neve moderata":24,"Rovesci di neve intensi":12,"Pioggia gelata intensa":10,Gelo:12,"Vento forte":10}},
+    "Granuli di neve":{temp:[-3,2], next:{"Granuli di neve":28,"Neve debole":26,"Neve moderata":14,"Rovesci di neve deboli":10,Coperto:10,"Pioggia gelata debole":6,Gelo:6}},
+    "Rovesci deboli":{temp:[9,17], next:{"Rovesci deboli":28,"Pioggia debole":26,"Rovesci moderati":12,"Pioggia intensa":6,Temporale:8,Coperto:10,"Vento forte":8,"Parzialmente nuvoloso":2}},
+    "Rovesci moderati":{temp:[9,16], next:{"Rovesci moderati":26,"Pioggia moderata":24,"Rovesci deboli":14,"Pioggia intensa":10,Temporale:8,Coperto:8,"Vento forte":8,"Pioviggine intensa":2}},
+    "Rovesci violenti":{temp:[8,14], next:{"Rovesci violenti":25,"Pioggia intensa":28,Temporale:16,"Rovesci moderati":12,"Temporale con grandine":8,"Vento forte":11}},
+    "Rovesci di neve deboli":{temp:[-4,2], next:{"Rovesci di neve deboli":28,"Neve debole":24,"Neve moderata":14,"Granuli di neve":10,"Pioggia gelata debole":10,Coperto:8,Gelo:6}},
+    "Rovesci di neve intensi":{temp:[-6,0], next:{"Rovesci di neve intensi":30,"Neve intensa":28,"Neve moderata":16,"Pioggia gelata intensa":10,Gelo:8,"Vento forte":8}},
+    Temporale:{temp:[11,18], next:{Temporale:22,"Pioggia moderata":24,"Pioggia intensa":12,"Rovesci violenti":8,"Vento forte":8,"Temporale con grandine":10,Coperto:8,"Pioggia debole":6,"Tromba d'aria":2}},
+    "Temporale con grandine":{temp:[7,15], next:{"Temporale con grandine":26,Temporale:30,"Pioggia intensa":14,"Rovesci violenti":10,"Vento forte":8,"Pioggia moderata":6,"Temporale con grandine intensa":4,"Tromba d'aria":2}},
+    "Temporale con grandine intensa":{temp:[6,14], next:{"Temporale con grandine intensa":24,"Temporale con grandine":28,Temporale:26,"Pioggia intensa":12,"Vento forte":8,"Tromba d'aria":2}},
+    "Vento forte":{temp:[11,19], next:{"Vento forte":28,Coperto:22,Sereno:10,Temporale:10,"Pioggia moderata":8,"Rovesci moderati":6,"Tromba d'aria":2,"Temporale con grandine":3,"Parzialmente nuvoloso":6,Gelo:5}},
+    "Tromba d'aria":{temp:[14,24], next:{"Tromba d'aria":12,Temporale:42,"Vento forte":20,"Pioggia intensa":10,"Temporale con grandine":8,"Rovesci violenti":8}},
+    Gelo:{temp:[-6,0], next:{Gelo:34,"Neve debole":14,"Neve moderata":8,Coperto:18,Sereno:8,Nebbia:8,"Pioggia gelata debole":6,"Nebbia con brina":4}},
+  };;
+  const METEO_EMOJI = {Sereno:"☀️","Prevalentemente sereno":"🌤️","Parzialmente nuvoloso":"⛅",Coperto:"☁️",Nebbia:"🌫️","Nebbia con brina":"🌫️❄️","Pioviggine debole":"🌦️","Pioviggine moderata":"🌦️","Pioviggine intensa":"🌧️","Pioviggine gelata debole":"🌧️❄️","Pioviggine gelata intensa":"🌧️🧊","Pioggia debole":"🌧️","Pioggia moderata":"🌧️","Pioggia intensa":"🌧️💧","Pioggia gelata debole":"🌧️❄️","Pioggia gelata intensa":"🌧️🧊","Neve debole":"🌨️","Neve moderata":"🌨️","Neve intensa":"❄️","Granuli di neve":"🌨️","Rovesci deboli":"🌦️","Rovesci moderati":"🌧️","Rovesci violenti":"⛈️","Rovesci di neve deboli":"🌨️","Rovesci di neve intensi":"❄️🌨️",Temporale:"⛈️","Temporale con grandine":"⛈️🧊","Temporale con grandine intensa":"⛈️🌨️","Vento forte":"🌬️","Tromba d'aria":"🌪️",Gelo:"🥶"};
+ // gruppo di comportamento di ogni condizione (i TIPI usano chiavi Pioggia/Temporale/Vento/Sereno/Nebbia)
+ const METEO_GRUPPO = {Sereno:"sereno","Prevalentemente sereno":"sereno","Parzialmente nuvoloso":"nuvolo",Coperto:"nuvolo",Nebbia:"nebbia","Nebbia con brina":"nebbia","Pioviggine debole":"pioviggine","Pioviggine moderata":"pioviggine","Pioviggine intensa":"pioggia","Pioviggine gelata debole":"gelida","Pioviggine gelata intensa":"gelida","Pioggia debole":"pioggia","Pioggia moderata":"pioggia","Pioggia intensa":"intensa","Rovesci deboli":"pioggia","Rovesci moderati":"pioggia","Rovesci violenti":"intensa","Pioggia gelata debole":"gelida","Pioggia gelata intensa":"gelida","Neve debole":"neve","Neve moderata":"neve","Granuli di neve":"neve","Rovesci di neve deboli":"neve","Neve intensa":"neveforte","Rovesci di neve intensi":"neveforte",Temporale:"temporale","Temporale con grandine":"grandine","Temporale con grandine intensa":"grandine","Vento forte":"vento","Tromba d'aria":"tromba",Gelo:"gelo"};
+ const METEO_STORM_LISTA = {pioggia:"Pioggia",intensa:"Pioggia",temporale:"Temporale",grandine:"Grandine",vento:"Vento",tromba:"Tromba d'aria"};
+ const METEO_STORM_EVERY = {pioggia:12,intensa:6,temporale:4,grandine:5,vento:5,tromba:3}; // game-min tra un danno e l'altro
+ const METEO_STRADA_RISCHIO = {Nebbia:1,"Nebbia con brina":1,"Pioviggine gelata debole":1,"Pioviggine gelata intensa":1,"Pioggia gelata debole":1,"Pioggia gelata intensa":1,"Neve debole":1,"Neve moderata":1,"Neve intensa":1,"Granuli di neve":1,"Rovesci di neve deboli":1,"Rovesci di neve intensi":1,Gelo:1}; // fondo/visibilita: +60% missioni su strada
+ const METEO_VEL = {Nebbia:50,"Nebbia con brina":40,"Neve debole":60,"Neve moderata":60,"Granuli di neve":60,"Rovesci di neve deboli":60,"Neve intensa":50,"Rovesci di neve intensi":50}; // km/h mezzi con visibilita scarsa
+ // Peso meteo del tipo: i nuovi stati riusano la chiave piu vicina, gli altri restano neutri.
+ function meteoPesoTipo(x){
+   const md = x.meteo; if(!md) return 1;
+   const c = meteo.cond;
+   if(md[c]!=null) return md[c];
+   const fb = {"Prevalentemente sereno":"Sereno","Nebbia con brina":"Nebbia","Pioviggine intensa":"Pioggia","Pioggia debole":"Pioggia","Pioggia moderata":"Pioggia","Pioggia intensa":"Pioggia","Rovesci deboli":"Pioggia","Rovesci moderati":"Pioggia","Rovesci violenti":"Pioggia","Pioviggine gelata debole":"Pioggia","Pioviggine gelata intensa":"Pioggia","Pioggia gelata debole":"Pioggia","Pioggia gelata intensa":"Pioggia","Temporale con grandine":"Temporale","Temporale con grandine intensa":"Temporale","Tromba d'aria":"Temporale","Vento forte":"Vento"}[c];
+   if(fb && md[fb]!=null) return md[fb];
+   return 1;
+ }
+ // nomi ed emoji sono le descrizioni WMO di Open-Meteo (niente piu nomi brevi).
+ // (tabella WMO sotto: descrizione + emoji per codice)
+ const METEO_WMO = {0:["Sereno","☀️"],1:["Prevalentemente sereno","🌤️"],2:["Parzialmente nuvoloso","⛅"],3:["Coperto","☁️"],45:["Nebbia","🌫️"],48:["Nebbia con brina","🌫️❄️"],51:["Pioviggine debole","🌦️"],53:["Pioviggine moderata","🌦️"],55:["Pioviggine intensa","🌧️"],56:["Pioviggine gelata debole","🌧️❄️"],57:["Pioviggine gelata intensa","🌧️🧊"],61:["Pioggia debole","🌧️"],63:["Pioggia moderata","🌧️"],65:["Pioggia intensa","🌧️💧"],66:["Pioggia gelata debole","🌧️❄️"],67:["Pioggia gelata intensa","🌧️🧊"],71:["Neve debole","🌨️"],73:["Neve moderata","🌨️"],75:["Neve intensa","❄️"],77:["Granuli di neve","🌨️"],80:["Rovesci deboli","🌦️"],81:["Rovesci moderati","🌧️"],82:["Rovesci violenti","⛈️"],85:["Rovesci di neve deboli","🌨️"],86:["Rovesci di neve intensi","❄️🌨️"],95:["Temporale","⛈️"],96:["Temporale con grandine","⛈️🧊"],99:["Temporale con grandine intensa","⛈️🌨️"]};
+ function meteoDaCodice(code, ventoKmh, tempC){
+   const w = METEO_WMO[Number(code)];
+   let base = w ? w[0] : null;
+   if(!base) return null;
+   const v = Number(ventoKmh), t = Number(tempC);
+   if((base==="Temporale"||base==="Temporale con grandine"||base==="Temporale con grandine intensa") && Number.isFinite(v) && v>=60) return "Tromba d'aria";
+   const cielo = (base==="Sereno"||base==="Prevalentemente sereno"||base==="Parzialmente nuvoloso"||base==="Coperto");
+   if(cielo && Number.isFinite(v) && v>=30) return "Vento forte";
+   if(Number.isFinite(t) && t<=0){
+     if(base==="Pioviggine debole"||base==="Pioviggine moderata") return "Pioggia gelata debole";
+     if(cielo) return "Gelo";
+   }
+   return base;
+ }
+ async function aggiornaMeteoReale(){
+   if(!meteoAuto) return;
+   try{
+     const r = await fetch("https://api.open-meteo.com/v1/forecast?latitude=45.4642&longitude=9.19&current=temperature_2m,weather_code,wind_speed_10m&timezone=Europe%2FRome");
+     const j = await r.json();
+     const cur = j && j.current;
+     if(!cur || !Number.isFinite(Number(cur.temperature_2m))) return;
+     if(!meteoAuto) return; // nel frattempo l'operatore ha scelto a mano: non sovrascrivere
+     meteo.cond = meteoDaCodice(cur.weather_code, cur.wind_speed_10m, cur.temperature_2m) || "Coperto";
+     meteo.temp = Number(cur.temperature_2m);
+     meteoTimer = 0; meteoLastReal = Date.now(); meteoRealeOk = true;
+     meteoUpdate();
+   }catch(_){ /* si riprova al prossimo giro */ }
+ }
+ // Torna al meteo reale (click sul riquadro 🌐 o da console): vale subito, poi rinfresca ogni 10 minuti reali.
+ function meteoReale(){
+   meteoAuto = true;
+   aggiornaMeteoReale();
+   return true;
+ }
+ function impostaMeteo(c){
+   if(!METEO_NEXT[c]) return false;
+   meteoAuto = false; // solo console/test: disattiva il reale finche non torni con meteoReale()
+   meteo.cond = c;
+   const lim = METEO_NEXT[c].temp;
+   if(lim) meteo.temp = rnd(lim[0],lim[1]);
+   meteoTimer = 0; meteoLastReal = Date.now(); meteoUpdate();
+   return true;
+ }
+ function wireMeteo(){
+   const btn = $("meteoBtn"); // niente piu scelta manuale: solo meteo reale di Milano
+   if(!btn || btn._w) return; btn._w = true;
+   btn.onclick = e=>{ e.stopPropagation(); meteoReale(); }; // click = aggiorna subito dal reale
+ }
   // orologio a tasto: scelta manuale dell’ora di gioco (presets + ora esatta);
   // cambia subito fasce orarie, pesi notte/giorno e coerenza missioni
   function impostaOrario(h, m){
@@ -3858,13 +3944,16 @@ window.COEUSIM = (() => {
     btn.onclick = e=>{ e.stopPropagation(); const inp = $("oraInput"); if(inp) inp.value = String(Math.floor(clockMin/60)).padStart(2,"0") + ":" + String(Math.floor(clockMin%60)).padStart(2,"0"); menu.hidden = !menu.hidden; };
     document.addEventListener("click", ()=>{ menu.hidden = true; });
   }
-  function meteoUpdate(){
-    const el=$("wetter");
-    if(el) el.textContent=`${meteoNome(meteo.cond)}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
-    // effetti visivi sulla mappa: disattivati su richiesta (il maltempo genera comunque danni)
-  }
-  function meteoTick(dtGameMin){
-    meteoTimer += dtGameMin;
+ function meteoUpdate(){
+   const el=$("wetter");
+    if(el) el.textContent=`${meteo.cond}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
+   const btn=$("meteoBtn");
+   if(btn) btn.title = "Meteo reale di Milano — premi per aggiornare subito";
+   // effetti visivi sulla mappa: disattivati su richiesta (il maltempo genera comunque danni)
+ }
+ function meteoTick(dtGameMin){
+   if(meteoAuto&&meteoRealeOk) return; // meteo reale: lo aggiorna il fetch, non la simulazione
+   meteoTimer += dtGameMin;
     meteo.temp += rnd(-0.15,0.15)*dtGameMin*0.2;
     // cambio ogni 2,5-4,5 ore di gioco E almeno ogni 3 minuti reali: ad alta velocità
     // il meteo non impazzisce più (prima cambiava ogni ~30 secondi a 100x)
@@ -3872,7 +3961,7 @@ window.COEUSIM = (() => {
     if(Date.now()-meteoLastReal < 180000) return;
     meteoTimer = 0;
     meteoLastReal = Date.now();
-    const cfg = METEO_NEXT[meteo.cond] || METEO_NEXT.Nuvoloso;
+    const cfg = METEO_NEXT[meteo.cond] || METEO_NEXT.Coperto;
     let r = Math.random()*100, nc = meteo.cond;
     for(const k of Object.keys(cfg.next)){ r-=cfg.next[k]; if(r<=0){ nc=k; break; } }
     // il meteo evolve da solo: solo stato in header, niente radio (non e una comunicazione operativa)
@@ -5579,9 +5668,11 @@ window.COEUSIM = (() => {
     const _tipiErr = validaTipi(); // schema + coerenza dinamica/mezzi/pazienti di tutti i TIPI
     if(_tipiErr.length) console.warn("[COEU] tipi da rivedere ("+_tipiErr.length+"):", _tipiErr.join(" | "));
     initMap();
-    renderCalls(); renderListe(); updateStats(); updateClock();
-    wireMeteo(); // il riquadro meteo e un tasto con scelta manuale
-    wireOra(); // l’orologio e un tasto con scelta manuale dell’ora
+   renderCalls(); renderListe(); updateStats(); updateClock();
+   wireMeteo(); // il riquadro meteo mostra il reale di Milano (click = aggiorna subito)
+   aggiornaMeteoReale(); // meteo reale al boot (se fallisce, resta la simulazione)
+   setInterval(()=>{ aggiornaMeteoReale(); }, 600000); // rinfresco ogni 10 minuti reali
+   wireOra(); // l’orologio e un tasto con scelta manuale dell’ora
     try{ setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },300); }catch(e){}
     try{ window.addEventListener("resize", ()=>{ try{ map.invalidateSize(); }catch(e){} }); }catch(e){}
     log("Centrale COEU SIM VA/CO/LC — inizio turno. Mezzi pronti.");
@@ -5640,8 +5731,10 @@ window.COEUSIM = (() => {
     setRitmo(v){ if(RITMI[v]){ flusso.ritmo=v; programmaFlusso(); } return flusso.ritmo; },
     getRitmo(){ return flusso.ritmo; },
     flussoStato(){ const c=caricoCentrale(); return {ritmo:flusso.ritmo, auto:autoInflow, attesa:Math.round(flusso.attesa*100)/100, aperti:c.aperti, coda:c.coda, fuochi:flusso.fuochi.slice(), ora:Math.floor(clockMin/60)+":"+String(Math.floor(clockMin%60)).padStart(2,"0")}; },
-    setMeteo(c){ return impostaMeteo(c); },
-    setOrario(h,m){ return impostaOrario(h,m); },
+   setMeteo(c){ return impostaMeteo(c); },
+   meteoReale(){ return meteoReale(); },
+   debugMeteo(code,vento,temp){ return meteoDaCodice(code,vento,temp); },
+   setOrario(h,m){ return impostaOrario(h,m); },
     setFascia(i,k,v){ setFascia(i,k,v); },
     applicaFasce(){ applicaFasce(); },
     syncFasce(){ syncFasce(); },
@@ -5859,9 +5952,10 @@ window.COEUSIM = (() => {
     },
     // distribuzione danni maltempo (per i test): debugStorm("Temporale", 20000) -> conteggi per tipo
     debugStorm(cond, n){
-      const lista = STORM_TIPI[cond] || [];
+      const gk = METEO_STORM_LISTA[METEO_GRUPPO[cond]];
+      const lista = (gk && STORM_TIPI[gk]) || [];
       const c = {};
-      for(let k=0;k<(n||5000);k++){ const t = pescaStorm(lista, cond); c[t]=(c[t]||0)+1; }
+      for(let k=0;k<(n||5000);k++){ const t = pescaStorm(lista, gk); c[t]=(c[t]||0)+1; }
       return {cond, N:n||5000, conteggi:c};
     },
     // tipi alpini agganciati alle montagne vere (per verifica): montagnaLista() -> nomi
