@@ -301,7 +301,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
         ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
-        ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
+        ((isVVF || !(v.c && v.c !== v.n)) ? "" : '<span class="cod">' + esc(v.c) + "</span>") +
         '<span class="st">' + (isVVF ? "" : '<span class="dot" style="background:' + dotMezzo(v.s) + '"></span>') +
         esc(statoMezzoIT(v.s)) + "</span></div>";
     }).join("") + "</div>";
