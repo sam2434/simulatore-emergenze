@@ -65673,6 +65673,19 @@ window.COEUSIM = (() => {
     return `quadro peggiore: ${p.q} (${p.c}, salute ${Math.round(Lq[bi])}%)`;
   }
   // scheda intervento stile LSTSim: una riga per paziente con % colorata + stato trasporto a destra
+  // riga età/sesso dei pazienti noti (al posto del Luogo nel dettaglio)
+  function etaSessoHTML(iv){
+    const Lq = iv.pazienti||[];
+    const parts = [];
+    for(let k=0;k<Lq.length;k++){
+      if(Lq[k]==null) continue;
+      const pr = (iv.profili||[])[k];
+      if(!pr) continue;
+      parts.push(pr.s+" "+pr.e);
+    }
+    if(!parts.length) return '\uD83D\uDC64 Nessun ferito';
+    return '\uD83D\uDC64 '+parts.join(' · ');
+  }
   function saluteCol(s){
     const v = Math.round(s);
     if(v<30) return "#d40000";
@@ -68432,7 +68445,7 @@ window.COEUSIM = (() => {
         <button class="lstBtn" id="assistBtn">🆘 Richiedi assistenza</button>
         <button class="lstBtn" id="editBtn">Chiudi intervento</button>
       </div>
-      <div class="kv"><b>Luogo:</b> ${luogoIV(iv,false)}</div>
+      ${iv.reportFatto?`<div class="kv small>${etaSessoHTML(iv)}</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&!iv.stabilizzato?`<div class="kv">🩺 Stabilizzazione in corso: trasporto al 100% di salute</div>`:""}
       ${msaAtteso(iv)?`<div class="kv">⏳ In attesa di MSA</div>`:""}
       ${iv.reportFatto&&iv.trasporto&&iv.stabilizzato&&(iv.daTrasportare||0)>0?`<div class="kv">💚 Pazienti stabili al 100%: pronti per il trasporto</div>`:""}
@@ -68732,6 +68745,8 @@ window.COEUSIM = (() => {
         lat: iv.lat||null,
         lng: iv.lng||null,
         nPaz: (iv.pazienti||[]).length,
+        salute: (iv.pazienti||[]).map(s=>s==null?null:Math.round(s)),
+        sessoEta: (iv.profili||[]).map(p=>({sx:p?p.s:"?", e:p?p.e:"?", t:p?p.t:3})),
         stato: iv.stato||"attesa",
         codice: iv.prio>0 ? COLORI_NOME(iv.prio) : "SENZA CODICE",
         mezzi: (iv.mezziIds||[]).map(c=>{
@@ -68760,7 +68775,7 @@ window.COEUSIM = (() => {
       const pazArr = Array.isArray(r.pazienti) ? r.pazienti : [];
       const salute = pazArr.map(p=>{ const v = +((p && p.s) ?? 70); return Math.max(3, Math.min(99, Math.round(v))); });
       const iaStabili = salute.length ? salute.every(s=>s>=100) : true; // salute reale: niente "stabili al 100%" né "a bordo" se non è vero
-      const profili = pazArr.map(p=>({ s:"?", e:"?", c:"cosciente", q:"quadro in verifica", v:"—", intr:false, t:(+((p && p.t) ?? 3)) || 3 }));
+      const profili = pazArr.map(p=>({ s:(p&&p.sx)||"?", e:(p&&p.e!=null)?p.e:"?", c:"cosciente", q:"quadro in verifica", v:"—", intr:false, t:(+((p && p.t) ?? 3)) || 3 }));
       let passatoMin = 0;
       try{ const ca = new Date(r.created_at).getTime(); if(ca>0) passatoMin = Math.max(0, Math.round((Date.now()-ca)/60000)); }catch(_){}
       const t0 = Math.max(0, clockMin - passatoMin);
@@ -69326,6 +69341,7 @@ window.COEULIVE = (() => {
       stato: mappaStato(m.stato),
       pubblica: true,
       codice: m.codice || "SENZA CODICE",
+      pazienti: Array.isArray(m.salute) ? m.salute.map((s,k)=>({s:s, t:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].t)||3, sx:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].sx)||"?", e:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].e)||"?" })) : [],
       mezzi: Array.isArray(m.mezzi) ? m.mezzi : [],
       origine: adottata ? "ia" : "simulatore",
       gestita_da: "simulatore", // chi scrive qui è il simulatore; l'IA salta queste righe
