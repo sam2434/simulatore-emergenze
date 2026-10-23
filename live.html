@@ -264,7 +264,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     var cat = String((v && v.cat) || "").toUpperCase();
     if(t === "ELI") return '<img src="https://user.uploads.dev/file/7e836fc9a694f41cdc652960e2d05569.gif" alt="🚁">';
     if(t === "AUTOMEDICA") return '<img src="https://user.uploads.dev/file/56de311743a246030d8b056afd9fd5d6.gif" alt="🚓">';
-    if(cat === "VVF") return "🚒";
+    if(cat === "VVF" || t === "VVF") return "🚒";
     if(t === "MSB" || t === "MSA") return "🚑";
     return (v && v.tr) ? "🚑" : "🚓";
   }
