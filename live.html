@@ -54,6 +54,7 @@
     border-bottom:1px solid #eef2f5; font-size:13px; }
   .mz:last-child{ border-bottom:0; }
   .mz .amb{ font-size:19px; }
+  .mz .amb img{ height:22px; vertical-align:middle; }
   .mz .nome{ font-weight:700; }
   .mz .tipo{ font-size:11px; font-weight:800; padding:0 6px; border-radius:10px;
     background:#eef2f5; color:var(--mut); white-space:nowrap; }
@@ -261,10 +262,10 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   function iconaMezzo(v){
     var t = String((v && v.t) || "").toUpperCase();
     var cat = String((v && v.cat) || "").toUpperCase();
-    if(t === "ELI") return "🚁";
+    if(t === "ELI") return '<img src="https://user.uploads.dev/file/7e836fc9a694f41cdc652960e2d05569.gif" alt="🚁">';
+    if(t === "AUTOMEDICA") return '<img src="https://user.uploads.dev/file/56de311743a246030d8b056afd9fd5d6.gif" alt="🚓">';
     if(cat === "VVF") return "🚒";
     if(t === "MSB" || t === "MSA") return "🚑";
-    if(t === "AUTOMEDICA") return "🚓";
     return (v && v.tr) ? "🚑" : "🚓";
   }
   function tipoMezzo(v){
@@ -295,12 +296,13 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var pazCod = String((v && v.tpaz) || "").toUpperCase();
       var pazCls = ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pazCod) >= 0 ? pazCod : "";
       var pazLet = trasportoDaCodice(pazCls);
+      var isVVF = String((v && v.t) || "").toUpperCase() === "VVF" || String((v && v.cat) || "").toUpperCase() === "VVF";
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
-        '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>" +
+        (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
         ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
         ((v.c && v.c !== v.n) ? '<span class="cod">' + esc(v.c) + "</span>" : "") +
-        '<span class="st"><span class="dot" style="background:' + dotMezzo(v.s) + '"></span>' +
+        '<span class="st">' + (isVVF ? "" : '<span class="dot" style="background:' + dotMezzo(v.s) + '"></span>') +
         esc(statoMezzoIT(v.s)) + "</span></div>";
     }).join("") + "</div>";
   }
