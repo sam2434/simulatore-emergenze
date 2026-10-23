@@ -431,10 +431,13 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   }
   function aggiornaLati(){
     var cor = 0, chi = 0, nMSB = 0, nVVF = 0, nELI = 0, nMSA = 0;
+    var cR = 0, cG = 0, cV = 0; // missioni di oggi per codice
     var visti = {}; // codice mezzo -> già contato (un mezzo uscito 2 volte conta 1)
     righe.forEach(function(r){
       if(r.stato === "attiva" || r.stato === "in_corso") cor++;
       else if(r.stato === "chiusa") chi++;
+      var cd = String(r.codice || "").toUpperCase();
+      if(cd === "ROSSO") cR++; else if(cd === "GIALLO") cG++; else if(cd === "VERDE") cV++;
       var mz = listaMezzi(r);
       // tutti i mezzi usciti oggi, anche dalle chiuse: niente gate su stato riga/mezzo
       mz.forEach(function(v){
@@ -450,7 +453,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         else nMSB++;
       });
     });
-    $("latoSX").innerHTML = '<div class="pannello"><h3>📡 Oggi</h3>' +
+    $("latoSX").innerHTML = '<div class="pannello"><h3>📡 Oggi <small style="font-weight:normal">🔴 ' + cR + " 🟡 " + cG + " 🟢 " + cV + "</small></h3>" +
       '<div class="riga"><span>In corso</span><b>' + cor + "</b></div>" +
       '<div class="riga"><span>Chiuse</span><b>' + chi + "</b></div>" +
       '<div class="riga"><span>🚑 mezzi 118</span><b>' + nMSB + "</b></div>" +
