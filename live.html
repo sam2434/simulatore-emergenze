@@ -346,10 +346,10 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var pazLet = trasportoDaCodice(pazCls);
       var isVVF = String((v && v.t) || "").toUpperCase() === "VVF" || String((v && v.cat) || "").toUpperCase() === "VVF";
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
-        (v.osp ? '<span class="osp" title="' + esc(v.osp) + '">→ ' + esc(v.osp) + '</span>' : "") +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
         ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
+        (v.osp ? '<span class="osp" title="' + esc(v.osp) + '">H ' + esc(String(v.osp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "")) + '</span>' : "") +
         ((isVVF || !(v.c && v.c !== v.n)) ? "" : '<span class="cod">' + esc(v.c) + "</span>") +
         '<span class="st">' + esc(statoMezzoIT(v.s)) + "</span></div>";
     }).join("") + "</div>";
@@ -381,7 +381,12 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var parr = Array.isArray(r.pazienti) ? r.pazienti : JSON.parse(r.pazienti || "[]");
         var pp = parr.filter(function(p){ return p && (p.sx === "M" || p.sx === "F") && p.e !== "?" && p.e != null; })
           .map(function(p){ return p.sx + " " + p.e; });
-        if (pp.length) eta = '<div class="rigaEnti">👤 ' + esc(pp.join(" · ")) + "</div>";
+        if (pp.length) {
+          var sulPosto = r.stato === "chiusa" || listaMezzi(r).some(function(v){
+            return v && (v.s === "sul_posto" || v.s === "pronto" || v.s === "trasporto" || v.s === "ospedale");
+          });
+          if (sulPosto) eta = '<div class="rigaEnti">👤 ' + esc(pp.join(" · ")) + "</div>";
+        }
       } catch (_) {}
       return '<article class="card">' +
         '<div class="badge cod-' + codCls + '" title="Codice di invio: ' + esc(cod) + '">✳</div>' +
