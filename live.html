@@ -18,6 +18,29 @@
   header{ position:sticky; top:0; z-index:10; background:var(--areu); color:#fff;
     padding:10px 14px; box-shadow:0 2px 6px #0005; }
   .wrap{ max-width:1100px; margin:0 auto; }
+  /* ===== Layout 3 colonne (solo schermi larghi) ===== */
+  .layout{ display:flex; gap:12px; align-items:flex-start; }
+  .feed{ flex:1 1 auto; min-width:0; }
+  .side{ flex:none; width:240px; }
+  .sideR{ width:280px; }
+  .pannello{ background:var(--card); border-radius:4px; padding:10px 12px;
+    margin-bottom:10px; box-shadow:0 1px 3px #0003; font-size:13px; }
+  .pannello h3{ margin:0 0 6px; font-size:12px; text-transform:uppercase;
+    letter-spacing:.5px; color:var(--mut); }
+  .pannello .riga{ display:flex; justify-content:space-between; gap:8px; padding:2px 0; }
+  .pannello .riga b{ font-variant-numeric:tabular-nums; }
+  .pannello .leg{ color:var(--mut); font-size:12px; line-height:1.7; }
+  .pannello .comp{ font-weight:700; }
+  .pannello .sub{ color:var(--mut); font-size:12px; }
+  @media (min-width:1280px){
+    main.wrap{ max-width:1560px; }
+    .side{ position:sticky; top:132px; }
+  }
+  @media (max-width:1279px){
+    .layout{ flex-direction:column; }
+    .feed{ order:-1; width:100%; }
+    .side,.sideR{ width:100%; }
+  }
   .bar{ display:flex; align-items:center; gap:12px; }
   .hamb{ font-size:24px; background:none; border:0; color:#fff; cursor:pointer; padding:2px 6px; }
   .logo{ display:flex; align-items:center; gap:10px; flex:1; }
@@ -126,10 +149,16 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
 </header>
 <main class="wrap">
   <div id="statoRiga">Connessione in corso… <span id="conto"></span></div>
+  <div class="layout">
+  <aside class="side" id="latoSX"></aside>
+  <div class="feed">
   <div id="errBox" class="errore" hidden></div>
   <div id="caricamento"><div class="spinner"></div><div class="centro">Caricamento missioni…</div></div>
   <div id="griglia"></div>
   <div id="vuoto" class="centro" hidden>Nessuna missione pubblicata al momento. 🚑</div>
+  </div>
+  <aside class="side sideR" id="latoDX"></aside>
+  </div>
 </main>
 <footer>Solo lettura — i dati si aggiornano da soli. <a href="index.html">Apri il simulatore</a></footer>
 
@@ -346,6 +375,71 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · ⏱ " + esc(dur) + " · #" + esc(r.missione_id) + "</div>" +
         "</div></article>";
     }).join("");
+    aggiornaLati();
+  }
+
+  var TOP5 = ["🚗 Incidenti stradali", "🫀 Malori", "🔥 Incendi", "🤕 Cadute", "🔍 Ricerche persona"];
+  function gruppoTop(tip){
+    var n = String(tip || "").toLowerCase();
+    if(/incendio|incendi|fuoco|fiamme|rogo|esplosione|esplode|brucia|ustione/.test(n)) return TOP5[2];
+    if(/dispers|scompars|ricerc|smarrit|allontan|non rientr|perso nel/.test(n)) return TOP5[4];
+    if(/caduta|caduto|scivola|scivolone|inciamp|precipit|dirupo|scarpata|burrone/.test(n)) return TOP5[3];
+    if(/scontro|tamponamento|tampona|investi|frontale|schianto|ribalta|fuori strada|uscita di strada|stradale|contro |carambola|svincolo|rotatoria|guardrail|spartitraffico|tir\b|camion|autoarticolato|monopattino|bicicletta|pedone|furgone|\bmoto\b|\bauto\b|veicolo|automobile/.test(n) && !/moto d'acqua|motoslitta|motosega|pedal[oò]|sup\b|piscina|in acqua|nel lago/.test(n)) return TOP5[0];
+    if(/malore|infarto|ictus|arresto|sincope|lipotimia|svenimento|collasso|coma|toracico|dispnea|dolore|febbre|vomito|nausea|vertigin|emicrania|panico|ansia|psich|parto|gravid|diabet|ipertens|aritmia|palpit|asma|convuls|epiless|shock anafil|intossicazione|avvelen|colica|reazione allerg|trasporto|dialisi|calo di|pressione|insufficienza|overdose|lomb|soffocamento|boccone|crisi /.test(n)) return TOP5[1];
+    return null;
+  }
+  function listaMezzi(r){
+    try { return Array.isArray(r.mezzi) ? r.mezzi : JSON.parse(r.mezzi || "[]"); }
+    catch (_) { return []; }
+  }
+  function listaPaz(r){
+    try { var a = Array.isArray(r.pazienti) ? r.pazienti : JSON.parse(r.pazienti || "[]"); return Array.isArray(a) ? a : []; }
+    catch (_) { return []; }
+  }
+  function aggiornaLati(){
+    var att = 0, cor = 0, chi = 0, m118 = 0, mvvf = 0;
+    var top = {}; TOP5.forEach(function(k){ top[k] = 0; });
+    var comp = null, best = -1, dec = 0;
+    righe.forEach(function(r){
+      if(r.stato === "attiva") att++;
+      else if(r.stato === "in_corso") cor++;
+      else if(r.stato === "chiusa") chi++;
+      var mz = listaMezzi(r);
+      if(r.stato !== "chiusa"){
+        mz.forEach(function(v){
+          var s = String((v && v.s) || "");
+          if(s !== "viaggio" && s !== "sul_posto" && s !== "pronto" && s !== "trasporto" && s !== "ospedale") return;
+          var t = String((v && v.t) || "").toUpperCase();
+          var cat = String((v && v.cat) || "").toUpperCase();
+          if(t === "VVF" || cat === "VVF") mvvf++; else m118++;
+        });
+      }
+      var g = gruppoTop(r.tipologia);
+      if(g) top[g]++;
+      var score = (+r.num_pazienti || 0) + mz.length;
+      if(score > best){ best = score; comp = r; }
+      listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) dec++; });
+    });
+    $("latoSX").innerHTML = '<div class="pannello"><h3>📡 Adesso</h3>' +
+      '<div class="riga"><span>Attive</span><b>' + att + "</b></div>" +
+      '<div class="riga"><span>In corso</span><b>' + cor + "</b></div>" +
+      '<div class="riga"><span>Chiuse</span><b>' + chi + "</b></div>" +
+      '<div class="riga"><span>🚑 118 impegnati</span><b>' + m118 + "</b></div>" +
+      '<div class="riga"><span>🚒 VVF in uscita</span><b>' + mvvf + "</b></div></div>" +
+      '<div class="pannello"><h3>Legenda</h3><div class="leg">' +
+      "✳ codice di invio<br>🤖 missione della centrale IA<br>👤 sesso ed età dei pazienti<br>" +
+      "🚑 ambulanza · 🚓 automedica/MSA · 🚁 elisoccorso · 🚒 VVF</div></div>";
+    var orde = TOP5.slice().sort(function(a, b){ return top[b] - top[a]; });
+    var t = '<div class="pannello"><h3>🏆 Top 5 tipologie</h3>' +
+      orde.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
+    if(comp){
+      t += '<div class="pannello"><h3>🧩 Intervento più complesso</h3>' +
+        '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
+        (+comp.num_pazienti || 0) + " pazienti · " + listaMezzi(comp).length + " mezzi</div></div>";
+    }
+    t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
+    $("latoDX").innerHTML = t;
   }
 
   function mostraErrore(msg, riprova){
