@@ -21,6 +21,10 @@
   /* ===== Layout 3 colonne (solo schermi larghi) ===== */
   .layout{ display:flex; gap:12px; align-items:flex-start; }
   .feed{ flex:1 1 auto; min-width:0; }
+  .feedDue{ display:flex; gap:12px; align-items:flex-start; }
+  .colonna{ flex:1 1 0; min-width:0; }
+  .colTit{ font-weight:800; color:var(--areu); font-size:13px; margin:2px 2px 8px; }
+  .colTit small{ font-weight:normal; color:var(--mut); }
   .side{ flex:none; width:240px; }
   .sideR{ width:280px; }
   .pannello{ background:var(--card); border-radius:4px; padding:10px 12px;
@@ -44,6 +48,10 @@
     .layout{ flex-direction:column; }
     .feed{ order:-1; width:100%; }
     .side,.sideR{ width:100%; }
+  }
+  @media (max-width:900px){
+    .feedDue{ flex-direction:column; }
+    .colonna{ width:100%; }
   }
   .bar{ display:flex; align-items:center; gap:12px; }
   .hamb{ font-size:24px; background:none; border:0; color:#fff; cursor:pointer; padding:2px 6px; }
@@ -161,7 +169,10 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   <div class="feed">
   <div id="errBox" class="errore" hidden></div>
   <div id="caricamento"><div class="spinner"></div><div class="centro">Caricamento missioni…</div></div>
-  <div id="griglia"></div>
+  <div class="feedDue">
+    <div class="colonna"><div class="colTit" id="titSX">VA · CO · LC · MB <small id="contoSX"></small></div><div id="grigliaSX"></div></div>
+    <div class="colonna"><div class="colTit" id="titDX">Brescia · altre <small id="contoDX"></small></div><div id="grigliaDX"></div></div>
+  </div>
   <div id="vuoto" class="centro" hidden>Nessuna missione pubblicata al momento. 🚑</div>
   </div>
   <aside class="side sideR" id="latoDX"></aside>
@@ -407,19 +418,12 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     }).join("") + "</div>";
   }
 
-  function disegna(){
-    var q = ($("cerca").value || "").toLowerCase();
-    var f = $("filtroStato").value;
-    var vis = righe.filter(function(r){
-      if(f === "attive" && !(r.stato === "attiva" || r.stato === "in_corso")) return false;
-      if(f !== "attive" && f !== "tutte" && r.stato !== f) return false;
-      if(!q) return true;
-      return ((r.tipologia || "") + " " + (r.localita || "") + " " + (r.comune || "")).toLowerCase().indexOf(q) >= 0;
-    });
-    var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
-    $("conto").textContent = "· " + aperte + " aperte · aggiornato " + new Date().toLocaleTimeString("it-IT");
-    $("vuoto").hidden = vis.length > 0;
-    $("griglia").innerHTML = vis.map(function(r){
+  // centrali a sx, tutto il resto (BS + future) a dx
+  function inDX(r){
+    var p = String((r && r.provincia) || "").toUpperCase();
+    return ["VA","CO","LC","MB","MI"].indexOf(p) < 0;
+  }
+  function cardHTML(r){
       var st = r.stato === "in_corso" ? "in_corso" : r.stato;
       var luogo = (r.comune || "").toUpperCase() + (r.provincia ? " (" + esc(r.provincia) + ")" : "");
       var via = esc(r.localita || "?");
@@ -451,7 +455,26 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         cronologiaHTML(r.cronologia) +
         '<div class="rigaEnti">🕐 ' + esc(quando(r.updated_at)) + " · ⏱ " + esc(dur) + " · #" + esc(r.missione_id) + "</div>" +
         "</div></article>";
-    }).join("");
+  }
+
+  function disegna(){
+    var q = ($("cerca").value || "").toLowerCase();
+    var f = $("filtroStato").value;
+    var vis = righe.filter(function(r){
+      if(f === "attive" && !(r.stato === "attiva" || r.stato === "in_corso")) return false;
+      if(f !== "attive" && f !== "tutte" && r.stato !== f) return false;
+      if(!q) return true;
+      return ((r.tipologia || "") + " " + (r.localita || "") + " " + (r.comune || "")).toLowerCase().indexOf(q) >= 0;
+    });
+    var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
+    $("conto").textContent = "· " + aperte + " aperte · aggiornato " + new Date().toLocaleTimeString("it-IT");
+    $("vuoto").hidden = vis.length > 0;
+    var visSX = vis.filter(function(r){ return !inDX(r); });
+    var visDX = vis.filter(function(r){ return inDX(r); });
+    $("contoSX").textContent = "· " + visSX.length;
+    $("contoDX").textContent = "· " + visDX.length;
+    $("grigliaSX").innerHTML = visSX.map(cardHTML).join("");
+    $("grigliaDX").innerHTML = visDX.length ? visDX.map(cardHTML).join("") : '<div class="centro">Nessuna missione da Brescia / altre province. 🚑</div>';
     aggiornaLati();
   }
 
@@ -524,10 +547,15 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     var comp = null, best = -1, dec = 0, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
     var freqTip = {}, biz = null, bizFreq = 1e9, bizTime = "", comCount = {}, comTop = "", comTopN = 0;
     var usoMezzi = {}, topV = null, topVN = 0;
+    var critS = 5, critR = null; // soglia: il pannello appare solo sotto il 5%
     righe48.forEach(function(r){
       var mz = listaMezzi(r);
       var g = gruppoTop(r.tipologia, r.num_pazienti);
       if(g) top[g]++;
+      listaPaz(r).forEach(function(p){
+        var ps = (p && p.s !== null && p.s !== "" && p.s !== "?") ? +p.s : NaN;
+        if(isFinite(ps) && ps < critS){ critS = ps; critR = r; }
+      });
       var tk = String(r.tipologia || "?");
       freqTip[tk] = (freqTip[tk] || 0) + 1;
       var cck = String(r.comune || "?") + (r.provincia ? " (" + r.provincia + ")" : "");
@@ -613,7 +641,17 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="comp">' + iconaMezzo(topV) + " " + esc(((topV && (topV.n || topV.c)) || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc(tipoMezzo(topV)) + " · " + topVN + " missioni</div></div>";
     }
-    $("latoSX").innerHTML = sx + bz + cm + vm;
+    var pc = '<div class="pannello mini"><h3>💔 Paziente più critico (48h)</h3>';
+    if(critR){
+      var sTxt = critS <= 0 ? "deceduto" : ("salute " + Math.round(critS) + "%");
+      pc += '<div class="comp">' + esc((critR.tipologia || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc((critR.comune || "") + (critR.provincia ? " (" + critR.provincia + ")" : "")) + " · " + esc(sTxt) + " · " +
+        esc(quando(critR.created_at || critR.updated_at)) + "</div>";
+    } else {
+      pc += '<div class="sub">Nessun paziente sotto il 5% nelle ultime 48h.</div>';
+    }
+    pc += "</div>";
+    $("latoSX").innerHTML = sx + bz + cm + vm + pc;
     var t = '<div class="pannello"><h3>🏆 Top tipologie (48h)</h3>' +
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
