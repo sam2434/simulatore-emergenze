@@ -552,7 +552,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var oo = v && v.osp;
         if(oo) ospCount[oo] = (ospCount[oo] || 0) + 1;
       });
-      if(nvv > bestV || (nvv === bestV && totvv > bestVtot)){ bestV = nvv; bestVtot = totvv; compV = r; }
+      // storico 48h: conta TUTTI i VVF usciti (anche rientrati/chiusi), come il pannello di destra
+      if(totvv > bestV){ bestV = totvv; bestVtot = totvv; compV = r; }
       var score = mz.length;
       if(score > best){ best = score; comp = r; }
       listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) dec++; });
@@ -567,8 +568,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     for(var ok in ospCount){ if(ospCount[ok] > topOspN){ topOspN = ospCount[ok]; topOsp = ok; } }
     if(compV && bestV > 0){
       var vvMz = listaMezzi(compV).filter(function(v){
-        return (String((v && v.t) || "").toUpperCase() === "VVF" ||
-                String((v && v.cat) || "").toUpperCase() === "VVF") && v.s !== "rientro";
+        return String((v && v.t) || "").toUpperCase() === "VVF" ||
+               String((v && v.cat) || "").toUpperCase() === "VVF";
       });
       var vvNomi = vvMz.map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
       sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF (48h)</h3>' +
