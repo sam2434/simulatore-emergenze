@@ -648,9 +648,21 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     var pc = '<div class="pannello mini"><h3>💔 Paziente più critico (48h)</h3>';
     if(critR){
       var sTxt = critS <= 0 ? "deceduto" : ("salute " + Math.round(critS) + "%");
+      var critChiusa = critR.stato === "chiusa";
+      var critMz = listaMezzi(critR).map(function(v){
+        var dot = "";
+        var pcc = String((v && v.tpaz) || "").toUpperCase();
+        var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
+        var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
+                   String((v && v.cat) || "").toUpperCase() !== "VVF";
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcc) >= 0 && (inTr || critChiusa))
+          dot = ' <span class="trDot ' + pcc + '"></span>';
+        return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
+      });
       pc += '<div class="comp">' + esc((critR.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((critR.comune || "") + (critR.provincia ? " (" + critR.provincia + ")" : "")) + " · " + esc(sTxt) + " · " +
-        esc(quando(critR.created_at || critR.updated_at)) + "</div>";
+        esc(quando(critR.created_at || critR.updated_at)) + "</div>" +
+        (critMz.length ? '<div class="sub">' + critMz.join("<br>") + "</div>" : "");
     } else {
       pc += '<div class="sub">Nessun paziente sotto il 5% nelle ultime 48h.</div>';
     }
