@@ -239,6 +239,7 @@
     <div style="margin-top:6px">Email operatore<br><input id="liveEmail" type="email" autocomplete="username" style="width:100%;font:inherit"></div>
     <div style="margin-top:4px">Password<br><input id="livePass" type="password" autocomplete="current-password" style="width:100%;font:inherit"></div>
     <div style="margin-top:6px"><label><input type="checkbox" id="livePubblica" checked> Invia le missioni alla pagina live pubblica</label></div>
+    <div style="margin-top:4px"><label><input type="checkbox" id="liveDelegaIA"> 🤖 Le missioni del cloud IA se le gestisce il cloud da solo</label></div>
     <div class="small" id="liveStatus" style="margin-top:6px"></div>
     <div class="small" style="margin-top:6px">La password non viene mai salvata nel codice: resta solo la sessione nel browser. Senza login il simulatore funziona normalmente.</div>
     <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveDoLogout">Esci</button><button class="lstBtn primary" id="liveDoLogin">Accedi</button></div>
@@ -72449,6 +72450,7 @@ window.COEULIVE = (() => {
   const LS_VISTE = "coeulive_viste";     // missione_id mai visti (per chiudere dopo un reload)
   const LS_CHIUSE = "coeulive_chiuse";   // missione_id gia marcati 'chiusa' (evita riscritture)
   const LS_PUBBLICA = "coeulive_pubblica"; // toggle globale "pubblica su live"
+  const LS_DELEGA = "coeulive_delega_ia"; // "on" = le missioni IA restano al cloud, non prenderle in carico
   const POLL_MS = 5000;
 
   let client = null, timer = null, booted = false;
@@ -72621,6 +72623,7 @@ window.COEULIVE = (() => {
   // Solo da loggati (serve il claim in scrittura); senza login il gioco resta
   // invariato e le missioni IA continuano a evolvere in cloud.
   async function caricaMissioniIA(){
+    if(delegaOn()) return; // l'operatore vuole che il cloud se le gestisca da solo
     if(!client || !window.COEUSIM || !COEUSIM.caricaMissioneIA) return;
     let res;
     try{
@@ -72656,6 +72659,12 @@ window.COEULIVE = (() => {
 
   function pubblicaOn(){
     try{ return localStorage.getItem(LS_PUBBLICA) !== "off"; }catch(_){ return true; }
+  }
+
+  // true = non prendere in carico le missioni IA: il cloud le gestisce da solo
+  // fino alla chiusura (restano visibili solo nel tabellone live, non nel simulatore)
+  function delegaOn(){
+    try{ return localStorage.getItem(LS_DELEGA) === "on"; }catch(_){ return false; }
   }
 
   function hostPubblico(){
@@ -72702,6 +72711,11 @@ window.COEULIVE = (() => {
     if(tgl){
       tgl.checked = pubblicaOn();
       tgl.onchange = () => { try{ localStorage.setItem(LS_PUBBLICA, tgl.checked ? "on" : "off"); }catch(_){} statoUI(); };
+    }
+    const dlg2 = $("liveDelegaIA");
+    if(dlg2){
+      dlg2.checked = delegaOn();
+      dlg2.onchange = () => { try{ localStorage.setItem(LS_DELEGA, dlg2.checked ? "on" : "off"); }catch(_){} };
     }
     wireDialog();
     if(!configurato()){ setBox("⚪ live non configurato"); return; }
