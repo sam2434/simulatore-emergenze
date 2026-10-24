@@ -72127,6 +72127,7 @@ function stormTick(dtGameMin){
     manTipoDi,
     btStats(){ if(!BT) btInit(); return JSON.parse(JSON.stringify(BT)); },
     btReset(){ btInit(); btSave(); },
+    nomeMezzo(cod){ const m = mezzi.find(x=>x&&x.codice===cod); return m ? (m.radio||m.codice) : cod; },
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     bisognoPaziente, ospedaliPerBisogno, mostraOspedale, togglePMA, piazzaPMA, rimuoviPMA, pmaStato, maxiAperta,
     pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo,
@@ -72579,7 +72580,10 @@ window.COEUTOT = (() => {
           const n = Math.max(1, r.m.missioni || 0);
           const straord = fmtLungo((r.m.servMin || 0) / n);
           const km = (r.m.km || 0);
-          return '<tr><td><b>' + esc(r.cod) + '</b></td><td>' + r.m.missioni + '</td><td>'
+          let nome = r.cod;
+          try{ if(window.COEUSIM && window.COEUSIM.nomeMezzo) nome = window.COEUSIM.nomeMezzo(r.cod) || r.cod; }catch(_){}
+          const et = (nome !== r.cod) ? ('<b>' + esc(nome) + '</b> <span class="small">' + esc(r.cod) + '</span>') : ('<b>' + esc(r.cod) + '</b>');
+          return '<tr><td>' + et + '</td><td>' + r.m.missioni + '</td><td>'
             + esc(straord) + '</td><td>' + km.toFixed(1) + ' km</td><td>'
             + (km / n).toFixed(1) + ' km</td></tr>';
         }).join("") + '</table></div>';
