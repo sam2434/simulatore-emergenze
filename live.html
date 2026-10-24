@@ -24,6 +24,7 @@
   .feedDue{ display:flex; gap:12px; align-items:flex-start; }
   .colonna{ flex:1 1 0; min-width:0; }
   .colTit{ font-weight:800; color:var(--areu); font-size:15px; margin:2px 2px 8px; }
+  .colTit .freccia{ font-size:12px; margin-right:6px; }
   .colTit small{ font-weight:normal; color:var(--mut); }
   .side{ flex:none; width:240px; }
   .sideR{ width:280px; }
@@ -145,7 +146,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     <div class="bar">
       <button class="hamb" id="hambBtn" title="Menu">☰</button>
       <div class="logo">
-        <span class="name">🚨 Simulatore Emergenze</span> <small style="font-weight:normal;opacity:.7">(VA) (CO) (LC) (MB)</small>
+        <span class="name">🚨 Simulatore Emergenze</span> <small style="font-weight:normal;opacity:.7">VARESE · COMO · LECCO · MONZA + altre province</small>
       </div>
       <button class="searchbtn" id="searchBtn" title="Cerca">🔍</button>
     </div>
@@ -170,8 +171,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   <div id="errBox" class="errore" hidden></div>
   <div id="caricamento"><div class="spinner"></div><div class="centro">Caricamento missioni…</div></div>
   <div class="feedDue">
-    <div class="colonna"><div class="colTit" id="titSX">VA · CO · LC · MB <small id="contoSX"></small></div><div id="grigliaSX"></div></div>
-    <div class="colonna"><div class="colTit" id="titDX">BS - BG - SO - NO - PV <small id="contoDX"></small></div><div id="grigliaDX"></div></div>
+    <div class="colonna"><div class="colTit" id="titSX"><span class="freccia">▼</span>VARESE · COMO · LECCO · MONZA <small id="contoSX"></small></div><div id="grigliaSX"></div></div>
+    <div class="colonna"><div class="colTit" id="titDX"><span class="freccia">▼</span>BERGAMO · BRESCIA · SONDRIO · PAVIA · NOVARA <small id="contoDX"></small></div><div id="grigliaDX"></div></div>
   </div>
   <div id="vuoto" class="centro" hidden>Nessuna missione pubblicata al momento. 🚑</div>
   </div>
@@ -600,7 +601,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
                String((v && v.cat) || "").toUpperCase() === "VVF";
       });
       var vvNomi = vvMz.map(function(v){ return iconaMezzo(v) + " " + esc((v && v.n) || "?"); });
-      sx += '<div class="pannello"><h3>🚒🚒 intervento con più mezzi VVF (48h)</h3>' +
+      sx += '<div class="pannello"><h3>int. con più mezzi VVF (48h)</h3>' +
         '<div class="comp">' + esc((compV.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((compV.comune || "") + (compV.provincia ? " (" + compV.provincia + ")" : "")) + " · " +
         bestV + " mezzi VVF</div>" +
@@ -656,6 +657,19 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       TOP11.map(function(k){ return '<div class="riga"><span>' + k + "</span><b>" + top[k] + "</b></div>"; }).join("") + "</div>";
     if(comp){
       var compChiusa = comp.stato === "chiusa";
+      var compConti = {};
+      listaMezzi(comp).forEach(function(v){
+        var k = String(tipoMezzo(v) || "?").toUpperCase();
+        compConti[k] = (compConti[k] || 0) + 1;
+      });
+      var compOrd = ["MSB","MSA","AUTOMEDICA","ELI","VVF","CNSAS","PMA"];
+      var compDett = Object.keys(compConti).sort(function(a, b){
+        var ia = compOrd.indexOf(a), ib = compOrd.indexOf(b);
+        if(ia < 0) ia = 99;
+        if(ib < 0) ib = 99;
+        if(ia !== ib) return ia - ib;
+        return a < b ? -1 : 1;
+      }).map(function(k){ return compConti[k] + " " + k; }).join(" · ");
       var mrighe = listaMezzi(comp).map(function(v){
         var dot = "";
         var pc = String((v && v.tpaz) || "").toUpperCase();
@@ -666,10 +680,10 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
           dot = ' <span class="trDot ' + pc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
-      t += '<div class="pannello"><h3>🚓🚑🚒 intervento con più mezzi (48h)</h3>' +
+      t += '<div class="pannello"><h3>🚑intervento con più mezzi (48h)</h3>' +
         '<div class="comp">' + esc((comp.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((comp.comune || "") + (comp.provincia ? " (" + comp.provincia + ")" : "")) + " · " +
-        listaMezzi(comp).length + " mezzi</div>" +
+        listaMezzi(comp).length + " mezzi" + (compDett ? " (" + esc(compDett) + ")" : "") + "</div>" +
         (mrighe.length ? '<div class="sub miniDots">' + mrighe.join("<br>") + "</div>" : "") + "</div>";
     }
     if(topOsp){
