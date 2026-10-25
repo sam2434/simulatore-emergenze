@@ -243,7 +243,7 @@
     <div style="margin-top:6px">Email operatore<br><input id="liveEmail" type="email" autocomplete="username" style="width:100%;font:inherit"></div>
     <div style="margin-top:4px">Password<br><input id="livePass" type="password" autocomplete="current-password" style="width:100%;font:inherit"></div>
     <div style="margin-top:6px"><label><input type="checkbox" id="livePubblica" checked> Invia le missioni alla pagina live pubblica</label></div>
-    <div style="margin-top:4px"><label><input type="checkbox" id="liveDelegaIA"> 🤖 Le missioni del cloud IA se le gestisce il cloud da solo</label></div>
+    <div style="margin-top:4px"><label><input type="checkbox" id="liveDelegaIA"> 🤖 Le missioni del cloud IA se le gestisce il cloud da solo (i mezzi che usa spariscono dal simulatore e tornano quando chiude)</label></div>
     <div class="small" id="liveStatus" style="margin-top:6px"></div>
     <div class="small" style="margin-top:6px">La password non viene mai salvata nel codice: resta solo la sessione nel browser. Senza login il simulatore funziona normalmente.</div>
     <div style="margin-top:8px;display:flex;gap:6px;justify-content:flex-end;"><button class="lstBtn" id="liveDoLogout">Esci</button><button class="lstBtn primary" id="liveDoLogin">Accedi</button></div>
@@ -260,7 +260,7 @@
     4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). Premi sull'<b>orologio</b> in alto per cambiare l'ora di gioco (presets o ora esatta: cambiano missioni, fasce e pesi notte/giorno). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto, con la via reale del punto cliccato; <b>click su un mezzo</b> = i suoi dettagli (stato FMS 1-8: da libero in sede puoi metterlo <b>🔧 6 fuori servizio</b> e rimetterlo <b>✅ 1 in servizio</b>; i mezzi <b>a turno</b>, come le NEF di Magenta ⏰ 8:00-20:00 / 20:00-8:00, lavorano solo nella loro fascia oraria ed escono dal servizio da soli). Con <b>Afflusso ON</b> le chiamate arrivano da sole con un <b>ritmo vivo</b>: momenti di calma si alternano a <b>raffiche</b> di più chiamate a pochi secondi di distanza, il passo cambia con l'<b>ora di gioco</b> (di notte quasi niente, nelle ore di punta di più) e col <b>carico della centrale</b> (satura = rallenta da solo, mai missioni ingestibili); accettare o chiudere non azzera mai il conto alla rovescia della prossima. Il <b>meteo</b> in alto è quello <b>reale di Milano</b> (aggiornato ogni 10 minuti: guida missioni coerenti e danni in diretta) e <b>picchia davvero</b> — premi sul <b>riquadro meteo</b> per aggiornarlo subito: col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, con <b>rovesci</b> e <b>pioggia intensa</b> i danni sono più frequenti, con la <b>grandine</b> chicchi pericolosi, con la <b>tromba d'aria</b> danni gravissimi, con <b>neve</b>, <b>gelo</b> e <b>pioggia gelata</b> strade scivolose e mezzi più lenti, con la <b>nebbia</b> (anche <b>con brina</b>) visibilità quasi zero. In tutto 31 condizioni WMO, ognuna con la sua emoji. Sulla mappa, col <b>Satellite</b>, vedi <b>— tutte le strade</b> mappate (bianche, posizioni reali): gli incidenti in autostrada/tangenziale/superstrada nascono esattamente sul tratto vero le missioni ferroviarie nascono sui binari veri (stazione, galleria o passaggio a livello), i mezzi raggiungono l'accesso più vicino senza mai entrare sui binari e la circolazione viene sospesa (i binari non si disegnano sulla mappa); le 27 missioni infrastrutturali (folgorati, fughe di gas, esondazioni, dispersi sui sentieri, crolli in galleria…) nascono sul punto vero della rete (i livelli grafici non si disegnano sulla mappa); e i mezzi tengono velocità contenute (90% del limite, automediche 95%) e la velocità reale in autostrada, con spinta gameplay (più rapidi già a 1x, ancora più rapidi a 5x/10x/30x). Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). La Situazione con l'elenco dei pazienti (salute % colorata, scritta <b style="color:#d40000">MSA</b> in rosso di fianco alla % se richiede un medicalizzato — solo sotto il 35% (sopra la scritta sparisce), e sparisce anche quando il medicalizzato lo prende in carico — e, per ognuno, la sigla H … della destinazione quando è in trasporto o in PS) si vede sotto la registrazione quando il primo mezzo arriva sul posto (l'elenco cresce da solo se vengono scoperti altri feriti; gli incidenti con 3+ veicoli, più rari, mostrano da 0 a 6 feriti di qualsiasi gravità già da subito). Ogni paziente segue i <b>14 stati</b> (segnalato → da valutare → attesa soccorso → valutazione sanitaria → eventuale attesa liberazione/ambulanza → preso in carico → caricato → trasporto → ospedale → missione conclusa; oppure concluso sul posto, rifiuto o decesso): un solo stato alla volta, ogni passaggio con orario registrato, i terminali non si riaprono. Il lieve (≥70%) valutato può <b>✋ rifiutare il trasporto</b> (bottone nella riga). Sulla mappa lo <b>spillo è grigio solo per le missioni VVF senza codice</b>: se dai un codice a una missione VVF, lo spillo prende quel colore. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, quando il mezzo è PRONTO parte da solo per il PS più vicino. <b>🆘 Richiedi assistenza</b> = apre la finestra per mandare altri mezzi. I 36 PS sulla mappa (H) hanno scheda con reparti verificati e fonti (🚁 = elisuperficie); passando il cursore sopra si vedono i mezzi al momento in PS. Gli elisoccorsi trasportano SOLO agli hub con elisuperficie (Bergamo, Brescia, Como S.Anna, Lecco, Legnano, Milano, Monza, Pavia, Varese): partono da PRONTO per l'hub più vicino (mai PMA né PS minori). Con <b>⛺ PMA</b> piazzi un ospedale da campo dove vuoi (click sul tasto, poi click sulla mappa; ESC annulla, click sul marker per rimuoverlo): con una missione da <b>10+ pazienti</b> in corso accoglie i feriti come un PS (sigla H PMA), altrimenti resta inattivo; se lo rimuovi mentre ambulanze ci sono dirette, vengono rirottate al PS più vicino.<br>
     6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
-    7. Con <b>📊 Statistiche</b> apri il riepilogo essenziale della centrale (dati reali, aggiornati ogni 2 secondi): tempo reale trascorso nella sessione, giorno e ora di gioco, chiamate e missioni, pazienti (attivi, consegnati in PS, deceduti), mezzi 118 liberi/impegnati e missioni VVF in corso; <b>📥 Esporta CSV</b> e <b>Chiudi</b> in fondo. Lo storico resta salvato anche se chiudi e riapri il browser (Reset lo azzera per un nuovo turno; solo il tempo di sessione riparte ricaricando la pagina). Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser (missioni chiuse con/senza trasporto, tempo totale di gioco, rianimazioni, tempi medi, tabella dei veicoli con missioni, straordinario medio e chilometri): sopravvivono al reset, si azzerano solo col tasto apposito. Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.
+    7. Con <b>📊 Statistiche</b> apri il riepilogo essenziale della centrale (dati reali, aggiornati ogni 2 secondi): tempo reale trascorso nella sessione, giorno e ora di gioco, chiamate e missioni, pazienti (attivi, consegnati in PS, deceduti), mezzi 118 liberi/impegnati e missioni VVF in corso; <b>📥 Esporta CSV</b> e <b>Chiudi</b> in fondo. Lo storico resta salvato anche se chiudi e riapri il browser (Reset lo azzera per un nuovo turno; solo il tempo di sessione riparte ricaricando la pagina). Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -52632,7 +52632,6 @@ const TIPI = [
   { nome:"Frontale tra Apecar e kart sul ponte", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra semirimorchio e monovolume alla strettoia", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra monovolume e Apecar sul cavalcavia", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
-  { nome:"Frontale tra trike e semirimorchio sul vialetto del paese", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra taxi e rimorchio sulla provinciale", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra riscio e utilitaria al capolinea", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra utilitaria e SUV al cantiere stradale", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
@@ -52663,13 +52662,11 @@ const TIPI = [
   { nome:"Testa-coda di pick-up alla deviazione, due feriti", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"🚗", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Testa-coda con due a bordo." },
   { nome:"Frontale tra taxi e furgoncino all'incrocio", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra limousine e carro funebre sulle strisce pedonali", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
-  { nome:"Frontale tra trike e limousine in zona 30", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra utilitaria e riscio all'incrocio", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra riscio e rimorchio sotto il ponte", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra filobus e rimorchio al cimitero", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra tram e SUV sul cavalcavia", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra taxi e Apecar sul viale alberato", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
-  { nome:"Frontale tra trike e bisarca in curva senza visibilità", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra tram e camper all'area di servizio", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra Apecar e auto al semaforo", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra semirimorchio e utilitaria allo svincolo", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
@@ -52685,14 +52682,12 @@ const TIPI = [
   { nome:"Scontro tra motorino e moto al dosso rallentatore", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"🏍️", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Due centauri a terra." },
   { nome:"Frontale tra filobus e furgone sotto il ponte", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra tram e semirimorchio fuori dalla discoteca di notte", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
-  { nome:"Frontale tra furgone e trike in discesa", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra Apecar e limousine al cimitero", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra riscio e station wagon alla rotonda", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Frontale tra spazzatrice e bisarca in salita", pz:2, sal:[15,60], peso:3, zona:"strada", emoji:"💥", prio:[50,35,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, due feriti." },
   { nome:"Scontro tra furgoncino, utilitaria e monovolume all'area di servizio", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra filobus, kart e auto sotto il ponte", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra spazzatrice, pick-up e riscio sulla provinciale", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
-  { nome:"Scontro tra rimorchio, SUV e trike al distributore di benzina", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra furgoncino, utilitaria e limousine sul rettilineo", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra spider, carro attrezzi e taxi sul rettilineo", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
@@ -52722,11 +52717,8 @@ const TIPI = [
   { nome:"Scontro tra jeep, pick-up e station wagon al posteggio taxi", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra spazzatrice, spider e taxi sul cavalcavia", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra furgoncino, furgone e semirimorchio in discesa ripida", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
-  { nome:"Scontro tra taxi, trike e limousine sul viale alberato", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
-  { nome:"Scontro tra spider, taxi e trike sul vialetto del paese", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra utilitaria, jeep e monovolume in salita", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
-  { nome:"Scontro tra taxi, trike e carro funebre all'uscita della messa", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra camper, Apecar e kart in fiera", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra monovolume, SUV e fuoristrada in curva senza visibilità", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
   { nome:"Scontro tra camper, taxi e taxi all'uscita del paese", pz:3, sal:[30,70], peso:3, zona:"strada", emoji:"🚗", prio:[30,40,25,5], mezzi:{MSB:1}, durata:[8,18], trasporto:true, desc:"Scontro multiplo." },
@@ -52764,7 +52756,6 @@ const TIPI = [
   { nome:"Frontale tra jeep e Apecar al posteggio taxi, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra filobus e furgoncino alla rotonda, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Scontro tra moto, scooter e quad sul viale alberato", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"🏍️", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Tre centauri coinvolti." },
-  { nome:"Frontale tra riscio e trike allo svincolo, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra station wagon e monovolume al semaforo, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra station wagon e pick-up sotto il ponte, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra taxi e filobus sul rettilineo buio, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
@@ -52788,7 +52779,6 @@ const TIPI = [
   { nome:"Frontale tra Apecar e bisarca in curva senza visibilità, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra camper e auto allo stop, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra monovolume e semirimorchio in centro, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
-  { nome:"Frontale tra trike e riscio al passaggio pedonale, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra spazzatrice e pick-up sul viale alberato, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra pick-up e monovolume alla strettoia, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra Apecar e cabrio in centro, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
@@ -52812,12 +52802,9 @@ const TIPI = [
   { nome:"Pulmino con tre passeggeri contro guardrail sulla provinciale", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"🚚", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Pulmino contro ostacolo." },
   { nome:"Frontale tra SUV e furgoncino in curva senza visibilità, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra carro funebre e pick-up in salita, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
-  { nome:"Frontale tra trike e taxi sul vialetto del paese, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra monovolume e taxi allo svincolo, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra Apecar e kart al capolinea, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
-  { nome:"Frontale tra taxi e trike in discesa, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra tram e carro funebre in discesa ripida, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
-  { nome:"Frontale tra camper e trike al semaforo, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra monovolume e taxi alla strettoia, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra auto e limousine al distributore di benzina, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
   { nome:"Frontale tra auto e SUV fuori dalla discoteca di notte, tre feriti", pz:3, sal:[15,55], peso:3, zona:"strada", emoji:"💥", prio:[55,30,12,3], mezzi:{MSB:1,MSA:1}, durata:[10,22], trasporto:true, desc:"Frontale, tre feriti." },
@@ -52835,7 +52822,6 @@ const TIPI = [
   { nome:"Frontale tra camper e limousine al semaforo, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
   { nome:"Frontale tra bisarca e furgone al semaforo, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
   { nome:"Frontale tra fuoristrada e SUV sul rettilineo buio, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
-  { nome:"Frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
   { nome:"Frontale tra spazzatrice e limousine in salita, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
   { nome:"Frontale tra taxi e rimorchio in parcheggio, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
   { nome:"Frontale tra kart e rimorchio alla rotonda, quattro feriti", pz:4, sal:[25,65], peso:3, zona:"strada", emoji:"💥", prio:[40,38,18,4], mezzi:{MSB:2}, durata:[12,20], trasporto:true, desc:"Frontale con quattro feriti." },
@@ -59051,7 +59037,6 @@ const CHIAMATE = {
   "Frontale tra Apecar e kart sul ponte": "«Aiuto, mandate due ambulanze frontale tra Apecar e kart sul ponte: entrambi perdono sangue»",
   "Frontale tra semirimorchio e monovolume alla strettoia": "«Pronto, incidente stradale frontale tra semirimorchio e monovolume alla strettoia: entrambi perdono sangue»",
   "Frontale tra monovolume e Apecar sul cavalcavia": "«Aiuto, mandate due ambulanze frontale tra monovolume e Apecar sul cavalcavia: ci sono due feriti a terra»",
-  "Frontale tra trike e semirimorchio sul vialetto del paese": "«Pronto, incidente stradale frontale tra trike e semirimorchio sul vialetto del paese: ci sono due feriti a terra»",
   "Frontale tra taxi e rimorchio sulla provinciale": "«Pronto, incidente stradale frontale tra taxi e rimorchio sulla provinciale: due persone non si muovono»",
   "Frontale tra riscio e utilitaria al capolinea": "«Aiuto, mandate due ambulanze frontale tra riscio e utilitaria al capolinea: ci sono due feriti a terra»",
   "Frontale tra utilitaria e SUV al cantiere stradale": "«Pronto, brutto scontro qui frontale tra utilitaria e SUV al cantiere stradale: due persone non si muovono»",
@@ -59082,13 +59067,11 @@ const CHIAMATE = {
   "Testa-coda di pick-up alla deviazione, due feriti": "«Aiuto, mandate due ambulanze testa-coda di pick-up alla deviazione, due feriti: entrambi perdono sangue»",
   "Frontale tra taxi e furgoncino all'incrocio": "«Pronto, brutto scontro qui frontale tra taxi e furgoncino all'incrocio: sono in due gravi»",
   "Frontale tra limousine e carro funebre sulle strisce pedonali": "«Pronto, brutto scontro qui frontale tra limousine e carro funebre sulle strisce pedonali: sono in due gravi»",
-  "Frontale tra trike e limousine in zona 30": "«Aiuto, mandate due ambulanze frontale tra trike e limousine in zona 30: due persone non si muovono»",
   "Frontale tra utilitaria e riscio all'incrocio": "«Aiuto, mandate due ambulanze frontale tra utilitaria e riscio all'incrocio: ci sono due feriti a terra»",
   "Frontale tra riscio e rimorchio sotto il ponte": "«Pronto, incidente stradale frontale tra riscio e rimorchio sotto il ponte: ci sono due feriti a terra»",
   "Frontale tra filobus e rimorchio al cimitero": "«Pronto, incidente stradale frontale tra filobus e rimorchio al cimitero: entrambi perdono sangue»",
   "Frontale tra tram e SUV sul cavalcavia": "«Pronto, brutto scontro qui frontale tra tram e SUV sul cavalcavia: due persone non si muovono»",
   "Frontale tra taxi e Apecar sul viale alberato": "«Pronto, brutto scontro qui frontale tra taxi e Apecar sul viale alberato: due persone non si muovono»",
-  "Frontale tra trike e bisarca in curva senza visibilità": "«Aiuto, mandate due ambulanze frontale tra trike e bisarca in curva senza visibilità: ci sono due feriti a terra»",
   "Frontale tra tram e camper all'area di servizio": "«Pronto, brutto scontro qui frontale tra tram e camper all'area di servizio: entrambi perdono sangue»",
   "Frontale tra Apecar e auto al semaforo": "«Aiuto, mandate due ambulanze frontale tra Apecar e auto al semaforo: entrambi perdono sangue»",
   "Frontale tra semirimorchio e utilitaria allo svincolo": "«Aiuto, mandate due ambulanze frontale tra semirimorchio e utilitaria allo svincolo: due persone non si muovono»",
@@ -59104,14 +59087,12 @@ const CHIAMATE = {
   "Scontro tra motorino e moto al dosso rallentatore": "«Pronto, incidente stradale scontro tra motorino e moto al dosso rallentatore: ci sono due feriti a terra»",
   "Frontale tra filobus e furgone sotto il ponte": "«Pronto, incidente stradale frontale tra filobus e furgone sotto il ponte: due persone non si muovono»",
   "Frontale tra tram e semirimorchio fuori dalla discoteca di notte": "«Pronto, brutto scontro qui frontale tra tram e semirimorchio fuori dalla discoteca di notte: ci sono due feriti a terra»",
-  "Frontale tra furgone e trike in discesa": "«Pronto, incidente stradale frontale tra furgone e trike in discesa: sono in due gravi»",
   "Frontale tra Apecar e limousine al cimitero": "«Aiuto, mandate due ambulanze frontale tra Apecar e limousine al cimitero: entrambi perdono sangue»",
   "Frontale tra riscio e station wagon alla rotonda": "«Aiuto, mandate due ambulanze frontale tra riscio e station wagon alla rotonda: entrambi perdono sangue»",
   "Frontale tra spazzatrice e bisarca in salita": "«Pronto, incidente stradale frontale tra spazzatrice e bisarca in salita: sono in due gravi»",
   "Scontro tra furgoncino, utilitaria e monovolume all'area di servizio": "«Pronto, incidente stradale scontro tra furgoncino, utilitaria e monovolume all'area di servizio: tre persone non si alzano»",
   "Scontro tra filobus, kart e auto sotto il ponte": "«Pronto, incidente stradale scontro tra filobus, kart e auto sotto il ponte: sono tutti e tre contusi»",
   "Scontro tra spazzatrice, pick-up e riscio sulla provinciale": "«Pronto, incidente stradale scontro tra spazzatrice, pick-up e riscio sulla provinciale: ci sono tre feriti»",
-  "Scontro tra rimorchio, SUV e trike al distributore di benzina": "«Pronto, sono in tre feriti scontro tra rimorchio, SUV e trike al distributore di benzina: sono tutti e tre contusi»",
   "Scontro tra furgoncino, utilitaria e limousine sul rettilineo": "«Pronto, scontro brutto qui in strada scontro tra furgoncino, utilitaria e limousine sul rettilineo: tre persone non si alzano»",
   "Scontro tra spider, carro attrezzi e taxi sul rettilineo": "«Pronto, scontro brutto qui in strada scontro tra spider, carro attrezzi e taxi sul rettilineo: sono tutti e tre contusi»",
   "Scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità": "«Aiuto, mandate più ambulanze scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità: ci sono tre feriti»",
@@ -59141,11 +59122,8 @@ const CHIAMATE = {
   "Scontro tra jeep, pick-up e station wagon al posteggio taxi": "«Pronto, scontro brutto qui in strada scontro tra jeep, pick-up e station wagon al posteggio taxi: sono in tre a terra»",
   "Scontro tra spazzatrice, spider e taxi sul cavalcavia": "«Pronto, incidente stradale scontro tra spazzatrice, spider e taxi sul cavalcavia: ci sono tre feriti»",
   "Scontro tra furgoncino, furgone e semirimorchio in discesa ripida": "«Pronto, incidente stradale scontro tra furgoncino, furgone e semirimorchio in discesa ripida: sono in tre a terra»",
-  "Scontro tra taxi, trike e limousine sul viale alberato": "«Pronto, incidente stradale scontro tra taxi, trike e limousine sul viale alberato: sono in tre a terra»",
-  "Scontro tra spider, taxi e trike sul vialetto del paese": "«Aiuto, mandate più ambulanze scontro tra spider, taxi e trike sul vialetto del paese: tre persone non si alzano»",
   "Scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese": "«Pronto, incidente stradale scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese: sono in tre a terra»",
   "Scontro tra utilitaria, jeep e monovolume in salita": "«Pronto, sono in tre feriti scontro tra utilitaria, jeep e monovolume in salita: sono tutti e tre contusi»",
-  "Scontro tra taxi, trike e carro funebre all'uscita della messa": "«Pronto, incidente stradale scontro tra taxi, trike e carro funebre all'uscita della messa: sono tutti e tre contusi»",
   "Scontro tra camper, Apecar e kart in fiera": "«Aiuto, mandate più ambulanze scontro tra camper, Apecar e kart in fiera: ci sono tre feriti»",
   "Scontro tra monovolume, SUV e fuoristrada in curva senza visibilità": "«Pronto, sono in tre feriti scontro tra monovolume, SUV e fuoristrada in curva senza visibilità: tre persone non si alzano»",
   "Scontro tra camper, taxi e taxi all'uscita del paese": "«Pronto, sono in tre feriti scontro tra camper, taxi e taxi all'uscita del paese: sono tutti e tre contusi»",
@@ -59183,7 +59161,6 @@ const CHIAMATE = {
   "Frontale tra jeep e Apecar al posteggio taxi, tre feriti": "«Aiuto, mandate più ambulanze frontale tra jeep e Apecar al posteggio taxi, tre feriti: tre persone non si muovono»",
   "Frontale tra filobus e furgoncino alla rotonda, tre feriti": "«Aiuto, mandate più ambulanze frontale tra filobus e furgoncino alla rotonda, tre feriti: sono in tre gravi»",
   "Scontro tra moto, scooter e quad sul viale alberato": "«Aiuto, mandate più ambulanze scontro tra moto, scooter e quad sul viale alberato: tre persone non si muovono»",
-  "Frontale tra riscio e trike allo svincolo, tre feriti": "«Aiuto, mandate più ambulanze frontale tra riscio e trike allo svincolo, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra station wagon e monovolume al semaforo, tre feriti": "«Aiuto, mandate più ambulanze frontale tra station wagon e monovolume al semaforo, tre feriti: tre persone non si muovono»",
   "Frontale tra station wagon e pick-up sotto il ponte, tre feriti": "«Aiuto, mandate più ambulanze frontale tra station wagon e pick-up sotto il ponte, tre feriti: sono in tre gravi»",
   "Frontale tra taxi e filobus sul rettilineo buio, tre feriti": "«Pronto, brutto scontro qui frontale tra taxi e filobus sul rettilineo buio, tre feriti: ci sono tre feriti»",
@@ -59207,7 +59184,6 @@ const CHIAMATE = {
   "Frontale tra Apecar e bisarca in curva senza visibilità, tre feriti": "«Pronto, brutto scontro qui frontale tra Apecar e bisarca in curva senza visibilità, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra camper e auto allo stop, tre feriti": "«Pronto, incidente stradale frontale tra camper e auto allo stop, tre feriti: sono in tre gravi»",
   "Frontale tra monovolume e semirimorchio in centro, tre feriti": "«Pronto, incidente stradale frontale tra monovolume e semirimorchio in centro, tre feriti: sono in tre gravi»",
-  "Frontale tra trike e riscio al passaggio pedonale, tre feriti": "«Pronto, incidente stradale frontale tra trike e riscio al passaggio pedonale, tre feriti: tre persone non si muovono»",
   "Frontale tra spazzatrice e pick-up sul viale alberato, tre feriti": "«Pronto, brutto scontro qui frontale tra spazzatrice e pick-up sul viale alberato, tre feriti: tre persone non si muovono»",
   "Frontale tra pick-up e monovolume alla strettoia, tre feriti": "«Aiuto, mandate più ambulanze frontale tra pick-up e monovolume alla strettoia, tre feriti: ci sono tre feriti»",
   "Frontale tra Apecar e cabrio in centro, tre feriti": "«Pronto, brutto scontro qui frontale tra Apecar e cabrio in centro, tre feriti: ci sono tre feriti»",
@@ -59231,12 +59207,9 @@ const CHIAMATE = {
   "Pulmino con tre passeggeri contro guardrail sulla provinciale": "«Pronto, brutto scontro qui pulmino con tre passeggeri contro guardrail sulla provinciale: uno è grave, gli altri contusi»",
   "Frontale tra SUV e furgoncino in curva senza visibilità, tre feriti": "«Pronto, brutto scontro qui frontale tra SUV e furgoncino in curva senza visibilità, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra carro funebre e pick-up in salita, tre feriti": "«Aiuto, mandate più ambulanze frontale tra carro funebre e pick-up in salita, tre feriti: tre persone non si muovono»",
-  "Frontale tra trike e taxi sul vialetto del paese, tre feriti": "«Pronto, brutto scontro qui frontale tra trike e taxi sul vialetto del paese, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra monovolume e taxi allo svincolo, tre feriti": "«Aiuto, mandate più ambulanze frontale tra monovolume e taxi allo svincolo, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra Apecar e kart al capolinea, tre feriti": "«Pronto, brutto scontro qui frontale tra Apecar e kart al capolinea, tre feriti: ci sono tre feriti»",
-  "Frontale tra taxi e trike in discesa, tre feriti": "«Pronto, incidente stradale frontale tra taxi e trike in discesa, tre feriti: uno è grave, gli altri contusi»",
   "Frontale tra tram e carro funebre in discesa ripida, tre feriti": "«Aiuto, mandate più ambulanze frontale tra tram e carro funebre in discesa ripida, tre feriti: ci sono tre feriti»",
-  "Frontale tra camper e trike al semaforo, tre feriti": "«Pronto, incidente stradale frontale tra camper e trike al semaforo, tre feriti: sono in tre gravi»",
   "Frontale tra monovolume e taxi alla strettoia, tre feriti": "«Pronto, incidente stradale frontale tra monovolume e taxi alla strettoia, tre feriti: sono in tre gravi»",
   "Frontale tra auto e limousine al distributore di benzina, tre feriti": "«Pronto, brutto scontro qui frontale tra auto e limousine al distributore di benzina, tre feriti: ci sono tre feriti»",
   "Frontale tra auto e SUV fuori dalla discoteca di notte, tre feriti": "«Pronto, brutto scontro qui frontale tra auto e SUV fuori dalla discoteca di notte, tre feriti: tre persone non si muovono»",
@@ -59254,7 +59227,6 @@ const CHIAMATE = {
   "Frontale tra camper e limousine al semaforo, quattro feriti": "«Pronto, sono in quattro feriti frontale tra camper e limousine al semaforo, quattro feriti: ci sono quattro feriti»",
   "Frontale tra bisarca e furgone al semaforo, quattro feriti": "«Aiuto, mandate più ambulanze frontale tra bisarca e furgone al semaforo, quattro feriti: ci sono quattro feriti»",
   "Frontale tra fuoristrada e SUV sul rettilineo buio, quattro feriti": "«Aiuto, mandate più ambulanze frontale tra fuoristrada e SUV sul rettilineo buio, quattro feriti: ci sono quattro feriti»",
-  "Frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti": "«Pronto, incidente grave frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti: sono in quattro a terra»",
   "Frontale tra spazzatrice e limousine in salita, quattro feriti": "«Pronto, scontro brutto qui in strada frontale tra spazzatrice e limousine in salita, quattro feriti: quattro persone non si alzano»",
   "Frontale tra taxi e rimorchio in parcheggio, quattro feriti": "«Pronto, sono in quattro feriti frontale tra taxi e rimorchio in parcheggio, quattro feriti: ci sono quattro feriti»",
   "Frontale tra kart e rimorchio alla rotonda, quattro feriti": "«Pronto, sono in quattro feriti frontale tra kart e rimorchio alla rotonda, quattro feriti: ci sono quattro feriti»",
@@ -63364,7 +63336,6 @@ CHIAMATE_VAR = {
   "Frontale tra Apecar e kart sul ponte": ["«Pronto, incidente stradale: due persone non si muovono, il traffico è bloccato (frontale tra apecar e kart sul ponte)»","«Pronto, frontale tra apecar e kart sul ponte, ci sono due feriti a terra, il traffico è bloccato»"],
   "Frontale tra semirimorchio e monovolume alla strettoia": ["«Pronto, brutto scontro qui: sono in due gravi, il traffico è bloccato (frontale tra semirimorchio e monovolume alla strettoia)»","«Pronto, frontale tra semirimorchio e monovolume alla strettoia, sono in due gravi, il traffico è bloccato»"],
   "Frontale tra monovolume e Apecar sul cavalcavia": ["«Pronto, brutto scontro qui: sono in due gravi, i mezzi sono distrutti (frontale tra monovolume e apecar sul cavalcavia)»","«Pronto, frontale tra monovolume e apecar sul cavalcavia, due persone non si muovono, c'è gente che aiuta»"],
-  "Frontale tra trike e semirimorchio sul vialetto del paese": ["«Aiuto, mandate due ambulanze: due persone non si muovono, c'è gente che aiuta (frontale tra trike e semirimorchio sul vialetto del paese)»","«Pronto, frontale tra trike e semirimorchio sul vialetto del paese, ci sono due feriti a terra, i mezzi sono distrutti»"],
   "Frontale tra taxi e rimorchio sulla provinciale": ["«Pronto, incidente stradale: entrambi perdono sangue, il traffico è bloccato (frontale tra taxi e rimorchio sulla provinciale)»","«Pronto, frontale tra taxi e rimorchio sulla provinciale, sono in due gravi, c'è gente che aiuta»"],
   "Frontale tra riscio e utilitaria al capolinea": ["«Aiuto, mandate due ambulanze: entrambi perdono sangue, i mezzi sono distrutti (frontale tra riscio e utilitaria al capolinea)»","«Pronto, frontale tra riscio e utilitaria al capolinea, sono in due gravi, i mezzi sono distrutti»"],
   "Frontale tra utilitaria e SUV al cantiere stradale": ["«Pronto, brutto scontro qui: sono in due gravi, i mezzi sono distrutti (frontale tra utilitaria e suv al cantiere stradale)»","«Pronto, frontale tra utilitaria e suv al cantiere stradale, ci sono due feriti a terra, i mezzi sono distrutti»"],
@@ -63395,13 +63366,11 @@ CHIAMATE_VAR = {
   "Testa-coda di pick-up alla deviazione, due feriti": ["«Aiuto, mandate due ambulanze: due persone non si muovono, il traffico è bloccato (testa-coda di pick-up alla deviazione, due feriti)»","«Pronto, testa-coda di pick-up alla deviazione, due feriti, ci sono due feriti a terra, i mezzi sono distrutti»"],
   "Frontale tra taxi e furgoncino all'incrocio": ["«Pronto, brutto scontro qui: ci sono due feriti a terra, c'è gente che aiuta (frontale tra taxi e furgoncino all'incrocio)»","«Pronto, frontale tra taxi e furgoncino all'incrocio, due persone non si muovono, c'è gente che aiuta»"],
   "Frontale tra limousine e carro funebre sulle strisce pedonali": ["«Aiuto, mandate due ambulanze: entrambi perdono sangue, c'è gente che aiuta (frontale tra limousine e carro funebre sulle strisce pedonali)»","«Pronto, frontale tra limousine e carro funebre sulle strisce pedonali, entrambi perdono sangue, c'è gente che aiuta»"],
-  "Frontale tra trike e limousine in zona 30": ["«Pronto, incidente stradale: sono in due gravi, c'è gente che aiuta (frontale tra trike e limousine in zona 30)»","«Pronto, frontale tra trike e limousine in zona 30, due persone non si muovono, i mezzi sono distrutti»"],
   "Frontale tra utilitaria e riscio all'incrocio": ["«Pronto, brutto scontro qui: sono in due gravi, c'è gente che aiuta (frontale tra utilitaria e riscio all'incrocio)»","«Pronto, frontale tra utilitaria e riscio all'incrocio, entrambi perdono sangue, c'è gente che aiuta»"],
   "Frontale tra riscio e rimorchio sotto il ponte": ["«Pronto, brutto scontro qui: due persone non si muovono, c'è gente che aiuta (frontale tra riscio e rimorchio sotto il ponte)»","«Pronto, frontale tra riscio e rimorchio sotto il ponte, ci sono due feriti a terra, i mezzi sono distrutti»"],
   "Frontale tra filobus e rimorchio al cimitero": ["«Pronto, incidente stradale: due persone non si muovono, i mezzi sono distrutti (frontale tra filobus e rimorchio al cimitero)»","«Pronto, frontale tra filobus e rimorchio al cimitero, ci sono due feriti a terra, c'è gente che aiuta»"],
   "Frontale tra tram e SUV sul cavalcavia": ["«Pronto, brutto scontro qui: sono in due gravi, i mezzi sono distrutti (frontale tra tram e suv sul cavalcavia)»","«Pronto, frontale tra tram e suv sul cavalcavia, entrambi perdono sangue, il traffico è bloccato»"],
   "Frontale tra taxi e Apecar sul viale alberato": ["«Aiuto, mandate due ambulanze: ci sono due feriti a terra, i mezzi sono distrutti (frontale tra taxi e apecar sul viale alberato)»","«Pronto, frontale tra taxi e apecar sul viale alberato, due persone non si muovono, c'è gente che aiuta»"],
-  "Frontale tra trike e bisarca in curva senza visibilità": ["«Aiuto, mandate due ambulanze: entrambi perdono sangue, il traffico è bloccato (frontale tra trike e bisarca in curva senza visibilità)»","«Pronto, frontale tra trike e bisarca in curva senza visibilità, entrambi perdono sangue, il traffico è bloccato»"],
   "Frontale tra tram e camper all'area di servizio": ["«Pronto, brutto scontro qui: entrambi perdono sangue, i mezzi sono distrutti (frontale tra tram e camper all'area di servizio)»","«Pronto, frontale tra tram e camper all'area di servizio, sono in due gravi, i mezzi sono distrutti»"],
   "Frontale tra Apecar e auto al semaforo": ["«Pronto, incidente stradale: due persone non si muovono, c'è gente che aiuta (frontale tra apecar e auto al semaforo)»","«Pronto, frontale tra apecar e auto al semaforo, entrambi perdono sangue, i mezzi sono distrutti»"],
   "Frontale tra semirimorchio e utilitaria allo svincolo": ["«Pronto, incidente stradale: entrambi perdono sangue, il traffico è bloccato (frontale tra semirimorchio e utilitaria allo svincolo)»","«Pronto, frontale tra semirimorchio e utilitaria allo svincolo, due persone non si muovono, il traffico è bloccato»"],
@@ -63417,14 +63386,12 @@ CHIAMATE_VAR = {
   "Scontro tra motorino e moto al dosso rallentatore": ["«Aiuto, mandate due ambulanze: due persone non si muovono, i mezzi sono distrutti (scontro tra motorino e moto al dosso rallentatore)»","«Pronto, scontro tra motorino e moto al dosso rallentatore, sono in due gravi, i mezzi sono distrutti»"],
   "Frontale tra filobus e furgone sotto il ponte": ["«Pronto, incidente stradale: sono in due gravi, i mezzi sono distrutti (frontale tra filobus e furgone sotto il ponte)»","«Pronto, frontale tra filobus e furgone sotto il ponte, ci sono due feriti a terra, c'è gente che aiuta»"],
   "Frontale tra tram e semirimorchio fuori dalla discoteca di notte": ["«Pronto, brutto scontro qui: entrambi perdono sangue, c'è gente che aiuta (frontale tra tram e semirimorchio fuori dalla discoteca di notte)»","«Pronto, frontale tra tram e semirimorchio fuori dalla discoteca di notte, sono in due gravi, il traffico è bloccato»"],
-  "Frontale tra furgone e trike in discesa": ["«Aiuto, mandate due ambulanze: due persone non si muovono, i mezzi sono distrutti (frontale tra furgone e trike in discesa)»","«Pronto, frontale tra furgone e trike in discesa, due persone non si muovono, c'è gente che aiuta»"],
   "Frontale tra Apecar e limousine al cimitero": ["«Pronto, incidente stradale: sono in due gravi, il traffico è bloccato (frontale tra apecar e limousine al cimitero)»","«Pronto, frontale tra apecar e limousine al cimitero, due persone non si muovono, i mezzi sono distrutti»"],
   "Frontale tra riscio e station wagon alla rotonda": ["«Pronto, incidente stradale: sono in due gravi, il traffico è bloccato (frontale tra riscio e station wagon alla rotonda)»","«Pronto, frontale tra riscio e station wagon alla rotonda, entrambi perdono sangue, il traffico è bloccato»"],
   "Frontale tra spazzatrice e bisarca in salita": ["«Pronto, brutto scontro qui: ci sono due feriti a terra, il traffico è bloccato (frontale tra spazzatrice e bisarca in salita)»","«Pronto, frontale tra spazzatrice e bisarca in salita, ci sono due feriti a terra, il traffico è bloccato»"],
   "Scontro tra furgoncino, utilitaria e monovolume all'area di servizio": ["«Pronto, sono in tre feriti: sono in tre a terra, uno perde sangue da una gamba (scontro tra furgoncino, utilitaria e monovolume all'area di servizio)»","«Pronto, scontro tra furgoncino, utilitaria e monovolume all'area di servizio, tre persone non si alzano, uno perde sangue da una gamba»"],
   "Scontro tra filobus, kart e auto sotto il ponte": ["«Pronto, scontro brutto qui in strada: tre persone non si alzano, uno perde sangue da una gamba (scontro tra filobus, kart e auto sotto il ponte)»","«Pronto, scontro tra filobus, kart e auto sotto il ponte, sono tutti e tre contusi, servono altre ambulanze»"],
   "Scontro tra spazzatrice, pick-up e riscio sulla provinciale": ["«Aiuto, mandate più ambulanze: sono tutti e tre contusi, il traffico è bloccato (scontro tra spazzatrice, pick-up e riscio sulla provinciale)»","«Pronto, scontro tra spazzatrice, pick-up e riscio sulla provinciale, sono tutti e tre contusi, uno perde sangue da una gamba»"],
-  "Scontro tra rimorchio, SUV e trike al distributore di benzina": ["«Pronto, incidente stradale: tre persone non si alzano, i mezzi sono distrutti (scontro tra rimorchio, suv e trike al distributore di benzina)»","«Pronto, scontro tra rimorchio, suv e trike al distributore di benzina, ci sono tre feriti, i mezzi sono distrutti»"],
   "Scontro tra furgoncino, utilitaria e limousine sul rettilineo": ["«Pronto, sono in tre feriti: sono in tre a terra, servono altre ambulanze (scontro tra furgoncino, utilitaria e limousine sul rettilineo)»","«Pronto, scontro tra furgoncino, utilitaria e limousine sul rettilineo, tre persone non si alzano, c'è gente che aiuta»"],
   "Scontro tra spider, carro attrezzi e taxi sul rettilineo": ["«Pronto, incidente stradale: sono in tre a terra, uno perde sangue da una gamba (scontro tra spider, carro attrezzi e taxi sul rettilineo)»","«Pronto, scontro tra spider, carro attrezzi e taxi sul rettilineo, ci sono tre feriti, i mezzi sono distrutti»"],
   "Scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità": ["«Aiuto, mandate più ambulanze: ci sono tre feriti, servono altre ambulanze (scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità)»","«Pronto, scontro tra furgone, fuoristrada e rimorchio in curva senza visibilità, sono in tre a terra, il traffico è bloccato»"],
@@ -63454,11 +63421,8 @@ CHIAMATE_VAR = {
   "Scontro tra jeep, pick-up e station wagon al posteggio taxi": ["«Pronto, scontro brutto qui in strada: tre persone non si alzano, c'è gente che aiuta (scontro tra jeep, pick-up e station wagon al posteggio taxi)»","«Pronto, scontro tra jeep, pick-up e station wagon al posteggio taxi, ci sono tre feriti, servono altre ambulanze»"],
   "Scontro tra spazzatrice, spider e taxi sul cavalcavia": ["«Pronto, scontro brutto qui in strada: tre persone non si alzano, il traffico è bloccato (scontro tra spazzatrice, spider e taxi sul cavalcavia)»","«Pronto, scontro tra spazzatrice, spider e taxi sul cavalcavia, sono tutti e tre contusi, i mezzi sono distrutti»"],
   "Scontro tra furgoncino, furgone e semirimorchio in discesa ripida": ["«Pronto, incidente stradale: sono tutti e tre contusi, uno perde sangue da una gamba (scontro tra furgoncino, furgone e semirimorchio in discesa ripida)»","«Pronto, scontro tra furgoncino, furgone e semirimorchio in discesa ripida, sono in tre a terra, il traffico è bloccato»"],
-  "Scontro tra taxi, trike e limousine sul viale alberato": ["«Pronto, scontro brutto qui in strada: sono in tre a terra, c'è gente che aiuta (scontro tra taxi, trike e limousine sul viale alberato)»","«Pronto, scontro tra taxi, trike e limousine sul viale alberato, tre persone non si alzano, servono altre ambulanze»"],
-  "Scontro tra spider, taxi e trike sul vialetto del paese": ["«Aiuto, mandate più ambulanze: tre persone non si alzano, uno perde sangue da una gamba (scontro tra spider, taxi e trike sul vialetto del paese)»","«Pronto, scontro tra spider, taxi e trike sul vialetto del paese, tre persone non si alzano, i mezzi sono distrutti»"],
   "Scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese": ["«Pronto, incidente stradale: sono tutti e tre contusi, c'è gente che aiuta (scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese)»","«Pronto, scontro tra taxi, fuoristrada e fuoristrada sul vialetto del paese, ci sono tre feriti, uno perde sangue da una gamba»"],
   "Scontro tra utilitaria, jeep e monovolume in salita": ["«Pronto, incidente stradale: ci sono tre feriti, servono altre ambulanze (scontro tra utilitaria, jeep e monovolume in salita)»","«Pronto, scontro tra utilitaria, jeep e monovolume in salita, ci sono tre feriti, c'è gente che aiuta»"],
-  "Scontro tra taxi, trike e carro funebre all'uscita della messa": ["«Aiuto, mandate più ambulanze: sono tutti e tre contusi, uno perde sangue da una gamba (scontro tra taxi, trike e carro funebre all'uscita della messa)»","«Pronto, scontro tra taxi, trike e carro funebre all'uscita della messa, tre persone non si alzano, servono altre ambulanze»"],
   "Scontro tra camper, Apecar e kart in fiera": ["«Pronto, sono in tre feriti: sono in tre a terra, il traffico è bloccato (scontro tra camper, apecar e kart in fiera)»","«Pronto, scontro tra camper, apecar e kart in fiera, sono in tre a terra, servono altre ambulanze»"],
   "Scontro tra monovolume, SUV e fuoristrada in curva senza visibilità": ["«Pronto, scontro brutto qui in strada: tre persone non si alzano, servono altre ambulanze (scontro tra monovolume, suv e fuoristrada in curva senza visibilità)»","«Pronto, scontro tra monovolume, suv e fuoristrada in curva senza visibilità, tre persone non si alzano, c'è gente che aiuta»"],
   "Scontro tra camper, taxi e taxi all'uscita del paese": ["«Pronto, sono in tre feriti: tre persone non si alzano, il traffico è bloccato (scontro tra camper, taxi e taxi all'uscita del paese)»","«Pronto, scontro tra camper, taxi e taxi all'uscita del paese, tre persone non si alzano, uno perde sangue da una gamba»"],
@@ -63496,7 +63460,6 @@ CHIAMATE_VAR = {
   "Frontale tra jeep e Apecar al posteggio taxi, tre feriti": ["«Aiuto, mandate più ambulanze: tre persone non si muovono, servono altre ambulanze (frontale tra jeep e apecar al posteggio taxi, tre feriti)»","«Pronto, frontale tra jeep e apecar al posteggio taxi, tre feriti, tre persone non si muovono, il traffico è bloccato»"],
   "Frontale tra filobus e furgoncino alla rotonda, tre feriti": ["«Aiuto, mandate più ambulanze: uno è grave, gli altri contusi, i mezzi sono distrutti (frontale tra filobus e furgoncino alla rotonda, tre feriti)»","«Pronto, frontale tra filobus e furgoncino alla rotonda, tre feriti, ci sono tre feriti, i mezzi sono distrutti»"],
   "Scontro tra moto, scooter e quad sul viale alberato": ["«Pronto, brutto scontro qui: tre persone non si muovono, i mezzi sono distrutti (scontro tra moto, scooter e quad sul viale alberato)»","«Pronto, scontro tra moto, scooter e quad sul viale alberato, sono in tre gravi, servono altre ambulanze»"],
-  "Frontale tra riscio e trike allo svincolo, tre feriti": ["«Pronto, brutto scontro qui: ci sono tre feriti, servono altre ambulanze (frontale tra riscio e trike allo svincolo, tre feriti)»","«Pronto, frontale tra riscio e trike allo svincolo, tre feriti, uno è grave, gli altri contusi, il traffico è bloccato»"],
   "Frontale tra station wagon e monovolume al semaforo, tre feriti": ["«Aiuto, mandate più ambulanze: tre persone non si muovono, i mezzi sono distrutti (frontale tra station wagon e monovolume al semaforo, tre feriti)»","«Pronto, frontale tra station wagon e monovolume al semaforo, tre feriti, sono in tre gravi, c'è gente che aiuta»"],
   "Frontale tra station wagon e pick-up sotto il ponte, tre feriti": ["«Pronto, incidente stradale: sono in tre gravi, servono altre ambulanze (frontale tra station wagon e pick-up sotto il ponte, tre feriti)»","«Pronto, frontale tra station wagon e pick-up sotto il ponte, tre feriti, ci sono tre feriti, c'è gente che aiuta»"],
   "Frontale tra taxi e filobus sul rettilineo buio, tre feriti": ["«Pronto, brutto scontro qui: sono in tre gravi, servono altre ambulanze (frontale tra taxi e filobus sul rettilineo buio, tre feriti)»","«Pronto, frontale tra taxi e filobus sul rettilineo buio, tre feriti, ci sono tre feriti, c'è gente che aiuta»"],
@@ -63520,7 +63483,6 @@ CHIAMATE_VAR = {
   "Frontale tra Apecar e bisarca in curva senza visibilità, tre feriti": ["«Aiuto, mandate più ambulanze: uno è grave, gli altri contusi, i mezzi sono distrutti (frontale tra apecar e bisarca in curva senza visibilità, tre feriti)»","«Pronto, frontale tra apecar e bisarca in curva senza visibilità, tre feriti, tre persone non si muovono, servono altre ambulanze»"],
   "Frontale tra camper e auto allo stop, tre feriti": ["«Pronto, brutto scontro qui: sono in tre gravi, servono altre ambulanze (frontale tra camper e auto allo stop, tre feriti)»","«Pronto, frontale tra camper e auto allo stop, tre feriti, ci sono tre feriti, servono altre ambulanze»"],
   "Frontale tra monovolume e semirimorchio in centro, tre feriti": ["«Pronto, brutto scontro qui: sono in tre gravi, servono altre ambulanze (frontale tra monovolume e semirimorchio in centro, tre feriti)»","«Pronto, frontale tra monovolume e semirimorchio in centro, tre feriti, tre persone non si muovono, i mezzi sono distrutti»"],
-  "Frontale tra trike e riscio al passaggio pedonale, tre feriti": ["«Pronto, brutto scontro qui: uno è grave, gli altri contusi, c'è gente che aiuta (frontale tra trike e riscio al passaggio pedonale, tre feriti)»","«Pronto, frontale tra trike e riscio al passaggio pedonale, tre feriti, uno è grave, gli altri contusi, c'è gente che aiuta»"],
   "Frontale tra spazzatrice e pick-up sul viale alberato, tre feriti": ["«Pronto, brutto scontro qui: ci sono tre feriti, servono altre ambulanze (frontale tra spazzatrice e pick-up sul viale alberato, tre feriti)»","«Pronto, frontale tra spazzatrice e pick-up sul viale alberato, tre feriti, sono in tre gravi, i mezzi sono distrutti»"],
   "Frontale tra pick-up e monovolume alla strettoia, tre feriti": ["«Aiuto, mandate più ambulanze: uno è grave, gli altri contusi, il traffico è bloccato (frontale tra pick-up e monovolume alla strettoia, tre feriti)»","«Pronto, frontale tra pick-up e monovolume alla strettoia, tre feriti, sono in tre gravi, servono altre ambulanze»"],
   "Frontale tra Apecar e cabrio in centro, tre feriti": ["«Pronto, brutto scontro qui: uno è grave, gli altri contusi, c'è gente che aiuta (frontale tra apecar e cabrio in centro, tre feriti)»","«Pronto, frontale tra apecar e cabrio in centro, tre feriti, tre persone non si muovono, servono altre ambulanze»"],
@@ -63544,12 +63506,9 @@ CHIAMATE_VAR = {
   "Pulmino con tre passeggeri contro guardrail sulla provinciale": ["«Pronto, brutto scontro qui: uno è grave, gli altri contusi, il traffico è bloccato (pulmino con tre passeggeri contro guardrail sulla provinciale)»","«Pronto, pulmino con tre passeggeri contro guardrail sulla provinciale, sono in tre gravi, servono altre ambulanze»"],
   "Frontale tra SUV e furgoncino in curva senza visibilità, tre feriti": ["«Aiuto, mandate più ambulanze: sono in tre gravi, servono altre ambulanze (frontale tra suv e furgoncino in curva senza visibilità, tre feriti)»","«Pronto, frontale tra suv e furgoncino in curva senza visibilità, tre feriti, tre persone non si muovono, c'è gente che aiuta»"],
   "Frontale tra carro funebre e pick-up in salita, tre feriti": ["«Aiuto, mandate più ambulanze: sono in tre gravi, servono altre ambulanze (frontale tra carro funebre e pick-up in salita, tre feriti)»","«Pronto, frontale tra carro funebre e pick-up in salita, tre feriti, uno è grave, gli altri contusi, i mezzi sono distrutti»"],
-  "Frontale tra trike e taxi sul vialetto del paese, tre feriti": ["«Pronto, incidente stradale: ci sono tre feriti, c'è gente che aiuta (frontale tra trike e taxi sul vialetto del paese, tre feriti)»","«Pronto, frontale tra trike e taxi sul vialetto del paese, tre feriti, uno è grave, gli altri contusi, c'è gente che aiuta»"],
   "Frontale tra monovolume e taxi allo svincolo, tre feriti": ["«Pronto, incidente stradale: sono in tre gravi, c'è gente che aiuta (frontale tra monovolume e taxi allo svincolo, tre feriti)»","«Pronto, frontale tra monovolume e taxi allo svincolo, tre feriti, uno è grave, gli altri contusi, c'è gente che aiuta»"],
   "Frontale tra Apecar e kart al capolinea, tre feriti": ["«Pronto, incidente stradale: tre persone non si muovono, servono altre ambulanze (frontale tra apecar e kart al capolinea, tre feriti)»","«Pronto, frontale tra apecar e kart al capolinea, tre feriti, ci sono tre feriti, il traffico è bloccato»"],
-  "Frontale tra taxi e trike in discesa, tre feriti": ["«Pronto, incidente stradale: tre persone non si muovono, i mezzi sono distrutti (frontale tra taxi e trike in discesa, tre feriti)»","«Pronto, frontale tra taxi e trike in discesa, tre feriti, uno è grave, gli altri contusi, c'è gente che aiuta»"],
   "Frontale tra tram e carro funebre in discesa ripida, tre feriti": ["«Pronto, brutto scontro qui: tre persone non si muovono, il traffico è bloccato (frontale tra tram e carro funebre in discesa ripida, tre feriti)»","«Pronto, frontale tra tram e carro funebre in discesa ripida, tre feriti, uno è grave, gli altri contusi, il traffico è bloccato»"],
-  "Frontale tra camper e trike al semaforo, tre feriti": ["«Pronto, brutto scontro qui: tre persone non si muovono, il traffico è bloccato (frontale tra camper e trike al semaforo, tre feriti)»","«Pronto, frontale tra camper e trike al semaforo, tre feriti, uno è grave, gli altri contusi, i mezzi sono distrutti»"],
   "Frontale tra monovolume e taxi alla strettoia, tre feriti": ["«Aiuto, mandate più ambulanze: tre persone non si muovono, c'è gente che aiuta (frontale tra monovolume e taxi alla strettoia, tre feriti)»","«Pronto, frontale tra monovolume e taxi alla strettoia, tre feriti, tre persone non si muovono, i mezzi sono distrutti»"],
   "Frontale tra auto e limousine al distributore di benzina, tre feriti": ["«Aiuto, mandate più ambulanze: sono in tre gravi, i mezzi sono distrutti (frontale tra auto e limousine al distributore di benzina, tre feriti)»","«Pronto, frontale tra auto e limousine al distributore di benzina, tre feriti, tre persone non si muovono, i mezzi sono distrutti»"],
   "Frontale tra auto e SUV fuori dalla discoteca di notte, tre feriti": ["«Aiuto, mandate più ambulanze: tre persone non si muovono, servono altre ambulanze (frontale tra auto e suv fuori dalla discoteca di notte, tre feriti)»","«Pronto, frontale tra auto e suv fuori dalla discoteca di notte, tre feriti, uno è grave, gli altri contusi, i mezzi sono distrutti»"],
@@ -63567,7 +63526,6 @@ CHIAMATE_VAR = {
   "Frontale tra camper e limousine al semaforo, quattro feriti": ["«Pronto, scontro brutto qui in strada: sono tutti contusi, i mezzi sono distrutti (frontale tra camper e limousine al semaforo, quattro feriti)»","«Pronto, frontale tra camper e limousine al semaforo, quattro feriti, sono tutti contusi, servono più ambulanze»"],
   "Frontale tra bisarca e furgone al semaforo, quattro feriti": ["«Aiuto, mandate più ambulanze: quattro persone non si alzano, servono più ambulanze (frontale tra bisarca e furgone al semaforo, quattro feriti)»","«Pronto, frontale tra bisarca e furgone al semaforo, quattro feriti, quattro persone non si alzano, servono più ambulanze»"],
   "Frontale tra fuoristrada e SUV sul rettilineo buio, quattro feriti": ["«Aiuto, mandate più ambulanze: sono tutti contusi, il traffico è bloccato (frontale tra fuoristrada e suv sul rettilineo buio, quattro feriti)»","«Pronto, frontale tra fuoristrada e suv sul rettilineo buio, quattro feriti, sono in quattro a terra, c'è gente che aiuta»"],
-  "Frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti": ["«Pronto, scontro brutto qui in strada: quattro persone non si alzano, i mezzi sono distrutti (frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti)»","«Pronto, frontale tra taxi e trike fuori dalla discoteca di notte, quattro feriti, sono in quattro a terra, c'è gente che aiuta»"],
   "Frontale tra spazzatrice e limousine in salita, quattro feriti": ["«Pronto, incidente grave: sono tutti contusi, il traffico è bloccato (frontale tra spazzatrice e limousine in salita, quattro feriti)»","«Pronto, frontale tra spazzatrice e limousine in salita, quattro feriti, quattro persone non si alzano, c'è gente che aiuta»"],
   "Frontale tra taxi e rimorchio in parcheggio, quattro feriti": ["«Pronto, incidente grave: ci sono quattro feriti, c'è gente che aiuta (frontale tra taxi e rimorchio in parcheggio, quattro feriti)»","«Pronto, frontale tra taxi e rimorchio in parcheggio, quattro feriti, ci sono quattro feriti, c'è gente che aiuta»"],
   "Frontale tra kart e rimorchio alla rotonda, quattro feriti": ["«Pronto, scontro brutto qui in strada: sono tutti contusi, servono più ambulanze (frontale tra kart e rimorchio alla rotonda, quattro feriti)»","«Pronto, frontale tra kart e rimorchio alla rotonda, quattro feriti, sono in quattro a terra, il traffico è bloccato»"],
@@ -67851,10 +67809,10 @@ function stormTick(dtGameMin){
   function callMzHTML(call){
     const sel = call.incaricoMz||[];
     const ck = c => sel.includes(c) ? " checked" : "";
-    const d118 = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF")
+    const d118 = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice])
       .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
       .sort((a,b)=>a.d-b.d).slice(0,8);
-    const dVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF")
+    const dVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice])
       .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
       .sort((a,b)=>a.d-b.d).slice(0,6);
     let h = '<div class="small" style="margin:4px 0">Spunta i mezzi da inviare (i più vicini):</div><div class="callMz">';
@@ -68087,8 +68045,8 @@ function stormTick(dtGameMin){
     wirePop("#assistHead", "#assistWin", "#assistX", ()=>closeAssist());
     const iv = interventi.find(x=>x.id===assistIvId);
     if(!iv){ ov.style.display = "none"; return; }
-    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF");
-    const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF");
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice]);
+    const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice]);
     body.innerHTML = `
       <div class="intTop"><b>🆘 Assistenza</b></div>
       <div class="intAddr">📍 ${luogoIV(iv,true)}</div>
@@ -68249,7 +68207,7 @@ function stormTick(dtGameMin){
         lab.title=`${mz.radio||mz.codice} — ${mz.tipo} — ${mz.sede}`;
         eg.appendChild(lab);
       };
-      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile")
+      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile"&&!cloudBusy[m.codice])
         .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
         .sort((a,b)=>a.d-b.d);
       for(const {mz, d} of eliFree) eliAddRow(mz, ` — ${d.toFixed(1)} km`);
@@ -68297,7 +68255,7 @@ function stormTick(dtGameMin){
         mg.appendChild(lab);
       };
       const gruppiMI = new Map();
-      for(const mz of mezzi.filter(m=>m.corpo==="VVF"&&m.prov==="MI"&&m.stato==="disponibile")){
+      for(const mz of mezzi.filter(m=>m.corpo==="VVF"&&m.prov==="MI"&&m.stato==="disponibile"&&!cloudBusy[m.codice])){
         const s = D().VVF_SEDI.find(x=>x.nome===mz.sede);
         const d = s ? haversineKm(iv.lat,iv.lng,s.lat,s.lng) : haversineKm(iv.lat,iv.lng,mz.lat,mz.lng);
         if(!gruppiMI.has(mz.sede)) gruppiMI.set(mz.sede, {sede:mz.sede, d, mezzi:[]});
@@ -69113,7 +69071,7 @@ function stormTick(dtGameMin){
 
  function mezziDisponibili(tipoWanted=null, corpoWanted=null){
  
-    return mezzi.filter(m=>m.stato==="disponibile" && (!tipoWanted || m.tipo===tipoWanted) && (!corpoWanted || m.corpo===corpoWanted));
+    return mezzi.filter(m=>m.stato==="disponibile" && !cloudBusy[m.codice] && (!tipoWanted || m.tipo===tipoWanted) && (!corpoWanted || m.corpo===corpoWanted));
   }
 
   function nearestMezzo(lat,lng,tipoWanted=null,corpoWanted=null){
@@ -71141,6 +71099,24 @@ function stormTick(dtGameMin){
       return true;
     }catch(_){ btInit(); return false; }
   }
+  // ---------- MEZZI OCCUPATI DAL CLOUD (il cloud se li gestisce da solo) ----------
+  // Codici impegnati dalle missioni cloud (origine=ia, gestita_da=ia, attive/in corso):
+  // i mezzi locali corrispondenti si nascondono finché la missione cloud è attiva,
+  // poi tornano disponibili da soli al chiudersi della missione (sync in COEULIVE.tick).
+  // Mai nascosto un mezzo già impegnato in una missione locale (stato != disponibile).
+  let cloudBusy = {};
+  function mezzoLibero(m){ return m && m.stato === "disponibile" && !cloudBusy[m.codice]; }
+  function setMezziCloudOccupati(arr){
+    const nq = {};
+    if(Array.isArray(arr)) for(const c of arr) if(typeof c === "string" && c) nq[c] = 1;
+    const a = Object.keys(cloudBusy).sort().join("|"), b = Object.keys(nq).sort().join("|");
+    if(a === b) return false;
+    cloudBusy = nq;
+    try{ renderListe(); }catch(_){}
+    try{ updateStats(); }catch(_){}
+    return true;
+  }
+  function mezziCloudOccupati(){ return Object.keys(cloudBusy); }
   // orologio cumulativo, giorno di gioco, tempo in servizio mezzi, autosave (dal tick)
   function statTick(dtG){
     statClock += dtG; statGameMin += dtG;
@@ -71659,7 +71635,7 @@ function stormTick(dtGameMin){
 
   // icone sedi fisse: casetta verde (118) e casetta rossa (VVF), senza stati
   function sedeHaMezzi(nome, isVVF){
-    return mezzi.some(m=>m.stato==="disponibile"&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
+    return mezzi.some(m=>m.stato==="disponibile"&&!cloudBusy[m.codice]&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
   }
   const HOUSE_SVG = c => `<svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2 L2 12 h3 v9 h6 v-6 h2 v6 h6 v-9 h3 z" fill="${c}" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
   function sedeIcon(nome, isVVF){
@@ -71671,7 +71647,7 @@ function stormTick(dtGameMin){
 
   // tooltip sede: nome + mezzi presenti in sede in questo momento (solo disponibili)
   function sedeTooltipHTML(nome, isVVF){
-    const inSede = mezzi.filter(m=>m.stato==="disponibile"&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
+    const inSede = mezzi.filter(m=>m.stato==="disponibile"&&!cloudBusy[m.codice]&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
     let h = `<span style="color:#e8720c;text-decoration:underline"><b>${nome}</b></span>`;
     if(!inSede.length) h += `<br><span class="small">nessun mezzo in sede</span>`;
     else for(const m of inSede.slice(0,12))
@@ -71813,6 +71789,7 @@ function stormTick(dtGameMin){
       const cnsasAttivi = mezzi.filter(m=>m.tipo==="CNSAS" && m.interventoId!=null);
       const pmaAttivi = mezzi.filter(m=>m.tipo==="PMA" && m.interventoId!=null);
       for(const mz of [...mezzi118, ...vvfAttivi, ...cnsasAttivi, ...pmaAttivi]){
+        if(cloudBusy[mz.codice] && mz.stato==="disponibile") continue; // occupato dal cloud: nascosto
         const d=document.createElement("div");
         d.className="mzCard "+mz.stato + (mz.codice===selMz?" selMz":"");
         const _mc = mz.tipo==="CNSAS" ? "#e6a100" : mz.tipo==="PMA" ? "#0e7c86" : (mz.cat==="MSI_MSA" ? "#d00000" : ((mz.cat==="VVF"||mz.corpo==="VVF") ? "#555" : ""));
@@ -71822,8 +71799,9 @@ function stormTick(dtGameMin){
         f2.appendChild(d);
       }
       mzEl.appendChild(f2);
-      const disp = mezzi118.filter(m=>m.stato==="disponibile").length;
-      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}`;
+      const disp = mezzi118.filter(m=>mezzoLibero(m)).length;
+      const cloudN = mezzi.filter(m=>m.stato==="disponibile"&&cloudBusy[m.codice]).length;
+      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}` + (cloudN ? ` ☁️${cloudN}` : "");
     }
     if(selMz) showMzDetail(selMz);
     renderDetail();
@@ -72041,7 +72019,7 @@ function stormTick(dtGameMin){
   function updateStats(){
     const aperti = interventi.filter(i=>i.stato!=="chiuso").length;
     const attesa = interventi.filter(i=>i.stato==="attesa").length;
-    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF").length;
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice]).length;
     const tot118 = mezzi.filter(m=>m.corpo!=="VVF").length;
     if($("statAperti")) $("statAperti").textContent=aperti;
     if($("statAttesa")) $("statAttesa").textContent=attesa;
@@ -72128,6 +72106,7 @@ function stormTick(dtGameMin){
     btStats(){ if(!BT) btInit(); return JSON.parse(JSON.stringify(BT)); },
     btReset(){ btInit(); btSave(); },
     nomeMezzo(cod){ const m = mezzi.find(x=>x&&x.codice===cod); return m ? (m.radio||m.codice) : cod; },
+    setMezziCloudOccupati, mezziCloudOccupati,
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     bisognoPaziente, ospedaliPerBisogno, mostraOspedale, togglePMA, piazzaPMA, rimuoviPMA, pmaStato, maxiAperta,
     pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo,
@@ -72154,7 +72133,7 @@ function stormTick(dtGameMin){
     syncFasce(){ syncFasce(); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
-    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; programmaFlusso(); statsReset(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
+    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
     listMezziCodici(){ return mezzi.map(m=>m.codice); },
     // test generazioni: debugPazienti("Incidente stradale", 8) → 8 possibili equipaggi di feriti
     debugPazienti(nome, n){
@@ -72555,39 +72534,65 @@ window.COEUTOT = (() => {
     catch(e){ body.innerHTML = '<div class="small">Errore lettura dati: ' + esc(e.message) + '</div>'; return; }
     const smalt = b.smaltN > 0 ? b.smaltSomma / b.smaltN : null;
     const risp = b.rispN > 0 ? b.rispSomma / b.rispN : null;
-    let h = sec("🚨 Missioni (questo browser)");
-    h += kv("missioni", "<b>" + b.missioni + "</b>");
-    h += kv("… compreso il trasporto dei pazienti", "<b>" + b.conTrasporto + "</b>");
-    h += kv("… comprese le operazioni di emergenza", "<b>" + b.emergenza + "</b>");
-    h += kv("Tempo totale di gioco", "<b>" + fmtLungo(b.gameMin) + "</b>");
+    // fusione col cloud IA (solo lettura): missioni chiuse gestite dal cloud
+    // (quelle prese in carico qui sono già nei numeri locali, niente doppi).
+    // RCP, tempi medi, straordinario e km restano solo locali: il cloud non li trasmette.
+    const cl = (window.COEULIVE && COEULIVE.cloudIA) ? COEULIVE.cloudIA() : null;
+    const cd = (cl && cl.ok && cl.dati) ? cl.dati : null;
+    const clMis = cd ? cd.missioni : 0, clTr = cd ? cd.conTrasporto : 0, clEm = cd ? cd.emergenza : 0;
+    let notaCloud;
+    if(cd) notaCloud = ' <span class="small">(di cui ☁️ ' + cd.missioni + ' dal cloud IA)</span>';
+    else if(cl && !cl.ok && cl.motivo === "non configurato") notaCloud = ' <span class="small">(☁️ cloud non configurato: solo questo browser)</span>';
+    else if(cl && !cl.ok) notaCloud = ' <span class="small">(☁️ cloud non raggiungibile: solo questo browser)</span>';
+    else notaCloud = ' <span class="small">(☁️ cloud in caricamento…)</span>';
+    let h = sec("🚨 Missioni (browser + ☁️ cloud IA)");
+    h += kv("missioni", "<b>" + (b.missioni + clMis) + "</b>" + notaCloud);
+    h += kv("… compreso il trasporto dei pazienti", "<b>" + (b.conTrasporto + clTr) + "</b>");
+    h += kv("… comprese le operazioni di emergenza", "<b>" + (b.emergenza + clEm) + "</b>");
+    h += kv("Tempo totale di gioco", "<b>" + fmtLungo(b.gameMin) + "</b>" + ' <span class="small">(solo browser)</span>');
     h += sec("❤️ Rianimazione");
-    h += kv("Rianimazione", "<b>" + b.rianimazioni + "</b>");
+    h += kv("Rianimazione", "<b>" + b.rianimazioni + "</b>" + ' <span class="small">(solo browser: il cloud non registra le RCP)</span>');
     h += kv("… con successo", "<b>" + b.rianimOk + "</b>");
-    h += sec("⏱️ Tempi medi (di gioco)");
+    h += sec("⏱️ Tempi medi (solo browser)");
     h += kv("tempo medio di smaltimento", "<b>" + fmtMinSec(smalt) + "</b>");
     h += kv("tempo di risposta medio", "<b>" + fmtMinSec(risp) + "</b>");
-    h += sec("🚑🚒 Statistiche sui veicoli");
-    const righe = Object.keys(b.mezzi || {})
-      .map(cod => ({cod: cod, m: b.mezzi[cod]}))
-      .filter(r => r.m && (r.m.missioni > 0 || r.m.km > 0.05))
-      .sort((x, y) => (y.m.missioni - x.m.missioni) || (y.m.km - x.m.km));
+    h += sec("🚑🚒 Statistiche sui veicoli (fuse col cloud IA)");
+    const fuse = {};
+    for(const cod of Object.keys(b.mezzi || {})) fuse[cod] = { loc:(b.mezzi || {})[cod], cl:0 };
+    if(cd) for(const cod of Object.keys(cd.mezzi || {})){
+      if(!fuse[cod]) fuse[cod] = { loc:null, cl:0 };
+      fuse[cod].cl = (cd.mezzi[cod] && cd.mezzi[cod].missioni) || 0;
+    }
+    const righe = Object.keys(fuse)
+      .map(cod => ({ cod:cod, loc:fuse[cod].loc, cl:fuse[cod].cl,
+        tot:((fuse[cod].loc && fuse[cod].loc.missioni) || 0) + fuse[cod].cl }))
+      .filter(r => r.tot > 0 || ((r.loc && r.loc.km) || 0) > 0.05)
+      .sort((x, y) => (y.tot - x.tot) || (((y.loc && y.loc.km) || 0) - ((x.loc && x.loc.km) || 0)));
     if(!righe.length){
-      h += '<div class="small">Nessun mezzo uscito in questo browser.</div>';
+      h += '<div class="small">Nessun mezzo uscito in questo browser né dal cloud IA.</div>';
     } else {
-      h += '<div style="max-height:38vh;overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%" cellpadding="3">'
+      h += '<div class="small" style="margin-bottom:4px">Medie e km solo da questo browser (il cloud non li trasmette).</div>'
+        + '<div style="max-height:38vh;overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%" cellpadding="3">'
         + '<tr style="text-align:left"><th>veicolo</th><th>missioni</th><th>straordinario medio</th><th>chilometraggio</th><th>media km per viaggio</th></tr>'
         + righe.map(r => {
-          const n = Math.max(1, r.m.missioni || 0);
-          const straord = fmtLungo((r.m.servMin || 0) / n);
-          const km = (r.m.km || 0);
+          const lm = r.loc || { missioni:0, servMin:0, km:0 };
+          const n = Math.max(1, lm.missioni || 0);
+          const straord = lm.missioni > 0 ? fmtLungo((lm.servMin || 0) / n) : "N/D";
+          const km = (lm.km || 0);
+          const kmCell = lm.missioni > 0 ? (km.toFixed(1) + ' km') : "N/D";
+          const kmMed = lm.missioni > 0 ? ((km / n).toFixed(1) + ' km') : "N/D";
+          const misCell = r.cl > 0
+            ? ('<b>' + r.tot + '</b> <span class="small">☁️+' + r.cl + '</span>')
+            : ('<b>' + r.tot + '</b>');
           let nome = r.cod;
           try{ if(window.COEUSIM && window.COEUSIM.nomeMezzo) nome = window.COEUSIM.nomeMezzo(r.cod) || r.cod; }catch(_){}
           const et = (nome !== r.cod) ? ('<b>' + esc(nome) + '</b> <span class="small">' + esc(r.cod) + '</span>') : ('<b>' + esc(r.cod) + '</b>');
-          return '<tr><td>' + et + '</td><td>' + r.m.missioni + '</td><td>'
-            + esc(straord) + '</td><td>' + km.toFixed(1) + ' km</td><td>'
-            + (km / n).toFixed(1) + ' km</td></tr>';
+          return '<tr><td>' + et + '</td><td>' + misCell + '</td><td>'
+            + esc(straord) + '</td><td>' + kmCell + '</td><td>'
+            + kmMed + '</td></tr>';
         }).join("") + '</table></div>';
     }
+    h += '<div class="small" style="margin-top:6px">🧹 Azzera azzera solo questo browser (il cloud resta).</div>';
     body.innerHTML = h;
   }
   function open(){
@@ -72595,8 +72600,13 @@ window.COEUTOT = (() => {
     if(!dlg) return;
     if(!dlg.open) dlg.showModal();
     render();
+    try{ if(window.COEULIVE && COEULIVE.statCloudIA) COEULIVE.statCloudIA(); }catch(_){}
     if(timer) clearInterval(timer);
-    timer = setInterval(() => { if($("totDlg").open) render(); }, 2000);
+    timer = setInterval(() => {
+      if(!$("totDlg").open) return;
+      try{ if(window.COEULIVE && COEULIVE.statCloudIA) COEULIVE.statCloudIA(); }catch(_){}
+      render();
+    }, 2000);
   }
   function close(){
     if(timer){ clearInterval(timer); timer = null; }
@@ -72959,6 +72969,23 @@ window.COEULIVE = (() => {
 
   async function tick(){
     if(!client || !configurato()) return;
+    // mezzi occupati dal cloud (missioni ia che il cloud gestisce da solo):
+    // il simulatore li nasconde finché restano attive, poi tornano da soli.
+    // Lettura pubblica (niente login richiesto), best-effort: mai bloccare il gioco.
+    try{
+      if(window.COEUSIM && COEUSIM.setMezziCloudOccupati){
+        const res = await client.from("missioni_live").select("mezzi")
+          .eq("origine", "ia").eq("gestita_da", "ia").in("stato", ["attiva", "in_corso"]).limit(500);
+        if(res && !res.error && Array.isArray(res.data)){
+          const codici = [];
+          for(const r of res.data){
+            const arr = Array.isArray(r.mezzi) ? r.mezzi : [];
+            for(const v of arr) if(v && v.c) codici.push(String(v.c));
+          }
+          COEUSIM.setMezziCloudOccupati(codici);
+        }
+      }
+    }catch(_){ /* la prossima sync riprova */ }
     if(!pubblicaOn()) return; // toggle globale spento: nessuna scrittura
     let session = null;
     try{ const r = await client.auth.getSession(); session = r.data && r.data.session; }
@@ -73339,7 +73366,59 @@ window.COEULIVE = (() => {
     return { ok:true, chiuse:n };
   }
 
-  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate, caricaMissioniIA };
+  // --- statistiche cloud IA fuse nei Totali browser (solo lettura pubblica) ---
+  // Conta le missioni IA gestite dal cloud dall'inizio alla fine (origine=ia,
+  // gestita_da=ia, chiuse): quelle prese in carico dal simulatore hanno
+  // gestita_da=simulatore e sono già nei totali locali (niente doppi conteggi),
+  // come le righe pubblicate dal simulatore stesso (origine=simulatore).
+  // Il cloud registra i trasporti (mezzi con tr=true) ma non RCP/tempi/km:
+  // quelli restano solo locali.
+  let csCache = null, csInCorso = null;
+  const CS_FRESCO_MS = 60000;
+  async function statCloudIA(){
+    const ora = Date.now();
+    if(csCache && ora - csCache.ts < CS_FRESCO_MS) return csCache;
+    if(csInCorso) return csCache; // fetch già in corso: intanto il dato vecchio
+    if(!client || !configurato()){ csCache = { ok:false, ts:ora, motivo:"non configurato" }; return csCache; }
+    csInCorso = (async () => {
+      try{
+        const agg = { missioni:0, conTrasporto:0, emergenza:0, mezzi:{} };
+        let from = 0;
+        const STEP = 1000;
+        for(let pag = 0; pag < 5; pag++){
+          const res = await client.from("missioni_live").select("codice,mezzi")
+            .eq("origine", "ia").eq("gestita_da", "ia").eq("stato", "chiusa")
+            .range(from, from + STEP - 1);
+          if(res.error) throw res.error;
+          const rows = res.data || [];
+          for(const r of rows){
+            agg.missioni++;
+            const mz = Array.isArray(r.mezzi) ? r.mezzi : [];
+            let tr = false;
+            const visti = {};
+            for(const v of mz){
+              if(v && v.tr) tr = true;
+              const c = (v && v.c) ? String(v.c) : "";
+              if(!c || visti[c]) continue;
+              visti[c] = 1;
+              if(!agg.mezzi[c]) agg.mezzi[c] = { missioni:0 };
+              agg.mezzi[c].missioni++;
+            }
+            if(tr) agg.conTrasporto++; else agg.emergenza++;
+          }
+          if(rows.length < STEP) break;
+          from += STEP;
+        }
+        csCache = { ok:true, ts:Date.now(), dati:agg };
+      }catch(e){ csCache = { ok:false, ts:Date.now(), motivo:"non raggiungibile" }; }
+      csInCorso = null;
+      return csCache;
+    })();
+    return csInCorso;
+  }
+  function cloudIA(){ return csCache; }
+
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate, caricaMissioniIA, statCloudIA, cloudIA };
 })();
 /* =====================================================================
  * MIGRAZIONI (una sola volta ciascuna, in Supabase Dashboard > SQL Editor).
