@@ -67880,6 +67880,7 @@ function stormTick(dtGameMin){
       indirizzo: call.indirizzo, comune: call.comune, prov: call.prov,
       stato: "attesa",
       mezziIds: [],
+      invii: {}, // n° invio per mezzo: il live mostra una riga per ogni invio
       richiesti: call.richiesti,
       durata: call.durata,
       tempoSulPosto: 0,
@@ -69256,7 +69257,7 @@ function stormTick(dtGameMin){
     const esceDallaSede = (mz.stato==="disponibile");
     vaiA(mz, iv.accLa!=null?iv.accLa:iv.lat, iv.accLng!=null?iv.accLng:iv.lng, "viaggio"); // ferroviarie: i mezzi vanno all'accesso, mai sui binari
     if(esceDallaSede) mz.uscita = turnoutPrio(iv.prio); // equipaggio in uscita: 30" sul rosso, 60" sul bianco
-    if(!iv.mezziIds.includes(mz.codice)) iv.mezziIds.push(mz.codice);
+    if(!iv.mezziIds.includes(mz.codice)){ iv.mezziIds.push(mz.codice); iv.invii = iv.invii||{}; iv.invii[mz.codice]=(iv.invii[mz.codice]||0)+1; } // ogni nuovo invio conta: rientro + rinvio = 2° invio
     if(iv.stato==="attesa") iv.stato="viaggio";
     suppLog(iv, gruppoSupporto(mz), dirottato ? "dirottato" : "assegnato", mz.codice, dirottato && oldId!=null ? ("dalla missione " + oldId) : null);
     if(!silent) log(`${mz.corpo==="VVF"?"🚒":(mz.tipo==="AUTOMEDICA"||isMedica(mz))?"🚓":"🚑"} ${nomem(mz)} ${dirottato?"dirottato a":"→"} <b>${iv.comune}</b>`, "status");
@@ -72338,7 +72339,7 @@ function stormTick(dtGameMin){
           }
           // ospedale di destinazione, solo mentre ci va o è lì (mandaOspedale lo scrive in m.ospedale)
           const osp = (m.stato==="trasporto"||m.stato==="ospedale") ? (m.ospedale||"") : "";
-          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz, osp};
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz, osp, k:((iv.invii||{})[m.codice]||1)}; // k = n° invio in questa missione
         })
       }));
     },
@@ -72371,6 +72372,7 @@ function stormTick(dtGameMin){
         indirizzo: r.localita||"", comune: r.comune||"?", prov: r.provincia||"?",
         stato: (r.stato==="in_corso") ? "sul_posto" : "attesa",
         mezziIds: [],
+        invii: {}, // n° invio per mezzo (storico dal cloud se presente)
         richiesti: [],
         durata: 0,
         tempoSulPosto: (r.stato==="in_corso") ? passatoMin : 0,
@@ -72411,6 +72413,7 @@ function stormTick(dtGameMin){
         if(mz.trasportaPz || mz.pazIdx!=null || mz.affido!=null) continue;
         if(!["disponibile","viaggio","rientro","sul_posto"].includes(mz.stato)) continue;
         if(!assegnaMezzo(mz.codice, iv.id, true)) continue;
+        if(vm && vm.k>1) iv.invii[mz.codice]=Math.max(iv.invii[mz.codice]||0, vm.k); // mantiene il n° invio dallo storico cloud
         const jx = (iv.lat || 0) + (Math.random()-0.5)*0.002, jy = (iv.lng || 0) + (Math.random()-0.5)*0.002;
         mz.lat = jx; mz.lng = jy;
         if(st==="sul_posto"){ mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy; }
@@ -73099,11 +73102,13 @@ window.COEULIVE = (() => {
       localStorage.setItem(LS_RIGHE, JSON.stringify(slim));
     }catch(_){}
   }
-  // unione per codice mezzo: i dati freschi vincono, gli usciti di scena restano con l'ultimo stato noto
+  // unione per invio (codice + n° invio): una riga live per ogni invio.
+  // I dati freschi vincono, gli usciti di scena restano con l'ultimo stato noto.
+  function chiaveInvio(v){ return (v && v.c) ? String(v.c) + "#" + (v.k||1) : ""; }
   function unisciMezzi(vecchi, nuovi){
     const map = {};
-    for(const v of (vecchi || [])) if(v && v.c) map[v.c] = v;
-    for(const v of (nuovi || [])) if(v && v.c) map[v.c] = v;
+    for(const v of (vecchi || [])){ const k = chiaveInvio(v); if(k && !map[k]) map[k] = v; }
+    for(const v of (nuovi || [])){ const k = chiaveInvio(v); if(k) map[k] = v; }
     return Object.values(map);
   }
 
@@ -73558,7 +73563,7 @@ window.COEULIVE = (() => {
   }
   function cloudIA(){ return csCache; }
 
-  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate, caricaMissioniIA, statCloudIA, cloudIA };
+  return { init, tick, configurato, mappaStato, buildRow, diagnostica, chiudiBloccate, caricaMissioniIA, statCloudIA, cloudIA, unisciMezzi };
 })();
 /* =====================================================================
  * MIGRAZIONI (una sola volta ciascuna, in Supabase Dashboard > SQL Editor).
