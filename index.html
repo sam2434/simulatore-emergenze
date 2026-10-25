@@ -158,7 +158,8 @@
     <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
     <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
     <button class="lstBtn" id="pmaBtn" onclick="COEUSIM.togglePMA()" title="Piazza un ospedale da campo (si attiva con missioni da 10+ pazienti)">⛑️ PMA</button>
-    <select id="zonaSel" class="lstBtn" title="Dove nascono le nuove missioni" onchange="COEUSIM.setZona(this.value)"><option value="tutte">🗺️ Tutte le zone</option><option value="ovest">🗺️ Varese·Como·Lecco·Milano·Monza</option><option value="est">🗺️ Bergamo·Brescia·Sondrio</option></select>
+    <select id="zonaSel" class="lstBtn" title="Dove nascono le nuove missioni" onchange="COEUSIM.setZona(this.value)"><option value="tutte">🗺️ Tutte le zone</option><option value="ovest">🗺️ Varese·Como·Lecco·Monza</option><option value="milano">🏙️ Solo Milano</option><option value="est">🗺️ Bergamo·Brescia·Sondrio</option></select>
+    <button class="lstBtn small" id="miBtn" onclick="COEUSIM.setZona(COEUSIM.getZona()==='milano'?'tutte':'milano')" title="Solo chiamate in provincia di Milano, con più peso alla città">🏙️ Milano</button>
     <button class="lstBtn" onclick="COEUTOT.open()">🖥️ Totali browser</button>
     <button class="lstBtn" onclick="COEUGLOB.open()">📊 Statistiche globali</button>
     <span id="liveSyncBox" class="small" title="Sincronizzazione pagina live pubblica (Supabase)">⚪ live</span>
@@ -66267,7 +66268,7 @@ window.COEUSIM = (() => {
   let contaColori = {1:0,2:0,3:0,4:0}; // codici classificati finora
   // MI = Milano e tutta la provincia (133 comuni)
   let filters = { VA:true, CO:true, LC:true, MB:true, MI:true, BS:true, PC:true, PV:true, NO:true, BG:true, SO:true, P1:true, P2:true, P3:true, P4:true, soloAttesa:false, search:"" };
-  let zonaSel = "tutte"; // 🗺️ selettore zona header: tutte | ovest (VA·CO·LC·MB·MI) | est (BG·BS·SO)
+  let zonaSel = "tutte"; // 🗺️ selettore zona header: tutte | ovest (VA·CO·LC·MB) | milano (MI, peso x13 alla città) | est (BG·BS·SO)
   let markersInt = new Map();
   let markersMz = new Map();
   let sedeMarkers = []; // {marker, sede} 118 — tooltip con mezzi in sede
@@ -66336,7 +66337,7 @@ window.COEUSIM = (() => {
     // peso spawn: Milano e la metà sud della mappa generano più chiamate
   const SUD_LAT = 45.62, SUD_MULT = 2, MI_MULT = 2, MILANO_MULT = 6;
   function pesoComune(c){
-    return (c.peso||1) * (c.p==="MI" ? MI_MULT : 1) * (c.lat<SUD_LAT ? SUD_MULT : 1) * (c.n==="Milano" ? MILANO_MULT : 1);
+    return (c.peso||1) * (c.p==="MI" ? MI_MULT : 1) * (c.lat<SUD_LAT ? SUD_MULT : 1) * (c.n==="Milano" ? MILANO_MULT : 1) * ((c.n==="Milano" && zonaSel==="milano") ? 13 : 1);
   }
   function pickPesato(list){
     let tot = 0;
@@ -67271,8 +67272,8 @@ window.COEUSIM = (() => {
     return false;
   }
   function creaBozzaUna(forceProv=null, forceTipoNome=null, forceComune=null){
-    // 🗺️ Zona header: ovest = VA·CO·LC·MB·MI, est = BG·BS·SO, tutte = tutto.
-    const zoneProv = zonaSel === "ovest" ? ["VA","CO","LC","MB","MI"] : zonaSel === "est" ? ["BG","BS","SO"] : ["VA","CO","LC","MB","MI","BG","BS","SO"];
+    // 🗺️ Zona header: ovest = VA·CO·LC·MB, milano = MI, est = BG·BS·SO, tutte = tutto.
+    const zoneProv = zonaSel === "ovest" ? ["VA","CO","LC","MB"] : zonaSel === "milano" ? ["MI"] : zonaSel === "est" ? ["BG","BS","SO"] : ["VA","CO","LC","MB","MI","BG","BS","SO"];
         // spawn pesato direttamente sui comuni delle province abilitate (Milano + sud pesano di più)
     let c = null, prov = null;
     if(forceComune){
@@ -72158,7 +72159,7 @@ function stormTick(dtGameMin){
     pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo, isMega, tiraConteggioMega,
     switchBase, toggleVVF, supportoStato,
     get filters(){return filters;},
-    setZona(z){ if(z==="ovest"||z==="est"||z==="tutte"){ zonaSel = z; const s = document.getElementById("zonaSel"); if(s) s.value = z; } return zonaSel; },
+    setZona(z){ if(z==="ovest"||z==="est"||z==="tutte"||z==="milano"){ zonaSel = z; const s = document.getElementById("zonaSel"); if(s) s.value = z; const b = document.getElementById("miBtn"); if(b) b.classList.toggle("active", z==="milano"); } return zonaSel; },
     getZona(){ return zonaSel; },
     setFilter(k,v){filters[k]=v; refreshMarkers(); renderListe();},
     setSearch(s){filters.search=s; renderListe(); refreshMarkers();},
