@@ -423,7 +423,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return '<div class="mz"><span class="amb">' + iconaMezzo(v) + "</span>" +
         '<span class="nome">' + esc(v.n || "?") + '</span>' +
         (isVVF ? "" : '<span class="tipo ' + classeTipoMezzo(v) + '">' + esc(tipoMezzo(v)) + "</span>") +
-        ((v.tr && pazLet && (inTrasporto || chiusa)) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
+        ((v.tr && pazLet) ? '<span class="trDot ' + pazCls + '" title="Codice di trasporto del paziente: ' + esc(pazCod) + '"></span>' : "") +
         (v.osp ? '<span class="osp" title="' + esc(v.osp) + '">H ' + esc(String(v.osp).replace(/^(Osp\. di |Osp\. |Ospedale )/i, "")) + '</span>' : "") +
         ((isVVF || !(v.c && v.c !== v.n)) ? "" : '<span class="cod">' + esc(v.c) + "</span>") +
         '<span class="st">' + esc(statoMezzoIT(v.s)) + "</span></div>";
@@ -636,7 +636,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
                     String((v && v.cat) || "").toUpperCase() !== "VVF";
         var bizChiusa = biz.stato === "chiusa";
-        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0 && (inTr || bizChiusa))
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0)
           dot = ' <span class="trDot ' + pc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
@@ -672,7 +672,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
         var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
                    String((v && v.cat) || "").toUpperCase() !== "VVF";
-        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcc) >= 0 && (inTr || critChiusa))
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcc) >= 0)
           dot = ' <span class="trDot ' + pcc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
@@ -712,7 +712,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
         var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
                     String((v && v.cat) || "").toUpperCase() !== "VVF";
-        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0 && (inTr || compChiusa))
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pc) >= 0)
           dot = ' <span class="trDot ' + pc + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
@@ -745,7 +745,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
         var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
                     String((v && v.cat) || "").toUpperCase() !== "VVF";
-        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcm) >= 0 && (inTr || mortChiusa))
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcm) >= 0)
           dot = ' <span class="trDot ' + pcm + '"></span>';
         return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
       });
