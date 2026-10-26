@@ -752,7 +752,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
         '<div class="comp">' + esc((mortR.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((mortR.comune || "") + (mortR.provincia ? " (" + mortR.provincia + ")" : "")) + " · " +
-        mortN + (mortN === 1 ? " morto" : " morti") + " · " + esc(quando(mortR.created_at || mortR.updated_at)) + "</div>" +
+        mortN + (mortN === 1 ? " Deceduto" : " Deceduti") + " · " + esc(quando(mortR.created_at || mortR.updated_at)) + "</div>" +
         (mortMz.length ? '<div class="sub">' + mortMz.join("<br>") + "</div>" : "") + "</div>";
     } else {
       t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
