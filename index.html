@@ -72370,11 +72370,12 @@ function stormTick(dtGameMin){
         mezzi: (iv.mezziIds||[]).map(c=>{
           const m = mezzi.find(x=>x&&x.codice===c);
           if(!m) return {c:String(c), n:String(c), t:"", cat:"", tr:false, s:"", osp:""};
-          // codice di trasporto = triage del paziente a bordo (profili[k].t), non il codice missione
+          // codice di trasporto = triage ATTUALE del paziente a bordo (dalla salute corrente, non da quella iniziale)
           let tpaz = "";
           const k = (m.pazIdx!=null ? m.pazIdx : m.affido);
-          if(m.trasporto && k!=null && iv.profili && iv.profili[k] && iv.profili[k].t>0){
-            tpaz = COLORI_NOME(iv.profili[k].t);
+          if(m.trasporto && k!=null && iv.pazienti && iv.pazienti[k]!=null){
+            const sk = +iv.pazienti[k];
+            if(isFinite(sk)) tpaz = COLORI_NOME(sk<10 ? 1 : sk<50 ? 2 : 3);
           }
           // ospedale di destinazione, solo mentre ci va o è lì (mandaOspedale lo scrive in m.ospedale)
           const osp = (m.stato==="trasporto"||m.stato==="ospedale") ? (m.ospedale||"") : "";
@@ -73103,7 +73104,7 @@ window.COEULIVE = (() => {
       stato: mappaStato(m.stato),
       pubblica: true,
       codice: m.codice || "SENZA CODICE",
-      pazienti: Array.isArray(m.salute) ? m.salute.map((s,k)=>({s:s, t:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].t)||3, sx:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].sx)||"?", e:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].e)||"?" })) : [],
+      pazienti: Array.isArray(m.salute) ? m.salute.map((s,k)=>({s:s, t:(s==null?3:(+s<10?1:+s<50?2:3)), sx:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].sx)||"?", e:(m.sessoEta&&m.sessoEta[k]&&m.sessoEta[k].e)||"?" })) : [],
       mezzi: Array.isArray(m.mezzi) ? m.mezzi : [],
       origine: adottata ? "ia" : "simulatore",
       gestita_da: "simulatore", // chi scrive qui è il simulatore; l'IA salta queste righe
