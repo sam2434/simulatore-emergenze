@@ -235,7 +235,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       })
       .catch(function(){ /* resta l'ultimo valore noto */ });
   }
-  var righe = [], righe48 = [], canale = null, client = null, pronte = false;
+  var righe = [], righe48 = [], righe7 = [], canale = null, client = null, pronte = false;
 
   var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
 
@@ -316,6 +316,17 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       var inizioIeri = new Date(o.getFullYear(), o.getMonth(), o.getDate() - 1);
       var fineOggi = new Date(o.getFullYear(), o.getMonth(), o.getDate() + 1);
       return d >= inizioIeri && d < fineOggi;
+    }catch(_){ return true; }
+  }
+  // true se la riga è degli ultimi 7 giorni di calendario (oggi + 6 precedenti); senza data valida resta dentro
+  function nellaSettimana(r){
+    try{
+      var d = new Date((r && r.created_at) || "");
+      if(!isFinite(d.getTime())) return true;
+      var o = new Date();
+      var inizioSett = new Date(o.getFullYear(), o.getMonth(), o.getDate() - 6);
+      var fineOggi = new Date(o.getFullYear(), o.getMonth(), o.getDate() + 1);
+      return d >= inizioSett && d < fineOggi;
     }catch(_){ return true; }
   }
   function cronologiaHTML(cr){
@@ -545,7 +556,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       '<div class="riga"><span>🚁 eli</span><b>' + nELI + "</b></div></div>";
     // pannelli di destra: oggi + ieri (giorni di calendario)
     var top = {}; TOP11.forEach(function(k){ top[k] = 0; });
-    var comp = null, best = -1, dec = 0, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
+    var comp = null, best = -1, intVVF = 0, compV = null, bestV = -1, bestVtot = -1, ospCount = {};
     var freqTip = {}, biz = null, bizFreq = 1e9, bizTime = "", comCount = {}, comTop = "", comTopN = 0;
     var usoMezzi = {}, topV = null, topVN = 0;
     var critS = 5, critR = null; // soglia: il pannello appare solo sotto il 5%
@@ -595,7 +606,6 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       });
       var score = Object.keys(setD).length;
       if(score > best){ best = score; comp = r; }
-      listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) dec++; });
     });
     righe48.forEach(function(r){
       if(!bizzarra(r.tipologia)) return;
@@ -717,8 +727,23 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       t += '<div class="pannello"><h3>🏥 PS più usata (48h)</h3>' +
         '<div class="comp">' + esc(ospBreve) + "</div>" +
         '<div class="sub">' + topOspN + " trasporti</div></div>";
+    }
+    var mortR = null, mortN = 0, mortT = "";
+    righe7.forEach(function(r){
+      var nm = 0;
+      listaPaz(r).forEach(function(p){ if(p && p.s !== null && p.s !== "" && +p.s <= 0) nm++; });
+      if(nm <= 0) return;
+      var tt = String(r.updated_at || "");
+      if(nm > mortN || (nm === mortN && tt > mortT)){ mortR = r; mortN = nm; mortT = tt; }
+    });
+    if(mortR){
+      t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
+        '<div class="comp">' + esc((mortR.tipologia || "?").toUpperCase()) + "</div>" +
+        '<div class="sub">' + esc((mortR.comune || "") + (mortR.provincia ? " (" + mortR.provincia + ")" : "")) + " · " +
+        mortN + (mortN === 1 ? " morto" : " morti") + " · " + esc(quando(mortR.created_at || mortR.updated_at)) + "</div></div>";
     } else {
-      t += '<div class="pannello"><h3>🕊️ Decessi registrati</h3><b style="font-size:18px">' + dec + "</b></div>";
+      t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
+        '<div class="sub">Nessun decesso negli ultimi 7 giorni.</div></div>';
     }
     t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     $("latoDX").innerHTML = t;
@@ -824,6 +849,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       // i pannelli di destra lavorano su oggi + ieri
       righe = (res.data || []).filter(diOggi);
       righe48 = (res.data || []).filter(nelle48h);
+      righe7 = (res.data || []).filter(nellaSettimana);
       pronte = true;
       $("caricamento").hidden = true;
       disegna();
