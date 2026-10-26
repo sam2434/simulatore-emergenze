@@ -728,6 +728,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="comp">' + esc(ospBreve) + "</div>" +
         '<div class="sub">' + topOspN + " trasporti</div></div>";
     }
+    t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     var mortR = null, mortN = 0, mortT = "";
     righe7.forEach(function(r){
       var nm = 0;
@@ -737,15 +738,26 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       if(nm > mortN || (nm === mortN && tt > mortT)){ mortR = r; mortN = nm; mortT = tt; }
     });
     if(mortR){
+      var mortChiusa = mortR.stato === "chiusa";
+      var mortMz = listaMezzi(mortR).map(function(v){
+        var dot = "";
+        var pcm = String((v && v.tpaz) || "").toUpperCase();
+        var inTr = v && (v.s === "trasporto" || v.s === "ospedale");
+        var noVVF = String((v && v.t) || "").toUpperCase() !== "VVF" &&
+                    String((v && v.cat) || "").toUpperCase() !== "VVF";
+        if(noVVF && v && v.tr && ["ROSSO","GIALLO","VERDE","BIANCO"].indexOf(pcm) >= 0 && (inTr || mortChiusa))
+          dot = ' <span class="trDot ' + pcm + '"></span>';
+        return iconaMezzo(v) + " " + esc((v && v.n) || "?") + dot;
+      });
       t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
         '<div class="comp">' + esc((mortR.tipologia || "?").toUpperCase()) + "</div>" +
         '<div class="sub">' + esc((mortR.comune || "") + (mortR.provincia ? " (" + mortR.provincia + ")" : "")) + " · " +
-        mortN + (mortN === 1 ? " morto" : " morti") + " · " + esc(quando(mortR.created_at || mortR.updated_at)) + "</div></div>";
+        mortN + (mortN === 1 ? " morto" : " morti") + " · " + esc(quando(mortR.created_at || mortR.updated_at)) + "</div>" +
+        (mortMz.length ? '<div class="sub">' + mortMz.join("<br>") + "</div>" : "") + "</div>";
     } else {
       t += '<div class="pannello"><h3>🕊️ Missione con più morti (7 giorni)</h3>' +
         '<div class="sub">Nessun decesso negli ultimi 7 giorni.</div></div>';
     }
-    t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     $("latoDX").innerHTML = t;
   }
 
