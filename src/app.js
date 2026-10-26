@@ -93,6 +93,7 @@ window.COEUSIM = (() => {
     flusso.attesa = Math.max(0.15, rnd(0.8,2.4)/f);
   }
   function scattaFlusso(){
+    elaboraCatene(false); // figli di maxiemergenze: nascono anche a centrale carica (coda permettendo)
     const R = RITMI[flusso.ritmo] || RITMI.normale;
     const libero = ()=>caricoCentrale().tot < R.cap && chiamate.length<3;
     // mai sovraccarico artificiale: a centrale satura si salta il giro senza accumulare debito
@@ -110,7 +111,8 @@ window.COEUSIM = (() => {
   let chiusi = 0;
   let contaColori = {1:0,2:0,3:0,4:0}; // codici classificati finora
   // MI = Milano e tutta la provincia (133 comuni)
-  let filters = { VA:true, CO:true, LC:true, MB:true, MI:true, P1:true, P2:true, P3:true, P4:true, soloAttesa:false, search:"" };
+  let filters = { VA:true, CO:true, LC:true, MB:true, MI:true, BS:true, PC:true, PV:true, NO:true, BG:true, SO:true, P1:true, P2:true, P3:true, P4:true, soloAttesa:false, search:"" };
+  let zonaSel = "tutte"; // 🗺️ selettore zona header: tutte | ovest (VA·CO·LC·MB) | milano (MI, peso x13 alla città) | est (BG·BS·SO)
   let markersInt = new Map();
   let markersMz = new Map();
   let sedeMarkers = []; // {marker, sede} 118 — tooltip con mezzi in sede
@@ -179,7 +181,7 @@ window.COEUSIM = (() => {
     // peso spawn: Milano e la metà sud della mappa generano più chiamate
   const SUD_LAT = 45.62, SUD_MULT = 2, MI_MULT = 2, MILANO_MULT = 6;
   function pesoComune(c){
-    return (c.peso||1) * (c.p==="MI" ? MI_MULT : 1) * (c.lat<SUD_LAT ? SUD_MULT : 1) * (c.n==="Milano" ? MILANO_MULT : 1);
+    return (c.peso||1) * (c.p==="MI" ? MI_MULT : 1) * (c.lat<SUD_LAT ? SUD_MULT : 1) * (c.n==="Milano" ? MILANO_MULT : 1) * ((c.n==="Milano" && zonaSel==="milano") ? 13 : 1);
   }
   function pickPesato(list){
     let tot = 0;
@@ -784,8 +786,8 @@ window.COEUSIM = (() => {
     }
   }
   // liste eventi grossi (UTENTE: mandami le tue liste e le metto qui — i nomi devono esistere nei TIPI)
-  const MAXI_TIPI = ["Maxi tamponamento","Tamponamento in autostrada","Incendio capannone","Fuga di gas in palazzina","Crollo edificio","Pullman contro guardrail","Tamponamento tra bus e auto in coda","Incidente autobus","Palco crollato al concerto","Rissa in discoteca","Crollo palazzina in centro","Incendio in discoteca affollata","Deragliamento treno passeggeri","Scontro tra treni in galleria","Autobus nel burrone","Pullman contro pilone in autostrada","Incendio mercato coperto affollato","Esplosione palazzina per fuga di gas","Crollo ponte con auto sopra","Incendio in casa di riposo","Naufragio battello sul lago","Funivia bloccata con cabine piene","Crollo tribuna allo stadio","Fuga di ammoniaca al palazzetto","Incendio in scuola con evacuazione","Cisterna contro auto in autostrada","Maxi tamponamento in galleria","Crollo gru su palazzina","Incendio deposito fuochi d'artificio","Valanga sulla strada con auto travolte"];
-  const MANV_TIPI = ["Incidente scuolabus","Incidente stradale","Pullman contro guardrail","Tamponamento tra bus e auto in coda","Rissa in discoteca","Concerto e calca","Rissa in campo","Rissa al bar","Sciame d'api","Intossicazione alimentare","Scontro tra auto e moto al semaforo","Scontro tra furgone e bici alla rotonda","Scontro tra taxi e monopattino in centro","Scontro tra SUV e moto in curva cieca","Scontro tra autobus e auto al capolinea","Scontro tra camion e furgone in zona industriale","Scontro tra auto d'epoca e spider sul lungolago","Scontro tra camper e auto in galleria","Scontro tra pick-up e bici in salita","Scontro tra tram e auto in viale","Scontro tra pullman e auto in autostrada","Scontro tra scuolabus e auto all'uscita","Scontro tra NCC e moto di notte","Scontro tra limousine e scooter in centro","Scontro tra fuoristrada e quad in discesa","Scontro tra minibus e auto al bivio","Scontro tra betoniera e auto in cantiere","Scontro tra spazzatrice e bici all'alba","Scontro tra corriera e furgone sul ponte","Scontro tra Apecar e moto in discesa","Scontro tra moto in curva cieca","Scontro tra bici e monopattino sulla ciclabile","Scontro tra auto e monopattino sulle strisce","Scontro tra filobus e bici in viale","Scontro tra taxi e bus in corsia","Scontro tra furgoncino e moto al semaforo","Scontro tra station wagon e scooter alla rotonda","Scontro tra roulotte e auto in discesa","Scontro tra camper e moto in autostrada","Scontro tra SUV e autobus in tangenziale","Scontro tra auto e cinghiale di notte","Scontro tra moto e cervo sulla provinciale","Scontro tra auto e autoarticolato in retromarcia","Scontro tra bici e auto in contromano","Scontro tra furgone e tram sui binari","Scontro tra moto e guardrail in curva","Scontro tra auto e muro in galleria","Scontro tra pullman e camion in autostrada","Scontro tra scuolabus e bici all'uscita","Scontro tra auto sul passo innevato","Tamponamento tra auto e moto in coda","Tamponamento tra furgone e auto al semaforo","Tamponamento tra taxi e bus in coda","Tamponamento tra SUV e camper in autostrada","Tamponamento tra moto e scooter in centro","Tamponamento tra autobus e auto in coda","Tamponamento tra camion e auto in galleria","Tamponamento tra NCC e taxi in stazione","Tamponamento tra pick-up e furgone in salita","Tamponamento tra camper e roulotte in discesa","Tamponamento tra tram e auto ai binari","Tamponamento tra monopattino e auto in centro","Tamponamento tra scuolabus e auto in colonna","Tamponamento tra pullman e camion in autostrada","Tamponamento tra Apecar e furgone in paese","Tamponamento tra fuoristrada e SUV in sterrata","Tamponamento tra minibus e taxi in fiera","Tamponamento tra betoniera e camion in cantiere","Tamponamento tra spider e moto sul lungolago","Tamponamento tra station wagon e furgoncino alla rotonda","Tamponamento tra limousine e NCC in centro","Tamponamento tra filobus e auto in viale","Tamponamento tra corriera e camper sul ponte","Tamponamento tra spazzatrice e furgone all'alba","Tamponamento tra autoarticolato e auto in rotonda","Tamponamento tra camper e bus in piazzola","Tamponamento tra taxi e moto al semaforo","Tamponamento tra auto e volante della polizia","Tamponamento tra moto d'epoca e auto in piazza","Tamponamento tra SUV e moto in tangenziale","Investimento pedone sulle strisce di notte","Investimento ciclista in galleria","Investimento runner all'alba","Investimento monopattino in discesa","Bimbo in bici investito all'uscita di scuola","Anziano investito al mercato","Motociclista contro guardrail in tangenziale","Scooter contro palo in viale","Auto contro albero sulla provinciale","Furgone contro muretto in curva","Camper contro pensilina del distributore","Autobus contro pensilina alla fermata","Filobus contro palo in viale","Pullman nella scarpata in montagna","Scuolabus contro guardrail in gita","Camion contro casa in curva","Auto nel fiume dal ponte","Moto nel torrente","Bici contro portiera in centro","Passeggino urtato sulle strisce","Carrozzina investita sulle strisce","Skate contro auto al parco","Ciclista caduto nella rotaia del tram","Moto contro cinghiale di notte","Auto contro mucca al pascolo","Furgone contro gregge in montagna","Camion contro traliccio in campagna","Auto contro pensilina del distributore","Auto contro masso in montagna","Tettoia crollata sulle auto al mercato"];
+  const MAXI_TIPI = ["Maxi tamponamento","Tamponamento in autostrada","Incendio capannone","Fuga di gas in palazzina","Crollo edificio","Pullman contro guardrail","Tamponamento tra bus e auto in coda","Incidente autobus","Palco crollato al concerto","Rissa in discoteca","Crollo palazzina in centro","Incendio in discoteca affollata","Deragliamento treno passeggeri","Scontro tra treni in galleria","Autobus nel burrone","Pullman contro pilone in autostrada","Incendio mercato coperto affollato","Esplosione palazzina per fuga di gas","Crollo ponte con auto sopra","Incendio in casa di riposo","Naufragio battello sul lago","Funivia bloccata con cabine piene","Crollo tribuna allo stadio","Fuga di ammoniaca al palazzetto","Incendio in scuola con evacuazione","Cisterna contro auto in autostrada","Maxi tamponamento in galleria","Crollo gru su palazzina","Incendio deposito fuochi d'artificio","Valanga sulla strada con auto travolte", "Sisma in centro con crollo di palazzi", "Esplosione alla raffineria", "Incendio nel grattacielo", "Crollo della gradinata allo stadio pieno", "Aereo precipitato sui capannoni", "Deragliamento in stazione con vagoni accartocciati", "Esplosione al deposito GPL", "Crollo del centro commerciale affollato", "Incendio al teatro durante lo spettacolo", "Crollo della diga con valle allagata", "Crollo del viadotto in autostrada con auto", "Nube di gas tossico dal carro cisterna in stazione", "Calca al festival con schiacciati", "Incendio in ospedale con reparti da evacuare", "Tromba d'aria sul campeggio", "Esplosione allo stadio durante la finale", "Incendio in metro all'ora di punta", "Scontro tra due pullman in autostrada"];
+  const MANV_TIPI = ["Incidente scuolabus","Incidente stradale","Pullman contro guardrail","Tamponamento tra bus e auto in coda","Rissa in discoteca","Concerto e calca","Rissa in campo","Rissa al bar","Sciame d'api","Intossicazione alimentare","Scontro tra auto e moto al semaforo","Scontro tra furgone e bici alla rotonda","Scontro tra taxi e monopattino in centro","Scontro tra SUV e moto in curva cieca","Scontro tra autobus e auto al capolinea","Scontro tra camion e furgone in zona industriale","Scontro tra camper e auto in galleria","Scontro tra pick-up e bici in salita","Scontro tra tram e auto in viale","Scontro tra pullman e auto in autostrada","Scontro tra scuolabus e auto all'uscita","Scontro tra NCC e moto di notte","Scontro tra fuoristrada e quad in discesa","Scontro tra minibus e auto al bivio","Scontro tra betoniera e auto in cantiere","Scontro tra spazzatrice e bici all'alba","Scontro tra corriera e furgone sul ponte","Scontro tra Apecar e moto in discesa","Scontro tra moto in curva cieca","Scontro tra bici e monopattino sulla ciclabile","Scontro tra auto e monopattino sulle strisce","Scontro tra filobus e bici in viale","Scontro tra taxi e bus in corsia","Scontro tra furgoncino e moto al semaforo","Scontro tra station wagon e scooter alla rotonda","Scontro tra camper e moto in autostrada","Scontro tra SUV e autobus in tangenziale","Scontro tra auto e cinghiale di notte","Scontro tra moto e cervo sulla provinciale","Scontro tra auto e autoarticolato in retromarcia","Scontro tra bici e auto in contromano","Scontro tra furgone e tram sui binari","Scontro tra moto e guardrail in curva","Scontro tra auto e muro in galleria","Scontro tra pullman e camion in autostrada","Scontro tra scuolabus e bici all'uscita","Scontro tra auto sul passo innevato","Tamponamento tra auto e moto in coda","Tamponamento tra furgone e auto al semaforo","Tamponamento tra taxi e bus in coda","Tamponamento tra SUV e camper in autostrada","Tamponamento tra moto e scooter in centro","Tamponamento tra autobus e auto in coda","Tamponamento tra camion e auto in galleria","Tamponamento tra NCC e taxi in stazione","Tamponamento tra pick-up e furgone in salita","Tamponamento tra tram e auto ai binari","Tamponamento tra monopattino e auto in centro","Tamponamento tra scuolabus e auto in colonna","Tamponamento tra pullman e camion in autostrada","Tamponamento tra Apecar e furgone in paese","Tamponamento tra fuoristrada e SUV in sterrata","Tamponamento tra minibus e taxi in fiera","Tamponamento tra betoniera e camion in cantiere","Tamponamento tra spider e moto sul lungolago","Tamponamento tra station wagon e furgoncino alla rotonda","Tamponamento tra filobus e auto in viale","Tamponamento tra corriera e camper sul ponte","Tamponamento tra spazzatrice e furgone all'alba","Tamponamento tra autoarticolato e auto in rotonda","Tamponamento tra camper e bus in piazzola","Tamponamento tra taxi e moto al semaforo","Tamponamento tra auto e volante della polizia","Tamponamento tra SUV e moto in tangenziale","Investimento pedone sulle strisce di notte","Investimento ciclista in galleria","Investimento runner all'alba","Investimento monopattino in discesa","Bimbo in bici investito all'uscita di scuola","Anziano investito al mercato","Motociclista contro guardrail in tangenziale","Scooter contro palo in viale","Auto contro albero sulla provinciale","Furgone contro muretto in curva","Camper contro pensilina del distributore","Autobus contro pensilina alla fermata","Filobus contro palo in viale","Pullman nella scarpata in montagna","Scuolabus contro guardrail in gita","Camion contro casa in curva","Auto nel fiume dal ponte","Moto nel torrente","Bici contro portiera in centro","Passeggino urtato sulle strisce","Carrozzina investita sulle strisce","Skate contro auto al parco","Ciclista caduto nella rotaia del tram","Moto contro cinghiale di notte","Auto contro mucca al pascolo","Furgone contro gregge in montagna","Camion contro traliccio in campagna","Auto contro pensilina del distributore","Auto contro masso in montagna","Tettoia crollata sulle auto al mercato"];
   function pescaDaLista(lista){
     const cand = [];
     for(const n of lista){ const t = D().TIPI.find(x=>x.nome===n); if(t) cand.push(t); }
@@ -800,7 +802,38 @@ window.COEUSIM = (() => {
     return 5;
   }
   // conteggio maxiemergenza da 8 in su (pesi su 28.5: 8 ~35%, 9 ~25%, 10 ~18%, 11+ rari)
-  function tiraConteggioMaxi(){
+  // mega-maxiemergenze (20-50 feriti): sottoinsieme di MAXI_TIPI con conteggio proprio
+  const MEGA_TIPI = ["Sisma in centro con crollo di palazzi", "Esplosione alla raffineria", "Incendio nel grattacielo", "Crollo della gradinata allo stadio pieno", "Aereo precipitato sui capannoni", "Deragliamento in stazione con vagoni accartocciati", "Esplosione al deposito GPL", "Crollo del centro commerciale affollato", "Incendio al teatro durante lo spettacolo", "Crollo della diga con valle allagata", "Crollo del viadotto in autostrada con auto", "Nube di gas tossico dal carro cisterna in stazione", "Calca al festival con schiacciati", "Incendio in ospedale con reparti da evacuare", "Tromba d'aria sul campeggio"];
+  const MEGA_SET = {}; for (const n of MEGA_TIPI) MEGA_SET[n] = true;
+  function isMega(nome){ return !!MEGA_SET[nome]; }
+  // conteggio mega-maxiemergenza (pesi su 61: 20-25 frequenti, 50 rarissimo)
+  function tiraConteggioMega(){
+    const ws = [[20,12],[22,10],[25,9],[28,8],[30,7],[35,6],[40,4],[45,3],[50,2]];
+    let tot = 0; for (const c of ws) tot += c[1];
+    let r = Math.random()*tot;
+    for (const c of ws){ r -= c[1]; if(r<=0) return c[0]; }
+    return 20;
+  }
+  // conteggio maxiemergenza da 8 in su (pesi su 28.5: 8 ~35%, 9 ~25%, 10 ~18%, 11+ rari;
+  // i tipi MEGA pescano 20-50 con tiraConteggioMega)
+  // missioni GIGA (50-100 feriti): sottoinsieme di MAXI_TIPI con conteggio proprio
+  const GIGA_TIPI = ["Esplosione allo stadio durante la finale", "Incendio in metro all'ora di punta"];
+  const GIGA_SET = {}; for (const n of GIGA_TIPI) GIGA_SET[n] = true;
+  // conteggio giga-maxiemergenza (pesi su 30: 50-60 frequenti, 100 rarissimo)
+  function tiraConteggioGiga(){
+    const ws = [[50,10],[60,8],[70,6],[85,4],[100,2]];
+    let tot = 0; for (const c of ws) tot += c[1];
+    let r = Math.random()*tot;
+    for (const c of ws){ if(r<=c[1]) return c[0]; r -= c[1]; }
+    return 50;
+  }
+  // maxi da 25 feriti fissi (conteggio esplicito dell'evento)
+  const CONTO25 = "Scontro tra due pullman in autostrada";
+  function tiraConteggioMaxi(tipo){
+    const nm = tipo && (tipo.nome || tipo);
+    if(nm && GIGA_SET[nm]) return tiraConteggioGiga();
+    if(nm === CONTO25) return 25;
+    if(nm && MEGA_SET[nm]) return tiraConteggioMega();
     const ws = [[8,10],[9,7],[10,5],[11,2],[12,1.5],[13,1],[14,1],[15,1]];
     let tot = 0; for(const c of ws) tot += c[1];
     let r = Math.random()*tot;
@@ -808,7 +841,7 @@ window.COEUSIM = (() => {
     return 8;
   }
   function tiraEventoGrande(){
-    // maxiemergenza (8-15 feriti) e MANV (5-7 feriti) — i pazienti si assegnano dopo;
+    // maxiemergenza (8-15 feriti, 20-50 per le MEGA) e MANV (5-7 feriti) — i pazienti si assegnano dopo;
     // riprova finché non trova un tipo sensato, non aperto e non appena uscito
     const f = FASCE[fasciaIdx()];
     const pMaxi = fasciaMaxiProb(f.maxi), pManv = fasciaMaxiProb(f.manv);
@@ -819,22 +852,102 @@ window.COEUSIM = (() => {
     return null;
   }
 
+  // CATENE DI EVENTI: una maxiemergenza (maxi o mega) puo generarne altri
+  // vicini (crollo -> fuga di gas, incendio -> intossicati...). I figli
+  // nascono nello stesso comune dopo 8-35 game-min, con la cronologia
+  // collegata; mai catene di catene (max 3 figli per padre).
+  const CATENA_MAP = [
+    [/crollo/i, [/fuga di gas/i, /incendio/i, /crollo/i]],
+    [/esplosione|scoppio/i, [/incendio/i, /fuga di gas/i, /ustione/i]],
+    [/incendio/i, [/incendio/i, /intossica/i, /ustione/i, /fuga di gas/i]],
+    [/alluvione|esondazione|diga|allag/i, [/anneg/i, /allag/i, /frana/i, /smottamento/i, /fango/i]],
+    [/deragliamento|treno|ferrov/i, [/incendio/i, /ferito/i, /schiacci/i, /fuga di gas/i]],
+    [/aereo|precipitato|elicottero/i, [/incendio/i, /carburante|chero|benzina/i]],
+    [/calca|folla|stadio|concerto|festival/i, [/malore/i, /schiacciamento/i, /rissa/i]],
+    [/tromba|tornado|uragano/i, [/albero/i, /tetto/i, /crollo/i, /ferito/i]],
+    [/nube|gas tossico|tossic/i, [/intossica/i, /malore/i, /evacuazione/i]]
+  ];
+  const CATENA_DEFAULT = [/malore/i, /incendio/i, /fuga di gas/i];
+  let cateneInAttesa = []; // {tipoNome, comune, prov, entroMin, parentTipo, tentativi}
+  function catenaFiglio(nomePadre){
+    const pn = String(nomePadre||"");
+    let modelli = CATENA_DEFAULT;
+    for(const rule of CATENA_MAP){ if(rule[0].test(pn)){ modelli = rule[1]; break; } }
+    const no = new Set([...tipiAperti(), ...ultimiTipi.slice(-BAN_TIPI)]);
+    const mega = new Set(MEGA_TIPI||[]);
+    for(const rx of modelli){
+      const cand = (D().TIPI||[]).filter(t=>t && rx.test(t.nome) && !no.has(t.nome) && !mega.has(t.nome) && Number.isFinite(Number(t.pz)) && Number(t.pz)<=4 && !t.qui);
+      if(cand.length) return cand[rndi(0,cand.length-1)];
+    }
+    return null;
+  }
+  function programmaCatena(call){
+    // solo maxi/mega naturali (mai figli di catene, mai MANV): 65% 1-3 figli
+    if(!call || !call.maxi || call.chainFiglio) return 0;
+    if(Math.random() >= 0.65) return 0;
+    const n = 1+Math.floor(Math.random()*3);
+    let messi = 0;
+    for(let k=0;k<n;k++){
+      const fig = catenaFiglio(call.tipoNome);
+      if(!fig) continue;
+      cateneInAttesa.push({ tipoNome: fig.nome, comune: call.comune, prov: call.prov, entroMin: clockMin+rnd(8,35)+k*6, parentTipo: call.tipoNome, tentativi: 0 });
+      messi++;
+    }
+    return messi;
+  }
+  function elaboraCatene(forza){
+    for(let i=cateneInAttesa.length-1;i>=0;i--){
+      const p = cateneInAttesa[i];
+      if(!forza && p.entroMin>clockMin) continue;
+      if(chiamate.length>=3){ p.entroMin = clockMin+10; if(++p.tentativi>3) cateneInAttesa.splice(i,1); continue; }
+      const b = creaBozza(null, p.tipoNome, p.comune);
+      if(!b || b.tipoNome!==p.tipoNome){ cateneInAttesa.splice(i,1); continue; }
+      b.visto.push("c'è ancora confusione per " + String(p.parentTipo).toLowerCase() + ", successo poco fa qui vicino");
+      b.chainFiglio = true; b.chainDa = p.parentTipo;
+      const call = { ...b, callId: callCounter++ };
+      chiamate.unshift(call);
+      statCall(call); notaChiamata(call); iaArricchisciRemoto(call);
+      logRadio(`🔗 Nuova chiamata collegata a <b>${p.parentTipo}</b> a <b>${call.comune}</b> (${call.prov}) — rispondi per i dettagli`, "alarm");
+      blip(); toast("🔗 Chiamata collegata in arrivo!");
+      refreshCallMarkers(); renderCalls(); updateStats();
+      cateneInAttesa.splice(i,1);
+    }
+    return cateneInAttesa.length;
+  }
+
   // punto ESATTAMENTE su una vera autostrada/statale (missioni autostradali): zero jitter,
   // le geometrie STRADE sono dense (errore max ~1 m) quindi il punto cade sulla strada vera
-  function puntoSuStrada(soloA){
+  // punti fissi su TUTTE le tratte (autostrade + statali mappate): campionati ogni
+  // ~500 m dalle geometrie STRADE, così ogni km di strada ha la stessa probabilità
+  // (prima: ref a caso = tratte corte sovrarappresentate e alcune quasi mai uscite)
+  let HWY_A = null, HWY_ALL = null, HWY_REF = null;
+  function hwyBuild(){
+    if(HWY_ALL) return;
+    HWY_A = []; HWY_ALL = []; HWY_REF = {};
     const ST = D().STRADE || {};
-    const refs = Object.keys(ST).filter(r=>!soloA || ST[r].cls==="A");
-    if(!refs.length) return null;
+    const STEP = 0.5; // km tra un punto e l'altro
+    for(const r in ST){
+      const cls = ST[r].cls, segs = ST[r].seg || [];
+      for(const s of segs){
+        let acc = 0;
+        for(let k=0;k<s.length;k++){
+          if(k>0) acc += haversineKm(s[k-1][0],s[k-1][1],s[k][0],s[k][1]);
+          if(k===0 || acc>=STEP){ acc = 0; const p = {lat:s[k][0], lng:s[k][1], ref:r}; HWY_ALL.push(p); if(cls==="A") HWY_A.push(p); (HWY_REF[r] = HWY_REF[r]||[]).push(p); }
+        }
+      }
+    }
+    if(!HWY_ALL.length){ HWY_A = null; HWY_ALL = null; }
+  }
+  function puntoSuStrada(soloA, pref){
+    hwyBuild();
+    const pts = soloA ? HWY_A : HWY_ALL;
+    if(!pts || !pts.length) return null;
+    const pool = (pref && HWY_REF && HWY_REF[pref] && HWY_REF[pref].length) ? HWY_REF[pref] : null;
     for(let k=0;k<24;k++){
-      const r = refs[rndi(0,refs.length-1)];
-      const segs = ST[r].seg || [];
-      const s = segs[rndi(0,segs.length-1)];
-      if(!s || s.length<2) continue;
-      const i = rndi(0,s.length-2), t = Math.random();
-      const la = s[i][0]+(s[i+1][0]-s[i][0])*t;
-      const ln = s[i][1]+(s[i+1][1]-s[i][1])*t;
-      if(inAcqua(la,ln)) continue;
-      return {lat:la, lng:ln, ref:r};
+      const src = (pool && Math.random()<0.7) ? pool : pts;
+      const p = src[rndi(0,src.length-1)];
+      if(inAcqua(p.lat,p.lng)) continue;
+      return {lat:p.lat, lng:p.lng, ref:p.ref};
     }
     return null;
   }
@@ -1034,16 +1147,26 @@ window.COEUSIM = (() => {
     }
     return false;
   }
-  function creaBozzaUna(forceProv=null, forceTipoNome=null){
+  function creaBozzaUna(forceProv=null, forceTipoNome=null, forceComune=null){
+    // 🗺️ Zona header: ovest = VA·CO·LC·MB, milano = MI, est = BG·BS·SO, tutte = tutto.
+    const zoneProv = zonaSel === "ovest" ? ["VA","CO","LC","MB"] : zonaSel === "milano" ? ["MI"] : zonaSel === "est" ? ["BG","BS","SO"] : ["VA","CO","LC","MB","MI","BG","BS","SO"];
         // spawn pesato direttamente sui comuni delle province abilitate (Milano + sud pesano di più)
-    let c, prov;
+    let c = null, prov = null;
+    if(forceComune){
+      // catene di eventi: stesso comune del padre (stessa zona)
+      const fc = D().COMUNI.find(cc=>cc.n===forceComune);
+      if(fc){ c = fc; prov = fc.p; }
+    }
+    if(!c){
     if(forceProv){ prov = forceProv; c = comuneRandom(prov); }
     else {
-      const pool = D().COMUNI.filter(cc=>filters[cc.p]);
+      // AREE ATTIVE: solo queste generano chiamate (BS/PC/PV/NO mappate ma ferme), ristrette dalla 🗺️ Zona.
+      const pool = D().COMUNI.filter(cc=>zoneProv.indexOf(cc.p)>=0);
       c = pickPesato(pool.length ? pool : D().COMUNI.filter(cc=>cc.p==="VA"));
       prov = c.p;
     }
-    const provs = ["VA","CO","LC","MB","MI"].filter(p=>filters[p]);
+    }
+    const provs = ["VA","CO","LC","MB","MI","BG","BS","SO"].filter(p=>filters[p] && zoneProv.indexOf(p)>=0);
     if(!provs.length) provs.push("VA");
     let { tipo, prio } = tipoRandom();
     let maxi = false, manv = false;
@@ -1063,22 +1186,37 @@ window.COEUSIM = (() => {
     const z = tipo.zona || "misto";
     let cc = c, pp = prov, iLat = c.lat, iLng = c.lng;
     // missioni autostradali/tangenziali/superstrade: punto SU una vera strada
-    let hwyRef = null;
+    let hwyRef = null, quiUsato = false;
     if(/autostrada|tangenziale|superstrada|spartitraffico/i.test(tipo.nome) || tipo.nome==="Scontro tra camion"){
-      const hp = puntoSuStrada(/autostrada/i.test(tipo.nome));
-      if(hp){ iLat = hp.lat; iLng = hp.lng; hwyRef = hp.ref; const nb = nearestComune(iLat, iLng); cc = nb; pp = nb.p; }
+      for(let k=0;k<12;k++){
+        const hp = puntoSuStrada(/autostrada/i.test(tipo.nome), tipo.hwy); // hwy:"A4" = 70% su quella tratta
+        if(!hp) break;
+        const nb = nearestComune(hp.lat, hp.lng);
+        if(!forceProv && zoneProv.indexOf(nb.p)<0) continue; // 🗺️ Zona: ritenta finché il tratto è in zona
+        iLat = hp.lat; iLng = hp.lng; hwyRef = hp.ref; cc = nb; pp = nb.p; break;
+      }
     }
     // missioni ferroviarie: punto SU un vero binario/stazione/galleria/PL
     let ferroRef = null;
     if((tipo.zona||"")==="ferro"){
-      const fp = puntoSuFerrovia(tipo.nome);
-      if(fp){ iLat = fp.lat; iLng = fp.lng; ferroRef = fp; const nb = nearestComune(iLat, iLng); cc = nb; pp = nb.p; }
+      for(let k=0;k<12;k++){
+        const fp = puntoSuFerrovia(tipo.nome);
+        if(!fp) break;
+        const nb = nearestComune(fp.lat, fp.lng);
+        if(!forceProv && zoneProv.indexOf(nb.p)<0) continue; // 🗺️ Zona
+        iLat = fp.lat; iLng = fp.lng; ferroRef = fp; cc = nb; pp = nb.p; break;
+      }
     }
     // missioni infrastrutturali: punto SU una vera rete (fiume, elettrodotto, sentiero...)
     let infraRef = null;
     if((tipo.zona||"")==="infra" && tipo.infra){
-      const ip = puntoSuInfra(tipo.infra);
-      if(ip){ iLat = ip.lat; iLng = ip.lng; infraRef = ip; const nb = nearestComune(iLat, iLng); cc = nb; pp = nb.p; }
+      for(let k=0;k<12;k++){
+        const ip = puntoSuInfra(tipo.infra);
+        if(!ip) break;
+        const nb = nearestComune(ip.lat, ip.lng);
+        if(!forceProv && zoneProv.indexOf(nb.p)<0) continue; // 🗺️ Zona
+        iLat = ip.lat; iLng = ip.lng; infraRef = ip; cc = nb; pp = nb.p; break;
+      }
     }
     // chiamate di montagna solo sulle montagne vere: i tipi alpini senza punto
     // proprio (natura generica) si agganciano a vette/funivie/montagna; rifugi e
@@ -1096,7 +1234,9 @@ window.COEUSIM = (() => {
             if(_snow && pass===0) continue;
             if(!montagnaVera(mp.lat, mp.lng)) continue;
           }
-          iLat=mp.lat; iLng=mp.lng; montRef=mp; const nb=nearestComune(iLat,iLng); cc=nb; pp=nb.p;
+          const nb=nearestComune(mp.lat,mp.lng);
+          if(!forceProv && zoneProv.indexOf(nb.p)<0) continue; // 🗺️ Zona
+          iLat=mp.lat; iLng=mp.lng; montRef=mp; cc=nb; pp=nb.p;
         }
       }
     }
@@ -1104,7 +1244,8 @@ window.COEUSIM = (() => {
     else if(ferroRef){ /* gia posizionato sulla ferrovia vera */ }
     else if(infraRef){ /* gia posizionato sulla rete vera */ }
     else if(montRef){ /* gia posizionato sulle montagne vere */ }
-    else if(tipo.qui){
+    else if(tipo.qui && (forceProv || zoneProv.indexOf(nearestComune(tipo.qui[0], tipo.qui[1]).p)>=0)){
+      quiUsato = true;
       iLat = tipo.qui[0]+rnd(-0.002,0.002); iLng = tipo.qui[1]+rnd(-0.002,0.002);
       cc = nearestComune(iLat, iLng); pp = cc.p;
     } else if(z==="lago"){
@@ -1129,9 +1270,18 @@ window.COEUSIM = (() => {
       const nb2 = nearestComune(iLat, iLng); // l'etichetta segue sempre il punto reale
       if(forceProv ? nb2.p===forceProv : provs.includes(nb2.p)){ cc=nb2; pp=nb2.p; }
     }
+    // Fuori area: gli snap (strade/ferrovie/reti/montagne) possono cadere in
+    // province mappate ma ferme (NO/PC/PV) o fuori 🗺️ Zona — si ripiega sul comune d'origine.
+    if(!forceProv && zoneProv.indexOf(pp) < 0){
+      hwyRef = ferroRef = infraRef = montRef = null;
+      const j0 = ZONA_JITTER[z] || ZONA_JITTER.misto;
+      iLat = c.lat + rnd(-j0[0], j0[0]);
+      iLng = c.lng + rnd(-j0[1], j0[1]);
+      cc = c; pp = prov;
+    }
     const gen = generaPazienti(prio, tipo); // VERITÀ dello scenario (tutti i coinvolti, vedi sopra)
     const pz = gen.salute;
-    if(maxi && tipo.pz>0){ const nG = tiraConteggioMaxi(); while(pz.length < nG) pushPaziente(pz, gen.profili, prio, tipo, gen.vds); } // maxiemergenza: 5-15 feriti
+    if(maxi && tipo.pz>0){ const nG = tiraConteggioMaxi(tipo); while(pz.length < nG) pushPaziente(pz, gen.profili, prio, tipo, gen.vds); } // maxiemergenza: 8-15 feriti (20-50 per le MEGA, 50-100 per le GIGA)
     else if(manv && tipo.pz>0){ const nM = tiraNManv(); while(pz.length < nM) pushPaziente(pz, gen.profili, prio, tipo, gen.vds); } // MANV: 5-7 feriti, 5 favorito
     // la centrale NON conosce il totale: solo i noti viaggiano in chiaro, gli altri
     // si scoprono sul posto (i nascosti mai rivelati al chiamante né al giocatore)
@@ -1143,7 +1293,7 @@ window.COEUSIM = (() => {
     else if(ferroRef){ indirizzo = indirizzoFerro(ferroRef, cc.n); } // es. Linea Saronno-Como (Stazione di Saronno) - Saronno
     else if(infraRef){ indirizzo = indirizzoInfra(infraRef, cc.n); } // es. Naviglio Martesana - Cassano d'Adda
     else if(montRef){ indirizzo = indirizzoInfra(montRef, cc.n); } // es. In vetta - Esino Lario
-    else if(tipo.qui){
+    else if(quiUsato){
       indirizzo = "Aeroporto di Malpensa"; // punto fisso: l'indirizzo è il sito, coincide per definizione
     } else if(z==="natura" || z==="lago"){
       // bosco/riva: il marker resta sul posto realistico e l'indirizzo cita la via
@@ -1190,17 +1340,17 @@ window.COEUSIM = (() => {
       illesi: gen.illesi, evac: gen.evac, variante: gen.variante,
     };
   }
- function creaBozza(forceProv=null, forceTipoNome=null){
+ function creaBozza(forceProv=null, forceTipoNome=null, forceComune=null){
    // la bozza accettata entra nella memoria anti-ripetizione (anche forzati/maxi/maltempo)
-   let b = creaBozzaUna(forceProv, forceTipoNome);
+   let b = creaBozzaUna(forceProv, forceTipoNome, forceComune);
    // tipo forzato (danno mirato): si rigenera solo il dialogo, il tipo resta quello
-   for(let k=0; k<8 && chiamataRipetuta(b, !forceTipoNome); k++) b = creaBozzaUna(forceProv, forceTipoNome);
+   for(let k=0; k<8 && chiamataRipetuta(b, !forceTipoNome); k++) b = creaBozzaUna(forceProv, forceTipoNome, forceComune);
    // validazione PRIMA di mostrare al giocatore: correzioni deterministiche,
    // oppure rigenerazione se il tipo non esiste piu (mai correzioni casuali)
    for(let k=0;k<4;k++){
      const v = validaBozza(b);
      if(v.ok){ if(v.correzioni.length) console.warn("[COEU] bozza corretta ("+b.tipoNome+"): "+v.correzioni.join(", ")); break; }
-     b = creaBozzaUna(forceProv, forceTipoNome);
+     b = creaBozzaUna(forceProv, forceTipoNome, forceComune);
    }
    iaMiglioraBozza(b);
    notaTipo(b.tipoNome);
@@ -1351,7 +1501,7 @@ window.COEUSIM = (() => {
       ind2 = via;
     }
     const pz2 = generaPazienti(prioQui, tipo); // VERITÀ dello scenario (tutti i coinvolti)
-    if(maxiQui && tipo.pz>0){ const nG2 = tiraConteggioMaxi(); while(pz2.salute.length < nG2) pushPaziente(pz2.salute, pz2.profili, prioQui, tipo, pz2.vds); }
+    if(maxiQui && tipo.pz>0){ const nG2 = tiraConteggioMaxi(tipo); while(pz2.salute.length < nG2) pushPaziente(pz2.salute, pz2.profili, prioQui, tipo, pz2.vds); }
     else if(manvQui && tipo.pz>0){ const nM2 = tiraNManv(); while(pz2.salute.length < nM2) pushPaziente(pz2.salute, pz2.profili, prioQui, tipo, pz2.vds); }
     const pre2 = {pazienti: pz2.salute, profili: pz2.profili, maxi: maxiQui, manv: manvQui};
     applicaStimaPazienti(pre2, tipo); // la centrale conosce solo i noti
@@ -1392,6 +1542,7 @@ window.COEUSIM = (() => {
     if(tipo.zona!=="ferro" && tipo.zona!=="infra") precisaIndirizzoClick(call); // indirizzo reale del punto cliccato (via geocodifica inversa; ferroviarie e infrastrutturali restano sulla rete)
     blip(); if(!(b.maxi||b.manv)) toast("🔔 Nuova chiamata in arrivo!");
     refreshCallMarkers(); renderCalls(); updateStats();
+    programmaCatena(call); // maxi/mega: possibili eventi collegati in zona
     return call;
   }
 
@@ -1496,7 +1647,7 @@ function stormTick(dtGameMin){
   // --- CLASSIFICA: scegli il codice colore -> diventa intervento attivo ---
   // R = rosso(P1), G = giallo(P2), V = verde(P3), B = bianco(P4)
   const COLORI = { R:{prio:1, nome:"ROSSO", col:"#d00000"}, G:{prio:2, nome:"GIALLO", col:"#e6a100"}, V:{prio:3, nome:"VERDE", col:"#35a835"}, B:{prio:4, nome:"BIANCO", col:"#888888"} };
-  function accettaChiamata(callId, colore, mezziCodici){
+  function accettaChiamata(callId, colore, mezziCodici, manTipo){
     const idx = chiamate.findIndex(c=>c.callId===callId);
     if (idx<0) return false;
     const call = chiamate.splice(idx,1)[0];
@@ -1506,6 +1657,7 @@ function stormTick(dtGameMin){
       id: idCounter++,
       callId: call.callId, // per aggiornare l'indirizzo se arriva la geocodifica inversa del click
       tipoNome: call.tipoNome, // vero tipo: nascosto fino a chiusura
+      manTipo: manTipo || null, // etichetta manuale dell'operatore: tipo ufficiale su live + dettaglio
       truePrio: call.truePrio,
       prio: COLORI[colore] ? COLORI[colore].prio : 0, // VVF: codice scelto, oppure 0 = senza codice
       vvf: isVVF,
@@ -1515,6 +1667,7 @@ function stormTick(dtGameMin){
       indirizzo: call.indirizzo, comune: call.comune, prov: call.prov,
       stato: "attesa",
       mezziIds: [],
+      invii: {}, // n° invio per mezzo: il live mostra una riga per ogni invio
       richiesti: call.richiesti,
       durata: call.durata,
       tempoSulPosto: 0,
@@ -1530,6 +1683,7 @@ function stormTick(dtGameMin){
       profiliNascosti: (call.profiliNascosti||[]).map(p=>({...p})),
       pazIgnoti: !!call.pazIgnoti, pazDaVerificare: !!call.pazDaVerificare, scopTra: null,
       emoji: call.emoji, desc: call.desc,
+      chainDa: call.chainDa||null, // catena di eventi: possibile conseguenza di...
       ospedale: null,
       pazDest: {}, // idx paziente -> nome ospedale scelto
       pazConsegnati: {}, // idx paziente -> true (handover fatto in PS)
@@ -1577,10 +1731,10 @@ function stormTick(dtGameMin){
   function callMzHTML(call){
     const sel = call.incaricoMz||[];
     const ck = c => sel.includes(c) ? " checked" : "";
-    const d118 = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF")
+    const d118 = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice])
       .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
       .sort((a,b)=>a.d-b.d).slice(0,8);
-    const dVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF")
+    const dVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice])
       .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
       .sort((a,b)=>a.d-b.d).slice(0,6);
     let h = '<div class="small" style="margin:4px 0">Spunta i mezzi da inviare (i più vicini):</div><div class="callMz">';
@@ -1667,6 +1821,47 @@ function stormTick(dtGameMin){
     renderIncarico();
   }
 
+  // ---------- INSERIMENTO MANUALE (l'operatore classifica: luogo/motivo/dettaglio) ----------
+  // Sostituisce la chiamata del richiedente: l'etichetta manuale diventa il tipo
+  // ufficiale (live + dettaglio), la meccanica resta quella del tipo generato.
+  const MAN_LUOGHI = ["CASA","STRADA","UFFICIO LUOGO PUBBLICO","STR. RESIDENZIALE",
+    "STR. SANITARIA","IMPIANTO SPORTIVO","IMPIANTO SCI","IMPIANTO LAVORATIVO",
+    "SCUOLE","FERROVIA","QUESTURA/CASERME","IMPERVIO","ALTRO LUOGO","AEREOPORTI"];
+  const MAN_MOTIVI = ["MEDICO ACUTO","---","CADUTA","---","NON NOTO","---",
+    "INTOSSICAZIONE","---","ANIMALI","PREVENZIONE","EVENTO VIOLENTO","SOCCORSO PERSONA",
+    "---","INCIDENTE/INFORTUNIO","INCIDENTE STRADALE","INCIDENTE FERROVIA",
+    "INCIDENTE ARIA","INCIDENTE MONTANO","INCIDENTE SPELEO/FORRA","INCIDENTE ACQUA",
+    "EVENTO DI MASSA","---","TRASFERIMENTO","TRASFERIMENTO URGENTE"];
+  const MAN_DETT = ["---","ALTRO","ALTRO/NON IDENTIFICA","---","ORECCHIO/NASO/GOLA",
+    "FERITA LACERO CONTUSA","CUTE/TESS.CONNETTIVO","FRATTURE/DISTOR ARTI",
+    "OSTEO MUSCOLARE","---","SOFFOCAMENTO","FOLGORATO","USTIONI","AMPUTAZIONE",
+    "IMPICCAMENTO","SCHIACCIAMENTO","SCONTRO DI GIOCO","PRECIPITATO","---",
+    "MORSO ANIMALE","PUNTURA ANIMALE","---","CADUTA SUOLO","CADUTA DALL ALTO",
+    "CADUTA DA SCALA","CADUTA DA BICI","CADUTA DA MOTO","CADUTA DA CAVALLO",
+    "CADUTA DA VEICOLO FERMO","CADUTA CAUSA MALORE","---","INVESTIMENTO PEDONE",
+    "INVESTIMENTO CICLISTA","SCONTRO BICICLETTE","RIBALTAMENTO","SBALZATO/PROIETTATO",
+    "FUORI STRADA","CONTRO OSTACOLO","MOTO/MOTO","AUTO/AUTO","AUTO/MOTO",
+    "AUTO/MEZZO PESANTE","MEZZO PESANTE/MOTO","MEZZO PESANTE / MEZZO PESANTE",
+    "DINAMICA NON NOTA","PIU DI DUE VEICOLI","ARROTAMENTO PERSONA","INCASTRATO",
+    "AUTOVETTURA","---","ASSISTENZA FF.OO.","RISSA","AGGRESSIONE","TENTATO SUICIDIO",
+    "FERITA","FERITA ARMA DA FUOCO","FERITA ARMA BIANCA","---","ASSISTENZA VV.FF.",
+    "INCENDIO","ANNEGAMENTO","APERTURA APPARTAMENTO","AUTOVETTURA","RICERCA DISPERSO",
+    "---","ETILICA","ALIMENTARE","FARMACI","DA SOSTANZE PERICOLOSE","INFETTIVO",
+    "---","INCRODATO","PZ GRANDE OBESO","---","AEROMOBILE","COLLISIONE","IMBARCAZIONE",
+    "---","ESPLOSIONE","FUGA GAS/ SOST. PERICOLOSE","SCOPPIO","CROLLO","MODALITA NON NOTA"];
+  function manOptions(list, sel){
+    let h = '<option value="">—</option>';
+    for(const v of list){
+      if(v === "---"){ h += '<option value="" disabled>──────────</option>'; continue; }
+      h += '<option value="' + v + '"' + (v === sel ? " selected" : "") + ">" + v + "</option>";
+    }
+    return h;
+  }
+  function manTipoDi(lu, mo, de){
+    if(mo === "MEDICO ACUTO") return lu ? lu + " - " + mo : null; // niente dettaglio
+    if(lu && mo && de) return lu + " - " + mo + ": " + de;
+    return null;
+  }
   // incarico in finestra separata (stile LSTSim): mezzi + codice, poi crea e si chiude
   let incaricoCallId = null;
   function openIncarico(callId){
@@ -1718,6 +1913,12 @@ function stormTick(dtGameMin){
       <div class="intTop"><b>📋 Nuovo incarico</b></div>
       <div class="intAddr">📍 ${luogoIV(call,true)}</div>
       <div class="dialogo">${call.dialogo}</div>
+      <div class="small" style="margin:6px 0 2px">✍️ <b>Inserimento manuale</b> <span class="small">(al posto della chiamata: compila tutto, o lascia tutto vuoto — MEDICO ACUTO non ha dettaglio)</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+        <label class="small">📍 Luogo<br><select id="manLuogoSel" style="max-width:190px">${manOptions(MAN_LUOGHI, call.manLuogo)}</select></label>
+        <label class="small">📌 Motivo<br><select id="manMotivoSel" style="max-width:190px">${manOptions(MAN_MOTIVI, call.manMotivo)}</select></label>
+        <label class="small">📝 Dettaglio<br><select id="manDettSel" style="max-width:190px"${call.manMotivo === "MEDICO ACUTO" ? " disabled" : ""}>${manOptions(MAN_DETT, call.manMotivo === "MEDICO ACUTO" ? null : call.manDett)}</select></label>
+      </div>
       ${callMzHTML(call)}
       ${call.vvf
         ? '<div class="small" style="margin:4px 0">🚒 Vigili del Fuoco — codice (oppure senza):</div><div class="colorBtns">' + codeBtn("R","🔴 Rosso","#d00000") + " " + codeBtn("G","🟡 Giallo","#e6a100") + " " + codeBtn("V","🟢 Verde","#35a835") + " " + codeBtn("B","⚪ Bianco","#888") + " " + codeBtn("VVF","🚒 Senza codice","#666") + "</div>"
@@ -1725,15 +1926,23 @@ function stormTick(dtGameMin){
       <div class="callBtns"><button class="lstBtn small primary" data-act="create">${effCod==="VVF" ? "🚒 Crea intervento" : "✅ Crea intervento"}</button><button class="lstBtn small" data-act="close">✖ Chiudi</button></div>`;
     body.querySelectorAll(".colorBtns button").forEach(b=>{ b.onclick = ()=>{ call.codSel = b.dataset.c; renderIncarico(); }; });
     body.querySelectorAll(".callMz input").forEach(ii=>{ ii.onchange = ()=>{ call.incaricoMz = [...body.querySelectorAll(".callMz input:checked")].map(xx=>xx.value); }; });
+    const mls = body.querySelector("#manLuogoSel"), mms = body.querySelector("#manMotivoSel"), mds = body.querySelector("#manDettSel");
+    if(mls) mls.onchange = ()=>{ call.manLuogo = mls.value || null; };
+    if(mms) mms.onchange = ()=>{ call.manMotivo = mms.value || null; const dd = body.querySelector("#manDettSel"); if(dd){ if(call.manMotivo === "MEDICO ACUTO"){ call.manDett = null; dd.value = ""; dd.disabled = true; } else dd.disabled = false; } };
+    if(mds) mds.onchange = ()=>{ call.manDett = mds.value || null; };
     body.querySelectorAll("[data-act]").forEach(b=>{ b.onclick = ()=>{
       const act = b.dataset.act;
       if(act==="close") closeIncarico(true);
       else if(act==="create"){
         if(!call.vvf && !call.codSel){ toast("Scegli il codice colore"); return; }
+        const l = body.querySelector("#manLuogoSel"), m = body.querySelector("#manMotivoSel"), d = body.querySelector("#manDettSel");
+        const lv = l ? l.value : "", mv = m ? m.value : "", dv = d ? d.value : "";
+        const man = manTipoDi(lv, mv, dv);
+        if((lv || mv || dv) && !man){ toast("Inserimento manuale incompleto"); return; }
         const cid = call.callId, cod = call.codSel || "VVF";
         const mz = [...body.querySelectorAll(".callMz input:checked")].map(xx=>xx.value);
         incaricoCallId = null; ov.style.display = "none";
-        accettaChiamata(cid, cod, mz);
+        accettaChiamata(cid, cod, mz, man);
       }
     };});
     const t = document.querySelector("#incaricoTitle");
@@ -1758,8 +1967,8 @@ function stormTick(dtGameMin){
     wirePop("#assistHead", "#assistWin", "#assistX", ()=>closeAssist());
     const iv = interventi.find(x=>x.id===assistIvId);
     if(!iv){ ov.style.display = "none"; return; }
-    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF");
-    const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF");
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice]);
+    const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice]);
     body.innerHTML = `
       <div class="intTop"><b>🆘 Assistenza</b></div>
       <div class="intAddr">📍 ${luogoIV(iv,true)}</div>
@@ -1920,7 +2129,7 @@ function stormTick(dtGameMin){
         lab.title=`${mz.radio||mz.codice} — ${mz.tipo} — ${mz.sede}`;
         eg.appendChild(lab);
       };
-      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile")
+      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile"&&!cloudBusy[m.codice])
         .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
         .sort((a,b)=>a.d-b.d);
       for(const {mz, d} of eliFree) eliAddRow(mz, ` — ${d.toFixed(1)} km`);
@@ -1968,7 +2177,7 @@ function stormTick(dtGameMin){
         mg.appendChild(lab);
       };
       const gruppiMI = new Map();
-      for(const mz of mezzi.filter(m=>m.corpo==="VVF"&&m.prov==="MI"&&m.stato==="disponibile")){
+      for(const mz of mezzi.filter(m=>m.corpo==="VVF"&&m.prov==="MI"&&m.stato==="disponibile"&&!cloudBusy[m.codice])){
         const s = D().VVF_SEDI.find(x=>x.nome===mz.sede);
         const d = s ? haversineKm(iv.lat,iv.lng,s.lat,s.lng) : haversineKm(iv.lat,iv.lng,mz.lat,mz.lng);
         if(!gruppiMI.has(mz.sede)) gruppiMI.set(mz.sede, {sede:mz.sede, d, mezzi:[]});
@@ -2305,7 +2514,7 @@ function stormTick(dtGameMin){
   }
   // numero atteso di pazienti di una bozza: esatto dai dati, oppure conteggio evento (maxi/MANV)
   function attesiBozza(b, tipo){
-    if(b.maxi && tipo.pz>0) return [8,15];
+    if(b.maxi && tipo.pz>0){ if(tipo.nome===CONTO25) return [25,25]; if(GIGA_SET[tipo.nome]) return [50,100]; if(MEGA_SET[tipo.nome]) return [20,50]; return [8,15]; }
     if(b.manv && tipo.pz>0) return [5,7];
     // VVF: intervallo della tipologia di scenario (dinamico, vedi PZV_TAB)
     if(tipo.vvf){ const tab = PZV_TAB[pzvBucket(tipo.nome, tipo.desc)] || PZV_TAB.tecnico; return [tab.w[0][0], tab.w[tab.w.length-1][0]]; }
@@ -2329,7 +2538,7 @@ function stormTick(dtGameMin){
     if(!Array.isArray(b.pazienti) || tot0<att[0] || tot0>att[1]){
       const g = generaPazienti(b.truePrio, tipo);
       b.pazienti = g.salute; b.profili = g.profili; b.illesi = g.illesi; b.evac = g.evac; b.variante = g.variante;
-      if(b.maxi && tipo.pz>0){ const nG=tiraConteggioMaxi(); while(b.pazienti.length<nG) pushPaziente(b.pazienti,b.profili,b.truePrio,tipo,g.vds); }
+      if(b.maxi && tipo.pz>0){ const nG=tiraConteggioMaxi(tipo); while(b.pazienti.length<nG) pushPaziente(b.pazienti,b.profili,b.truePrio,tipo,g.vds); }
       else if(b.manv && tipo.pz>0){ const nM=tiraNManv(); while(b.pazienti.length<nM) pushPaziente(b.pazienti,b.profili,b.truePrio,tipo,g.vds); }
       b.pazientiNascosti = []; b.profiliNascosti = []; // resettati prima dello split (niente doppi)
       applicaStimaPazienti(b, tipo);
@@ -2784,7 +2993,7 @@ function stormTick(dtGameMin){
 
  function mezziDisponibili(tipoWanted=null, corpoWanted=null){
  
-    return mezzi.filter(m=>m.stato==="disponibile" && (!tipoWanted || m.tipo===tipoWanted) && (!corpoWanted || m.corpo===corpoWanted));
+    return mezzi.filter(m=>m.stato==="disponibile" && !cloudBusy[m.codice] && (!tipoWanted || m.tipo===tipoWanted) && (!corpoWanted || m.corpo===corpoWanted));
   }
 
   function nearestMezzo(lat,lng,tipoWanted=null,corpoWanted=null){
@@ -2835,7 +3044,7 @@ function stormTick(dtGameMin){
     const esceDallaSede = (mz.stato==="disponibile");
     vaiA(mz, iv.accLa!=null?iv.accLa:iv.lat, iv.accLng!=null?iv.accLng:iv.lng, "viaggio"); // ferroviarie: i mezzi vanno all'accesso, mai sui binari
     if(esceDallaSede) mz.uscita = turnoutPrio(iv.prio); // equipaggio in uscita: 30" sul rosso, 60" sul bianco
-    if(!iv.mezziIds.includes(mz.codice)) iv.mezziIds.push(mz.codice);
+    if(!iv.mezziIds.includes(mz.codice)){ iv.mezziIds.push(mz.codice); iv.invii = iv.invii||{}; iv.invii[mz.codice]=(iv.invii[mz.codice]||0)+1; } // ogni nuovo invio conta: rientro + rinvio = 2° invio
     if(iv.stato==="attesa") iv.stato="viaggio";
     suppLog(iv, gruppoSupporto(mz), dirottato ? "dirottato" : "assegnato", mz.codice, dirottato && oldId!=null ? ("dalla missione " + oldId) : null);
     if(!silent) log(`${mz.corpo==="VVF"?"🚒":(mz.tipo==="AUTOMEDICA"||isMedica(mz))?"🚓":"🚑"} ${nomem(mz)} ${dirottato?"dirottato a":"→"} <b>${iv.comune}</b>`, "status");
@@ -2957,6 +3166,7 @@ function stormTick(dtGameMin){
     if(!mz.path || mz.path.length<2 || !mz.segLens){
       setPath(mz, [[mz.lat,mz.lng],[mz.targetLat,mz.targetLng]]);
     }
+    const btO0 = mz.lat, btO1 = mz.lng; // totali browser: km percorsi in questo passo
     const uni = isEli(mz) ? 180 : ((METEO_VEL[meteo.cond]!=null ? METEO_VEL[meteo.cond] : (mz.velKmh||50)));
     const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && (meteo.cond!=="Nebbia"&&meteo.cond!=="Nebbia con brina" && !isEli(mz))) ? mz.segVel : null;
     let guard = 0;
@@ -2981,10 +3191,13 @@ function stormTick(dtGameMin){
         else { remaining -= left; mz.segIdx++; mz.segProg=0; }
       }
     }
-    if(mz.segIdx >= mz.segLens.length){ mz.lat=mz.targetLat; mz.lng=mz.targetLng; return true; }
+    if(mz.segIdx >= mz.segLens.length){ mz.lat=mz.targetLat; mz.lng=mz.targetLng;
+      if(BT){ try{ btMezzo(mz.codice).km += haversineKm(btO0,btO1,mz.lat,mz.lng); }catch(_){} }
+      return true; }
     const a=mz.path[mz.segIdx], b=mz.path[mz.segIdx+1];
     const f=mz.segLens[mz.segIdx]>0?mz.segProg/mz.segLens[mz.segIdx]:1;
     mz.lat=a[0]+(b[0]-a[0])*f; mz.lng=a[1]+(b[1]-a[1])*f;
+    if(BT){ try{ btMezzo(mz.codice).km += haversineKm(btO0,btO1,mz.lat,mz.lng); }catch(_){} }
     if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.08) return true;
     return false;
   }
@@ -3944,6 +4157,17 @@ function stormTick(dtGameMin){
     btn.onclick = e=>{ e.stopPropagation(); const inp = $("oraInput"); if(inp) inp.value = String(Math.floor(clockMin/60)).padStart(2,"0") + ":" + String(Math.floor(clockMin%60)).padStart(2,"0"); menu.hidden = !menu.hidden; };
     document.addEventListener("click", ()=>{ menu.hidden = true; });
   }
+  // ⏱️ tasto velocità: missioni con calma / normali / veloci (usa i RITMI del flusso)
+  function wireVel(){
+    const btn = $("velBtn"), menu = $("velMenu");
+    if(!btn || !menu || btn._w) return; btn._w = true;
+    const NOMI = { tranquillo:"con calma", normale:"normale", intenso:"veloce" };
+    const segna = ()=>{ const r = flusso.ritmo; menu.querySelectorAll("[data-vel]").forEach(b=>{ b.classList.toggle("primary", b.dataset.vel===r); }); btn.title = "Velocità di generazione missioni: " + (NOMI[r]||r); };
+    menu.querySelectorAll("[data-vel]").forEach(b=>{ b.onclick = e=>{ e.stopPropagation(); if(RITMI[b.dataset.vel]){ flusso.ritmo = b.dataset.vel; programmaFlusso(); } segna(); menu.hidden = true; }; });
+    btn.onclick = e=>{ e.stopPropagation(); segna(); menu.hidden = !menu.hidden; };
+    document.addEventListener("click", ()=>{ menu.hidden = true; });
+    segna();
+  }
  function meteoUpdate(){
    const el=$("wetter");
     if(el) el.textContent=`${meteo.cond}, ${Math.round(meteo.temp)} °C ${METEO_EMOJI[meteo.cond]||""}`;
@@ -4778,17 +5002,68 @@ function stormTick(dtGameMin){
     if(!ST.perMezzo[cod]) ST.perMezzo[cod] = {invii:0, arrN:0, arrSomma:0, servMin:0};
     return ST.perMezzo[cod];
   }
+  // TOTALI BROWSER (persistenti, mai azzerati dal reset: il reset apre un nuovo turno,
+  // i totali restano). Chiavi stabili: missioni chiuse, trasporti, tempi medi, rianimazioni, mezzi.
+  const BT_KEY = "coeubtot-v1";
+  let BT = null;
+  function btInit(){
+    BT = {missioni:0, conTrasporto:0, emergenza:0, gameMin:0,
+      rianimazioni:0, rianimOk:0, smaltN:0, smaltSomma:0, rispN:0, rispSomma:0, mezzi:{}};
+  }
+  function btMezzo(cod){
+    if(!BT.mezzi[cod]) BT.mezzi[cod] = {missioni:0, servMin:0, km:0};
+    return BT.mezzi[cod];
+  }
+  function btSave(){
+    if(!BT) return false;
+    try{ localStorage.setItem(BT_KEY, JSON.stringify(BT)); return true; }
+    catch(_){ return false; }
+  }
+  function btLoad(){
+    btInit();
+    try{
+      const raw = localStorage.getItem(BT_KEY);
+      if(!raw) return false;
+      const d = JSON.parse(raw);
+      if(!d || typeof d.missioni!=="number") return false;
+      for(const k of ["missioni","conTrasporto","emergenza","gameMin","rianimazioni","rianimOk",
+        "smaltN","smaltSomma","rispN","rispSomma"]) if(typeof d[k]==="number") BT[k]=d[k];
+      if(d.mezzi && typeof d.mezzi==="object") BT.mezzi = d.mezzi;
+      return true;
+    }catch(_){ btInit(); return false; }
+  }
+  // ---------- MEZZI OCCUPATI DAL CLOUD (il cloud se li gestisce da solo) ----------
+  // Codici impegnati dalle missioni cloud (origine=ia, gestita_da=ia, attive/in corso):
+  // i mezzi locali corrispondenti si nascondono finché la missione cloud è attiva,
+  // poi tornano disponibili da soli al chiudersi della missione (sync in COEULIVE.tick).
+  // Mai nascosto un mezzo già impegnato in una missione locale (stato != disponibile).
+  let cloudBusy = {};
+  function mezzoLibero(m){ return m && m.stato === "disponibile" && !cloudBusy[m.codice]; }
+  function setMezziCloudOccupati(arr){
+    const nq = {};
+    if(Array.isArray(arr)) for(const c of arr) if(typeof c === "string" && c) nq[c] = 1;
+    const a = Object.keys(cloudBusy).sort().join("|"), b = Object.keys(nq).sort().join("|");
+    if(a === b) return false;
+    cloudBusy = nq;
+    try{ renderListe(); }catch(_){}
+    try{ refreshMarkers(); }catch(_){}
+    try{ updateStats(); }catch(_){}
+    return true;
+  }
+  function mezziCloudOccupati(){ return Object.keys(cloudBusy); }
   // orologio cumulativo, giorno di gioco, tempo in servizio mezzi, autosave (dal tick)
   function statTick(dtG){
     statClock += dtG; statGameMin += dtG;
+    if(BT) BT.gameMin += dtG;
     // wrap mezzanotte = nuovo giorno (salto >12h: i cambi ora manuali non contano)
     if(clockMin < statPrevClock && (statPrevClock-clockMin) > 12*60) statDay++;
     statPrevClock = clockMin;
     for(const m of mezzi){
       if(m.stato!=="disponibile" && m.stato!=="fuori_servizio") statMezzo(m.codice).servMin += dtG;
+      if(BT && m.stato!=="disponibile" && m.stato!=="fuori_servizio") btMezzo(m.codice).servMin += dtG;
     }
     const ora = performance.now();
-    if(ora - statSaveT > 30000){ statSaveT = ora; try{ statsSave(); }catch(_){} }
+    if(ora - statSaveT > 30000){ statSaveT = ora; try{ statsSave(); }catch(_){} try{ btSave(); }catch(_){} }
   }
   // diario chiamata pubblicata (una riga per callId: mai duplicati)
   function statCall(call){
@@ -4806,6 +5081,7 @@ function stormTick(dtGameMin){
     const te = ST.tipi[tk] || (ST.tipi[tk]={tipo:call.tipoNome, vvf:!!call.vvf, calls:0, chiuse:0});
     te.calls++;
     try{ if(window.COEUGLOB) COEUGLOB.bumpMissione(call.callId); }catch(_){} // statistiche globali: missione generata
+    try{ statSaveSoon(); }catch(_){}
   }
   function statEsito(callId, esito){
     if(!ST) return;
@@ -4813,6 +5089,7 @@ function stormTick(dtGameMin){
     if(e) e.esito = esito;
     if(esito==="rifiutata") ST.tot.rifiutate++;
     if(esito==="accettata") ST.tot.accettate++;
+    try{ statSaveSoon(); }catch(_){}
   }
   // avvio missione (dalla chiamata accettata: attesa risposta e attesa invio)
   function statAccetta(call, iv){
@@ -4826,11 +5103,14 @@ function stormTick(dtGameMin){
       tInvio:(call._s0!=null)?Math.max(0,statClock-call._s0):null});
     if(ST.missions.length>STAT_CAP.missions) ST.missions = ST.missions.slice(-STAT_CAP.missions);
     try{ if(window.COEUGLOB) COEUGLOB.bumpCodice(iv.id, iv.prio||0); }catch(_){} // statistiche globali: intervento per codice
+    try{ statSaveSoon(); }catch(_){}
   }
   function statAssegna(mz){
     if(!ST || !mz) return;
     statMezzo(mz.codice).invii++;
+    if(BT) btMezzo(mz.codice).missioni++;
     mz._statD0 = statClock; // partenza per il tempo di arrivo
+    try{ statSaveSoon(); }catch(_){}
   }
   function statArrivo(iv, mz){
     if(!ST || !iv || !mz) return;
@@ -4838,6 +5118,7 @@ function stormTick(dtGameMin){
     ST.arrivi.push({cod:mz.codice, iv:iv.id, s:statClock, corpo:mz.corpo, leg:Math.round(leg*10)/10});
     if(ST.arrivi.length>STAT_CAP.arrivi) ST.arrivi = ST.arrivi.slice(-STAT_CAP.arrivi);
     const pm = statMezzo(mz.codice); pm.arrN++; pm.arrSomma += leg;
+    try{ statSaveSoon(); }catch(_){}
   }
   // mezzo staccato dalla missione (manuale o automatico) con eventuali feriti in sospeso
   function statStacco(mz, iv, come){
@@ -4845,6 +5126,7 @@ function stormTick(dtGameMin){
     ST.stacchi.push({cod:mz.codice, iv:iv?iv.id:mz.interventoId, s:statClock, day:statDay,
       come:come||"auto", pending:iv?pazientiInSospeso(iv):null});
     if(ST.stacchi.length>STAT_CAP.stacchi) ST.stacchi = ST.stacchi.slice(-STAT_CAP.stacchi);
+    try{ statSaveSoon(); }catch(_){}
   }
   // enti coinvolti davvero: collegati ora + diario supporti (niente duplicati)
   function entiCoinvolti(iv){
@@ -4870,17 +5152,36 @@ function stormTick(dtGameMin){
     }
     const m0 = ST.missions.find(m=>m.id===iv.id);
     const s0 = (m0&&m0.s0!=null)?m0.s0:(iv._s0!=null?iv._s0:statClock);
+    const durC = Math.max(0,statClock-s0);
     ST.chiuse.push({id:iv.id, day:statDay, tipo:iv.tipoNome, vvf:!!iv.vvf,
       cong:en.cong, h118:en.h118, hvvf:en.hvvf,
       prio:iv.prio||0, prov:iv.prov||"?", comune:iv.comune||"?",
       nPaz:(iv.pazienti||[]).length, cons:cons, dec:dec, intr:intr, lib:lib,
-      s0:s0, s1:statClock, dur:Math.max(0,statClock-s0), come:come||"auto"});
+      s0:s0, s1:statClock, dur:durC, come:come||"auto"});
+    if(BT){
+      BT.missioni++;
+      if(cons>0) BT.conTrasporto++; else BT.emergenza++;
+      BT.smaltN++; BT.smaltSomma += durC;
+      let pArr = null;
+      for(const a of ST.arrivi){ if(a.iv===iv.id && (pArr==null || a.s<pArr)) pArr = a.s; }
+      if(pArr!=null){ BT.rispN++; BT.rispSomma += Math.max(0, pArr-s0); }
+      for(let k=0;k<(iv.pazienti||[]).length;k++){
+        if(iv.pazienti[k]==null) continue;
+        const pr = (iv.profili||[])[k];
+        if(pr && (/RCP/.test(pr.q||"") || pr.v==="RCP in corso")){
+          BT.rianimazioni++;
+          if(iv.pazConsegnati && iv.pazConsegnati[k]) BT.rianimOk++;
+        }
+      }
+      try{ btSave(); }catch(_){}
+    }
     if(ST.chiuse.length>STAT_CAP.chiuse) ST.chiuse = ST.chiuse.slice(-STAT_CAP.chiuse);
     ST.tot.chiuse++; if(dec>0) ST.tot.fallite++;
     const g = ST.giorni[statDay] || (ST.giorni[statDay]={calls:0, chiuse:0});
     g.chiuse++;
     const tk = iv.tipoNome+"|"+(iv.vvf?1:0);
     if(ST.tipi[tk]) ST.tipi[tk].chiuse++;
+    try{ statSaveSoon(); }catch(_){}
   }
   // persistenza reload (localStorage; niente kv-plugin nel progetto): id inclusi
   // per non riusare gli stessi id dopo il reload (niente collisioni col diario)
@@ -4918,6 +5219,16 @@ function stormTick(dtGameMin){
   function statsReset(){
     statClock=0; statDay=1; statGameMin=0; statPrevClock=8*60; statInit();
     try{ localStorage.removeItem(STAT_KEY); }catch(_){}
+  }
+  // salvataggio throttled (max 1 ogni 2s): chiamato a ogni evento del diario +
+  // pagehide/visibilitychange nel boot, così chiudere il browser non perde nulla
+  let statSaveT2 = 0;
+  function statSaveSoon(){
+    const n = Date.now();
+    if(n - statSaveT2 < 2000) return;
+    statSaveT2 = n;
+    try{ statsSave(); }catch(_){}
+    try{ btSave(); }catch(_){}
   }
   // --- formattazione snapshot ---
   function stFmtDur(min){ if(min==null||!isFinite(min)) return "N/D"; min=Math.max(0,Math.round(min)); const h=Math.floor(min/60); return h>0?(h+"h"+String(min%60).padStart(2,"0")+"m"):(min+"m"); }
@@ -5258,7 +5569,7 @@ function stormTick(dtGameMin){
 
   // icone sedi fisse: casetta verde (118) e casetta rossa (VVF), senza stati
   function sedeHaMezzi(nome, isVVF){
-    return mezzi.some(m=>m.stato==="disponibile"&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
+    return mezzi.some(m=>m.stato==="disponibile"&&!cloudBusy[m.codice]&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
   }
   const HOUSE_SVG = c => `<svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2 L2 12 h3 v9 h6 v-6 h2 v6 h6 v-9 h3 z" fill="${c}" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
   function sedeIcon(nome, isVVF){
@@ -5270,7 +5581,7 @@ function stormTick(dtGameMin){
 
   // tooltip sede: nome + mezzi presenti in sede in questo momento (solo disponibili)
   function sedeTooltipHTML(nome, isVVF){
-    const inSede = mezzi.filter(m=>m.stato==="disponibile"&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
+    const inSede = mezzi.filter(m=>m.stato==="disponibile"&&!cloudBusy[m.codice]&&m.sede===nome&&((m.corpo==="VVF")===isVVF));
     let h = `<span style="color:#e8720c;text-decoration:underline"><b>${nome}</b></span>`;
     if(!inSede.length) h += `<br><span class="small">nessun mezzo in sede</span>`;
     else for(const m of inSede.slice(0,12))
@@ -5412,6 +5723,7 @@ function stormTick(dtGameMin){
       const cnsasAttivi = mezzi.filter(m=>m.tipo==="CNSAS" && m.interventoId!=null);
       const pmaAttivi = mezzi.filter(m=>m.tipo==="PMA" && m.interventoId!=null);
       for(const mz of [...mezzi118, ...vvfAttivi, ...cnsasAttivi, ...pmaAttivi]){
+        if(cloudBusy[mz.codice] && mz.stato==="disponibile") continue; // occupato dal cloud: nascosto
         const d=document.createElement("div");
         d.className="mzCard "+mz.stato + (mz.codice===selMz?" selMz":"");
         const _mc = mz.tipo==="CNSAS" ? "#e6a100" : mz.tipo==="PMA" ? "#0e7c86" : (mz.cat==="MSI_MSA" ? "#d00000" : ((mz.cat==="VVF"||mz.corpo==="VVF") ? "#555" : ""));
@@ -5421,8 +5733,9 @@ function stormTick(dtGameMin){
         f2.appendChild(d);
       }
       mzEl.appendChild(f2);
-      const disp = mezzi118.filter(m=>m.stato==="disponibile").length;
-      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}`;
+      const disp = mezzi118.filter(m=>mezzoLibero(m)).length;
+      const cloudN = mezzi.filter(m=>m.stato==="disponibile"&&cloudBusy[m.codice]).length;
+      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}` + (cloudN ? ` ☁️${cloudN}` : "");
     }
     if(selMz) showMzDetail(selMz);
     renderDetail();
@@ -5498,7 +5811,7 @@ function stormTick(dtGameMin){
       <div class="kv"><b>Veicoli assegnati:</b></div>
       <div id="onScene"></div>
       <div class="kv"><b>Registrazione della conversazione:</b><br>${hhmm(iv.t0)} — chiamante: “${iv.dialogo||"—"}”</div>
-      ${iv.reportFatto?`<div class="kv"><b>Situazione:</b> ${iv.emoji||""} ${iv.tipoNome||""}. ${iv.desc||""}<br>${pazientiHTML(iv)}</div>`:""}
+      ${iv.reportFatto?`<div class="kv"><b>Situazione:</b> ${iv.manTipo ? iv.manTipo : ((iv.emoji||"")+" "+(iv.tipoNome||""))}. ${iv.desc||""}${iv.chainDa?`<br>🔗 Possibile conseguenza di ${iv.chainDa}.`:""}<br>${pazientiHTML(iv)}</div>`:""}
     `;
     if($("incTimer")) $("incTimer").textContent = Math.floor(waitS/60)+"m";
     const asb=$("assistBtn"), eb=$("editBtn"), mb=$("mapBtn");
@@ -5640,7 +5953,7 @@ function stormTick(dtGameMin){
   function updateStats(){
     const aperti = interventi.filter(i=>i.stato!=="chiuso").length;
     const attesa = interventi.filter(i=>i.stato==="attesa").length;
-    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF").length;
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice]).length;
     const tot118 = mezzi.filter(m=>m.corpo!=="VVF").length;
     if($("statAperti")) $("statAperti").textContent=aperti;
     if($("statAttesa")) $("statAttesa").textContent=attesa;
@@ -5659,6 +5972,7 @@ function stormTick(dtGameMin){
   // ---------- BOOT ----------
   function boot(){
     statsLoad(); // statistiche: ripristina lo storico del reload (se c'è)
+    try{ btLoad(); }catch(_){ btInit(); } // totali browser: mai azzerati dal reset
     try{ if(window.COEUGLOB) COEUGLOB.boot(); }catch(_){} // statistiche globali: visitatore + presenza
     initMezzi();
     preloadVeh(); // grafiche PNG mezzi stile LSTSim
@@ -5673,9 +5987,15 @@ function stormTick(dtGameMin){
    aggiornaMeteoReale(); // meteo reale al boot (se fallisce, resta la simulazione)
    setInterval(()=>{ aggiornaMeteoReale(); }, 600000); // rinfresco ogni 10 minuti reali
    wireOra(); // l’orologio e un tasto con scelta manuale dell’ora
+   wireVel(); // il tasto ⏱️ con la velocità di generazione missioni
     try{ setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} },300); }catch(e){}
     try{ window.addEventListener("resize", ()=>{ try{ map.invalidateSize(); }catch(e){} }); }catch(e){}
     log("Centrale COEU SIM VA/CO/LC — inizio turno. Mezzi pronti.");
+    try{ // chiudere la scheda/browser non perde lo storico: salvo all'uscita
+      const salvaUscita = ()=>{ try{ statsSave(); }catch(_){} try{ btSave(); }catch(_){} };
+      window.addEventListener("pagehide", salvaUscita);
+      document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="hidden") salvaUscita(); });
+    }catch(_){}
     log("📞 Premi 'Nuova chiamata' per far squillare il telefono (o attiva l'Afflusso).");
     let last=performance.now();
     setInterval(()=>{
@@ -5714,11 +6034,21 @@ function stormTick(dtGameMin){
   return {
     boot, generaN, nuovaChiamata, makeChiamataTipo, accettaChiamata, rifiutaChiamata, fuocoStato, fuocoClasse,
     creaChiamataQui, debugZone, statistiche, statsCSV, statsSave, statsLoad, statsReset,
+    manLuoghi(){ return MAN_LUOGHI.slice(); },
+    manMotivi(){ return MAN_MOTIVI.slice(); },
+    manDettagli(){ return MAN_DETT.slice(); },
+    manTipoDi,
+    btStats(){ if(!BT) btInit(); return JSON.parse(JSON.stringify(BT)); },
+    btReset(){ btInit(); btSave(); },
+    nomeMezzo(cod){ const m = mezzi.find(x=>x&&x.codice===cod); return m ? (m.radio||m.codice) : cod; },
+    setMezziCloudOccupati, mezziCloudOccupati,
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     bisognoPaziente, ospedaliPerBisogno, mostraOspedale, togglePMA, piazzaPMA, rimuoviPMA, pmaStato, maxiAperta,
-    pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo,
+    pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo, isMega, tiraConteggioMega,
     switchBase, toggleVVF, supportoStato,
     get filters(){return filters;},
+    setZona(z){ if(z==="ovest"||z==="est"||z==="tutte"||z==="milano"){ zonaSel = z; const s = document.getElementById("zonaSel"); if(s) s.value = z; const b = document.getElementById("miBtn"); if(b) b.classList.toggle("active", z==="milano"); } return zonaSel; },
+    getZona(){ return zonaSel; },
     setFilter(k,v){filters[k]=v; refreshMarkers(); renderListe();},
     setSearch(s){filters.search=s; renderListe(); refreshMarkers();},
     togglePause(){paused=!paused; return paused;},
@@ -5740,7 +6070,7 @@ function stormTick(dtGameMin){
     syncFasce(){ syncFasce(); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
-    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; programmaFlusso(); statsReset(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
+    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
     listMezziCodici(){ return mezzi.map(m=>m.codice); },
     // test generazioni: debugPazienti("Incidente stradale", 8) → 8 possibili equipaggi di feriti
     debugPazienti(nome, n){
@@ -5779,7 +6109,7 @@ function stormTick(dtGameMin){
     pazientiStato(id){
       const iv = interventi.find(x=>x.id===id);
       if(!iv) return null;
-      return (iv.pazienti||[]).map((s,k)=>({uid:pazUid(iv,k), idx:k, salute:(s==null?null:Math.round(s*10)/10), st:statoPaziente(iv,k), stato:ST_PAZ[statoPaziente(iv,k)], dal:(((iv.pazS||{})[k]||{}).dal!=null?((iv.pazS||{})[k]||{}).dal:null), intr:!!((iv.profili||[])[k]&&iv.profili[k].intr), liberato:!!((iv.liberati||{})[k]), consegnato:!!(iv.pazConsegnati&&iv.pazConsegnati[k]), resp:((iv.pazMezzo&&iv.pazMezzo[k])||(iv.affidi&&iv.affidi[k])||(mezzi.find(m=>m.interventoId===id&&m.pazIdx===k&&m.trasportaPz)||{}).codice||null), mezzo:((iv.pazMezzo&&iv.pazMezzo[k])||(iv.affidi&&iv.affidi[k])||(mezzi.find(m=>m.interventoId===id&&m.pazIdx===k&&m.trasportaPz)||{}).codice||null), log:(((iv.pazS||{})[k]||{}).log||[]).slice(-12)}));
+      return (iv.pazienti||[]).map((s,k)=>({uid:pazUid(iv,k), idx:k, salute:(s==null?null:Math.round(s*10)/10), st:statoPaziente(iv,k), stato:ST_PAZ[statoPaziente(iv,k)], dal:(((iv.pazS||{})[k]||{}).dal!=null?((iv.pazS||{})[k]||{}).dal:null), q:((iv.profili||[])[k]||{}).q||null, intr:!!((iv.profili||[])[k]&&iv.profili[k].intr), liberato:!!((iv.liberati||{})[k]), consegnato:!!(iv.pazConsegnati&&iv.pazConsegnati[k]), resp:((iv.pazMezzo&&iv.pazMezzo[k])||(iv.affidi&&iv.affidi[k])||(mezzi.find(m=>m.interventoId===id&&m.pazIdx===k&&m.trasportaPz)||{}).codice||null), mezzo:((iv.pazMezzo&&iv.pazMezzo[k])||(iv.affidi&&iv.affidi[k])||(mezzi.find(m=>m.interventoId===id&&m.pazIdx===k&&m.trasportaPz)||{}).codice||null), log:(((iv.pazS||{})[k]||{}).log||[]).slice(-12)}));
     },
     interventiIds(){ return interventi.map(x=>x.id); },
     // snapshot missioni per la pagina live pubblica (solo lettura, nessuna logica di gioco)
@@ -5788,7 +6118,7 @@ function stormTick(dtGameMin){
         id: iv.id,
         midEsterno: iv.midEsterno || null,
         daIA: !!iv.daIA,
-        tipo: iv.tipoNome||"?",
+        tipo: iv.manTipo || iv.tipoNome || "?",
         indirizzo: iv.indirizzo||"",
         comune: iv.comune||"",
         prov: iv.prov||"",
@@ -5810,7 +6140,7 @@ function stormTick(dtGameMin){
           }
           // ospedale di destinazione, solo mentre ci va o è lì (mandaOspedale lo scrive in m.ospedale)
           const osp = (m.stato==="trasporto"||m.stato==="ospedale") ? (m.ospedale||"") : "";
-          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz, osp};
+          return {c:m.codice, n:nomem(m), t:m.tipo||"", cat:m.cat||"", tr:!!m.trasporto, s:m.stato||"", tpaz, osp, k:((iv.invii||{})[m.codice]||1)}; // k = n° invio in questa missione
         })
       }));
     },
@@ -5843,6 +6173,7 @@ function stormTick(dtGameMin){
         indirizzo: r.localita||"", comune: r.comune||"?", prov: r.provincia||"?",
         stato: (r.stato==="in_corso") ? "sul_posto" : "attesa",
         mezziIds: [],
+        invii: {}, // n° invio per mezzo (storico dal cloud se presente)
         richiesti: [],
         durata: 0,
         tempoSulPosto: (r.stato==="in_corso") ? passatoMin : 0,
@@ -5883,6 +6214,7 @@ function stormTick(dtGameMin){
         if(mz.trasportaPz || mz.pazIdx!=null || mz.affido!=null) continue;
         if(!["disponibile","viaggio","rientro","sul_posto"].includes(mz.stato)) continue;
         if(!assegnaMezzo(mz.codice, iv.id, true)) continue;
+        if(vm && vm.k>1) iv.invii[mz.codice]=Math.max(iv.invii[mz.codice]||0, vm.k); // mantiene il n° invio dallo storico cloud
         const jx = (iv.lat || 0) + (Math.random()-0.5)*0.002, jy = (iv.lng || 0) + (Math.random()-0.5)*0.002;
         mz.lat = jx; mz.lng = jy;
         if(st==="sul_posto"){ mz.stato="sul_posto"; mz.targetLat=jx; mz.targetLng=jy; }
@@ -5983,6 +6315,11 @@ function stormTick(dtGameMin){
       }
       return out;
     },
+    // catene di eventi (per i test): pianifica figli, elabora, stato, mappa
+    catenaPianifica(call){ return programmaCatena(call); },
+    catenaElabora(forza){ elaboraCatene(!!forza); return cateneInAttesa.length; },
+    cateneAttese(){ return cateneInAttesa.map(p=>({tipo:p.tipoNome, comune:p.comune, entro:p.entroMin, da:p.parentTipo})); },
+    catenaFiglioDi(nome){ const f = catenaFiglio(nome); return f ? f.nome : null; },
     psEliLista(){ return (D().OSPEDALI||[]).filter(o=>o.eli).map(o=>o.nome); },
     psEli(lat, lng){ const o = nearestOspedale(lat, lng, true); return o ? {nome:o.nome, km:Math.round(haversineKm(lat,lng,o.lat,o.lng)*10)/10} : null; },
     // stato di un mezzo (per i test): stato + destinazione + intervento
