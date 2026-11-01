@@ -65933,14 +65933,17 @@ window.COEUSIM = (() => {
     return 1.0;
   }
   // --- MEDICALIZZATE PIÙ SCATTANTI: MSA/automediche dirette sull'intervento (+25%)
-  function medMult(mz){
-    return (mz && mz.stato==="viaggio" && (mz.tipo==="MSA"||mz.tipo==="AUTOMEDICA")) ? 1.25 : 1;
-  }
+ function medMult(mz){
+   return (mz && mz.stato==="viaggio" && (mz.tipo==="MSA"||mz.tipo==="AUTOMEDICA")) ? 1.25 : 1;
+ }
+  // --- MEZZI PIÙ LENTI (richiesta utente): fattore globale alle velocità
+  const LENTO = 0.7; // tutti i mezzi al 70% (strada, autostrada, meteo, eli)
+  const ELI_VEL = Math.round(180*LENTO); // 126 km/h
   // velocità effettiva del mezzo in km/h (base × bonus medicalizzata; il boostMoto
   // scala col tempo di gioco e non cambia i km/h): per scheda/test
   function velEff(mz){
     if(!mz) return null;
-    const base = isEli(mz) ? 180 : ((METEO_VEL[meteo.cond]!=null ? METEO_VEL[meteo.cond] : (mz.velKmh||50)));
+    const base = isEli(mz) ? ELI_VEL : ((METEO_VEL[meteo.cond]!=null ? Math.round(METEO_VEL[meteo.cond]*LENTO) : (mz.velKmh||Math.round(50*LENTO))));
     return Math.round(base*medMult(mz)*10)/10;
   }
   let paused = false;
@@ -66022,21 +66025,23 @@ window.COEUSIM = (() => {
   // tutto prima di mostrarla (le bozze scartate non sono pubblicate: mai duplicati)
   let ultimeChiamate = []; // {tipo, dialogo} delle ultime chiamate pubblicate
   const STORICO_CHIAMATE = 8;
+  function tipoChiave(nome){ return String(nome||"").replace(/ \(bis\)$/, ""); } // "X (bis)" conta come "X"
   function chiamataRipetuta(b, forbidTipo){
     for(const p of ultimeChiamate){
-      if(forbidTipo && p.tipo === b.tipoNome) return true; // stesso tipo di una recente
-      if(p.tipo === b.tipoNome && p.dialogo === b.dialogo) return true; // stessa combinazione evento+dialogo
+      if(forbidTipo && tipoChiave(p.tipo) === tipoChiave(b.tipoNome)) return true; // stesso tipo di una recente
+      if(tipoChiave(p.tipo) === tipoChiave(b.tipoNome) && p.dialogo === b.dialogo) return true; // stessa combinazione evento+dialogo
     }
     return false;
   }
   function dialogoRipetuto(d){ for(const p of ultimeChiamate){ if(p.dialogo === d) return true; } return false; }
   function notaChiamata(b){
     if(!b) return;
-    ultimeChiamate.push({tipo: b.tipoNome, dialogo: b.dialogo});
+    ultimeChiamate.push({tipo: tipoChiave(b.tipoNome), dialogo: b.dialogo});
     if(ultimeChiamate.length>STORICO_CHIAMATE) ultimeChiamate.shift();
   }
-  function tipoBandito(nome){ return ultimiTipi.slice(-BAN_TIPI).indexOf(nome)>=0; }
+  function tipoBandito(nome){ return ultimiTipi.slice(-BAN_TIPI).indexOf(tipoChiave(nome))>=0; }
   function notaTipo(nome){ // registra il tipo uscito, senza doppioni consecutivi
+    nome = tipoChiave(nome);
     if(!nome || ultimiTipi[ultimiTipi.length-1]===nome) return;
     ultimiTipi.push(nome);
     if(ultimiTipi.length>STORICO_TIPI) ultimiTipi.shift();
@@ -66109,8 +66114,8 @@ window.COEUSIM = (() => {
   // tipi già aperti (in coda o in corso, non chiusi): non se ne genera uno uguale
   function tipiAperti(){
     const s = new Set();
-    for(const c of chiamate) s.add(c.tipoNome);
-    for(const iv of interventi) if(iv.stato!=="chiuso") s.add(iv.tipoNome);
+    for(const c of chiamate) s.add(tipoChiave(c.tipoNome));
+    for(const iv of interventi) if(iv.stato!=="chiuso") s.add(tipoChiave(iv.tipoNome));
     return s;
   }
   // ---------- GENERAZIONE MISSIONI DALL'ARCHIVIO (categorie pesate) ----------
@@ -68987,9 +68992,9 @@ function stormTick(dtGameMin){
   // velocita contenute: sotto il limite reale (90%; automediche 95%).
   // Autostrade (tratto OSRM >= 90): la reale.
   function lstSegVel(kmh, mz){
-    if(kmh>=90) return kmh;
-    if(mz && mz.tipo==="AUTOMEDICA") return kmh*0.95;
-    return kmh*0.9;
+    if(kmh>=90) return kmh*LENTO;
+    if(mz && mz.tipo==="AUTOMEDICA") return kmh*0.95*LENTO;
+    return kmh*0.9*LENTO;
   }
   // allinea le velocita OSRM (una per segmento annotato) ai punti della geometria:
   // ogni tratto eredita la velocita del segmento che lo contiene (LSTSim sotto i 90, reale sopra; 30-130)
@@ -69030,7 +69035,7 @@ function stormTick(dtGameMin){
     }
    mz.targetLat = lat; mz.targetLng = lng;
    setPath(mz, [[mz.lat,mz.lng],[lat,lng]]);
-    mz.velKmh = null; // in attesa del percorso reale: 50 fissi, poi la media dei tratti
+    mz.velKmh = null; // in attesa del percorso reale: 35 fissi (50×LENTO), poi la media dei tratti
     if(isEli(mz)) { refreshRoutes(); return; } // elisoccorso: niente strade, dritto per dritto
     const fromLat = mz.lat, fromLng = mz.lng;
     const stillThere = () => mz.targetLat===lat && mz.targetLng===lng &&
@@ -69040,10 +69045,10 @@ function stormTick(dtGameMin){
       const full = [[mz.lat,mz.lng], ...res.coords.slice(1)];
       const sv = alignSegVel(full, res, mz); // tratti LSTSim (autostrada = reale)
       if(sv){ let tot=0, wsum=0; for(let qi=0;qi<sv.length;qi++){ const L=haversineKm(full[qi][0],full[qi][1],full[qi+1][0],full[qi+1][1]); tot+=sv[qi]*L; wsum+=L; }
-        if(wsum>0) mz.velKmh = Math.max(30, Math.min(115, Math.round(tot/wsum))); }
+        if(wsum>0) mz.velKmh = Math.max(20, Math.min(80, Math.round(tot/wsum*LENTO))); }
       else if(res.distance>0 && res.duration>0){
         const v = (res.distance/1000)/(res.duration/3600);
-        mz.velKmh = Math.max(30, Math.min(115, Math.round(v))); // fallback: media reale
+        mz.velKmh = Math.max(20, Math.min(80, Math.round(v*LENTO))); // fallback: media reale rallentata
       }
       setPath(mz, full, sv); // velocita per tratto: base realistica, in autostrada si corre davvero
       for(const e of ospMarkers){ try{ e.marker.setTooltipContent(ospTooltipHTML(e.osp)); }catch(_){} }
@@ -69064,7 +69069,7 @@ function stormTick(dtGameMin){
       setPath(mz, [[mz.lat,mz.lng],[mz.targetLat,mz.targetLng]]);
     }
     const btO0 = mz.lat, btO1 = mz.lng; // totali browser: km percorsi in questo passo
-    const uni = isEli(mz) ? 180 : ((METEO_VEL[meteo.cond]!=null ? METEO_VEL[meteo.cond] : (mz.velKmh||50)));
+    const uni = isEli(mz) ? ELI_VEL : ((METEO_VEL[meteo.cond]!=null ? Math.round(METEO_VEL[meteo.cond]*LENTO) : (mz.velKmh||Math.round(50*LENTO))));
     const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && (meteo.cond!=="Nebbia"&&meteo.cond!=="Nebbia con brina" && !isEli(mz))) ? mz.segVel : null;
     let guard = 0;
     if(sv){
@@ -69095,7 +69100,7 @@ function stormTick(dtGameMin){
     const f=mz.segLens[mz.segIdx]>0?mz.segProg/mz.segLens[mz.segIdx]:1;
     mz.lat=a[0]+(b[0]-a[0])*f; mz.lng=a[1]+(b[1]-a[1])*f;
     if(BT){ try{ btMezzo(mz.codice).km += haversineKm(btO0,btO1,mz.lat,mz.lng); }catch(_){} }
-    if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.08) return true;
+    if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.015) return true; // arrivo solo quasi sullo spillo (15 m), mai prima
     return false;
   }
 
@@ -69621,7 +69626,7 @@ function stormTick(dtGameMin){
     if(sal!=null && sal<40 && /trauma|frattura|schiacciamento|caduta|investimento/.test(q)) return "TRAUMA";
     return "GENERICO";
   }
-  function etaMinuti(km, mz){ return km/((mz&&isEli(mz))?180:((mz&&mz.velKmh)||50))*60/boostMoto(); }
+  function etaMinuti(km, mz){ return km/((mz&&isEli(mz))?ELI_VEL:((mz&&mz.velKmh)||Math.round(50*LENTO)))*60/boostMoto(); }
   // proposte compatibili col bisogno, ordinate: reparto verificato (1 prima di "nd"),
   // poi distanza. Niente compatibili = ripiego sul PS più vicino.
   // Bellano (ps:0) non è mai proposta.
