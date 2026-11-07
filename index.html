@@ -66180,38 +66180,57 @@ window.COEUSIM = (() => {
   function plausTipo(x){
     return meteoPesoTipo(x)*oreMult(x.nome)*sensoMult(x.nome)*(METEO_STRADA_RISCHIO[meteo.cond]&&x.zona==="strada"?1.6:1)*fasciaAmbMult(x)*(x.vvf||x.pz!==1?1:PZ1_BOOST)*(TRE_VEICOLI_RE.test(x.nome||"")?TRE_VEICOLI_MULT:1)*(HWY_RE.test(x.nome||"")||x.nome==="Scontro tra camion"?HWY_MULT:1)*(MALPENSA_RE.test(x.nome||"")?MALPENSA_MULT:1);
   }
+  // fattore SOLO-meteo di un tipo (1 = neutro, 0 = escluso col meteo attuale):
+  // meteoPesoTipo del tipo × coerenza neve/estate × strade a rischio col maltempo.
+  // Niente categoria/ora/scuola/notte/fascia/boost: a parità di fattore meteo tutti
+  // i tipi hanno la stessa probabilità (richiesta utente 31 ott 2026 + filtri meteo).
+  function sensoMeteoMult(nome){
+    const temp = meteo.temp, cond = meteo.cond;
+    let m = 1;
+    if(SENSO_NEVE.test(nome)){ // neve solo col freddo (la temperatura fa da stagione)
+      if(temp>16) return 0;
+      if(temp>12) m*=0.05;
+      const grn = METEO_GRUPPO[cond]||"";
+      if(grn==="neve"||grn==="neveforte"||grn==="gelo") m*=2; // con la neve vera si scia di più
+    }
+    if(SENSO_ESTATE.test(nome) && !/cloro/i.test(nome)){ // piscina coperta col cloro: tutto l'anno
+      const gre = METEO_GRUPPO[cond]||"";
+      if(gre==="pioggia"||gre==="intensa"||gre==="gelida"||gre==="temporale"||gre==="grandine"||gre==="tromba"||gre==="neve"||gre==="neveforte") m*=0.1; // tuffi e pedalò col maltempo: quasi mai
+      if(cond==="Nebbia") m*=0.5;
+      if(cond==="Nebbia con brina"||cond==="Gelo") m*=0.3;
+      if(gre==="pioviggine") m*=0.5;
+      if(temp<5) return 0;
+      if(temp<10) m*=0.05; else if(temp<15) m*=0.3;
+    }
+    return m;
+  }
+  function meteoFattore(x){
+    return meteoPesoTipo(x)*sensoMeteoMult(x.nome)*((METEO_STRADA_RISCHIO[meteo.cond]&&x.zona==="strada")?1.6:1);
+  }
    function tipoRandom(){
-    // archivio in due livelli: categoria per pesi calibrati, scenario per plausibilita.
-    // Anti-ripetizione invariata: mai tipo gia aperto, mai ultimi 10 usciti.
+    // UNIFORME + filtri meteo: ogni tipo ha la stessa probabilità di base, pesata
+    // SOLO dal meteo (meteoFattore) — niente più pesi per categoria/ora/scuola/
+    // notte/fascia/boost. Resta solo l'anti-ripetizione: mai tipo già aperto, mai
+    // ultimi 10 usciti.
     const open = tipiAperti();
-    const arr = D().TIPI, cats = categorieMissioni();
+    const arr = D().TIPI;
+    // pesi solo-meteo calcolati una volta sola (meteo/temp non cambiano nel giro)
+    const cum = new Array(arr.length);
+    let tot = 0;
+    for(let i=0;i<arr.length;i++){ tot += meteoFattore(arr[i]); cum[i] = tot; }
+    const pesca = ()=>{
+      if(!(tot>0)) return arr[rndi(0,arr.length-1)]; // rete di sicurezza (praticamente mai)
+      let r = Math.random()*tot, lo = 0, hi = arr.length-1;
+      while(lo<hi){ const mid = (lo+hi)>>1; if(cum[mid]<r) lo = mid+1; else hi = mid; }
+      return arr[lo];
+    };
     let t = null;
     for(let k=0;k<25;k++){
-      let tot = 0;
-      const cw = new Array(cats.length);
-      for(let ci=0;ci<cats.length;ci++){
-        let n = 0;
-        const mm = cats[ci].membri;
-        for(let m=0;m<mm.length;m++){ const x = mm[m]; if(!open.has(x.nome)&&!tipoBandito(x.nome)) n++; }
-        const w = mm.length ? cats[ci].peso*(n/mm.length) : 0; // massa = peso x frazione ammissibile: le frequenze restano quelle impostate
-        cw[ci] = w; tot += w;
-      }
-      let r = Math.random()*tot, ci = cats.length-1;
-      for(let c2=0;c2<cats.length;c2++){ r -= cw[c2]; if(r<=0){ ci = c2; break; } }
-      const pool = cats[ci].membri.filter(x=>!open.has(x.nome)&&!tipoBandito(x.nome));
-      let cand;
-      if(!pool.length){ cand = arr[rndi(0,arr.length-1)]; }
-      else {
-        let pt = 0;
-        const ws = new Array(pool.length);
-        for(let p2=0;p2<pool.length;p2++){ const w = plausTipo(pool[p2]); ws[p2] = w; pt += w; }
-        let r2 = Math.random()*pt; cand = pool[pool.length-1];
-        for(let p3=0;p3<pool.length;p3++){ r2 -= ws[p3]; if(r2<=0){ cand = pool[p3]; break; } }
-      }
+      const cand = pesca();
       if(!t) t = cand; // riserva se tutti i tipi fossero aperti
       if(!open.has(cand.nome) && !tipoBandito(cand.nome)){ t = cand; break; }
     }
-    if(!t) t = arr[rndi(0,arr.length-1)]; // ultima rete di sicurezza (praticamente mai)
+    if(!t) t = pesca(); // ultima rete di sicurezza (praticamente mai)
     // priorità secondo distribuzione del tipo
     const p = prioDaTipo(t);
     return { tipo:t, prio:p };
@@ -71983,7 +72002,7 @@ function stormTick(dtGameMin){
     setMezziCloudOccupati, mezziCloudOccupati,
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     bisognoPaziente, ospedaliPerBisogno, mostraOspedale, togglePMA, piazzaPMA, rimuoviPMA, pmaStato, maxiAperta,
-    pazCat, pzvBucket, tipoRandom, categoriaMissione, categorieMissioni, notaTipo, isMega, tiraConteggioMega,
+    pazCat, pzvBucket, tipoRandom, meteoFattore, categoriaMissione, categorieMissioni, notaTipo, isMega, tiraConteggioMega,
     switchBase, toggleVVF, supportoStato,
     get filters(){return filters;},
     setZona(z){ if(z==="ovest"||z==="est"||z==="tutte"||z==="milano"){ zonaSel = z; const s = document.getElementById("zonaSel"); if(s) s.value = z; const b = document.getElementById("miBtn"); if(b) b.classList.toggle("active", z==="milano"); } return zonaSel; },
@@ -72461,7 +72480,7 @@ window.COEUTOT = (() => {
       h += '<div class="small">Nessun mezzo uscito in questo browser né dal cloud IA.</div>';
     } else {
       h += '<div class="small" style="margin-bottom:4px">Medie e km solo da questo browser (il cloud non li trasmette).</div>'
-        + '<div style="max-height:38vh;overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%" cellpadding="3">'
+        + '<div data-totscroll style="max-height:38vh;overflow:auto"><table style="font-size:11px;border-collapse:collapse;width:100%" cellpadding="3">'
         + '<tr style="text-align:left"><th>veicolo</th><th>missioni</th><th>straordinario medio</th><th>chilometraggio</th><th>media km per viaggio</th></tr>'
         + righe.map(r => {
           const lm = r.loc || { missioni:0, servMin:0, km:0 };
@@ -72482,7 +72501,15 @@ window.COEUTOT = (() => {
         }).join("") + '</table></div>';
     }
     h += '<div class="small" style="margin-top:6px">🧹 Azzera azzera solo questo browser (il cloud resta).</div>';
+    // il refresh ogni 2s ricostruisce il DOM: preserva la posizione di
+    // scorrimento o il riquadro dei veicoli tornerebbe in cima da solo
+    const scroller = body.querySelector("[data-totscroll]");
+    const st = scroller ? scroller.scrollTop : 0;
+    const bst = body.scrollTop;
     body.innerHTML = h;
+    const sc2 = body.querySelector("[data-totscroll]");
+    if(sc2) sc2.scrollTop = st;
+    body.scrollTop = bst;
   }
   function open(){
     const dlg = $("totDlg");
