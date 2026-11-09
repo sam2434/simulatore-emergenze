@@ -130,6 +130,24 @@
   .intAddr{ font-size:11px; } .intMeta{ font-size:10px; color:#555; }
   .mzType{ font-size:10px; color:#555; }
   #toast{ position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#ffffe1; border:1px solid #808080; padding:8px 16px; z-index:9999; font-size:12px; box-shadow:2px 2px 6px #0008; }
+  /* doppio operatore TU+IA */
+  .opTag{ display:inline-block; font-size:10px; font-weight:bold; padding:0 5px; border:1px solid #555; border-radius:8px; margin:0 4px; vertical-align:middle; cursor:default; }
+  .opIO{ background:#dceaff; color:#0645ad; border-color:#0645ad; }
+  .opIA{ background:#ffe9c4; color:#a35a00; border-color:#a35a00; }
+  .intPinIA{ outline:2px dashed #ff8c00; outline-offset:2px; border-radius:9px; }
+  #opBadge{ display:inline-block; min-width:16px; text-align:center; font-size:10px; font-weight:bold; color:#fff; background:#d00000; border-radius:8px; padding:0 4px; margin-left:2px; }
+  #opBody{ overflow:auto; max-height:66vh; padding:2px; font-size:12px; }
+  #opBody h4{ margin:8px 0 3px; font-size:12px; border-bottom:1px solid #bbb; padding-bottom:2px; }
+  #opBody h4:first-child{ margin-top:0; }
+  .opRow{ display:flex; gap:6px; align-items:center; padding:2px 4px; border-bottom:1px solid #eee; background:#fff; }
+  .opRow:nth-child(even){ background:#f7f7f7; }
+  .opBar{ height:10px; background:#e0e0e0; border:1px solid #999; position:relative; flex:1; min-width:60px; }
+  .opBarFill{ position:absolute; left:0; top:0; bottom:0; background:#e6a100; }
+  #opChat{ max-height:170px; overflow:auto; background:#fff; border:1px solid #999; padding:4px 6px; margin:4px 0; font-size:12px; }
+  #opChat .ia{ color:#7a4a00; } #opChat .tu{ color:#0645ad; } #opChat .sys{ color:#555; font-style:italic; }
+  .opStat{ border-collapse:collapse; width:100%; font-size:11px; background:#fff; }
+  .opStat th,.opStat td{ border:1px solid #bbb; padding:2px 6px; text-align:right; }
+  .opStat th:first-child,.opStat td:first-child{ text-align:left; }
   .small{ font-size:11px; color:#333; }
   /* marker */
   .intPin{ width:26px; height:32px; display:flex; align-items:center; justify-content:center; filter:drop-shadow(1px 2px 2px #0009); }
@@ -162,6 +180,7 @@
     <select id="zonaSel" class="lstBtn" title="Dove nascono le nuove missioni" onchange="COEUSIM.setZona(this.value)"><option value="tutte">🗺️ Tutte le zone</option><option value="ovest">🗺️ Varese·Como·Lecco·Monza</option><option value="milano">🏙️ Solo Milano</option><option value="est">🗺️ Bergamo·Brescia·Sondrio</option></select>
     <button class="lstBtn small" id="miBtn" onclick="COEUSIM.setZona(COEUSIM.getZona()==='milano'?'tutte':'milano')" title="Solo chiamate in provincia di Milano, con più peso alla città">🏙️ Milano</button>
     <button class="lstBtn" onclick="COEUTOT.open()">🖥️ Totali browser</button>
+    <button class="lstBtn" onclick="COEUDOP.open()">👥 Doppio operatore<span id="opBadge" hidden></span></button>
     <button class="lstBtn" onclick="COEUGLOB.open()">📊 Statistiche globali</button>
     <span id="liveSyncBox" class="small" title="Sincronizzazione pagina live pubblica (Supabase)">⚪ live</span>
     <button class="lstBtn small" id="liveLoginBtn" title="Login operatore: abilita l'invio delle missioni alla pagina live pubblica">🔑 Live: off</button>
@@ -222,6 +241,13 @@
   <div style="margin-top:6px; text-align:right; display:flex; gap:6px; justify-content:flex-end;"><button class="lstBtn" onclick="COEUSTATS.csv()">📥 Esporta CSV</button><button class="lstBtn primary" onclick="COEUSTATS.close()">Chiudi</button></div>
 </dialog>
 
+<dialog id="opDlg" style="max-width:680px;">
+  <div class="lstHead">👥 Doppio operatore — TU + collega IA <span class="right"><button class="lstBtn small" onclick="COEUDOP.close()">✖</button></span></div>
+  <div id="opBody"><div class="small">Caricamento…</div></div>
+  <div class="small" style="margin:4px 0">L'IA gestisce le sue missioni in autonomia con gli stessi mezzi e le stesse regole. Tu gestisci le tue: collaborate via chat e richieste.</div>
+  <div style="margin-top:6px; text-align:right;"><button class="lstBtn primary" onclick="COEUDOP.close()">Chiudi</button></div>
+</dialog>
+
 <dialog id="totDlg" style="max-width:640px;">
   <div class="lstHead">🖥️ Totali browser <span class="right"><button class="lstBtn small" onclick="COEUTOT.close()">✖</button></span></div>
   <div id="totBody"></div>
@@ -258,11 +284,12 @@
   <div style="font-size:12px; line-height:1.6">
     1. Premi <b>📞 Nuova chiamata</b> (quante volte vuoi, senza limiti di coda): squilla il telefono nel pannello Chiamate — si vede solo il luogo, NON il motivo.<br>
     2. Quando squilla premi <b>Rispondi</b>: il richiedente racconta. Con <b>🗺️ Mostra su mappa</b> la centri subito sulla mappa. Poi premi <b>📋 Crea nuovo incarico</b>: spunti i mezzi da inviare (i più vicini, 118 e/o VVF — anche mezzi già impegnati o in rientro: vengono <b>dirottati subito</b>, ripartono da dove sono senza attesa) e scegli il codice: 🔴🟡🟢⚪ (per i VVF puoi anche tenere <b>🚒 senza codice</b>). Con <b>✍️ Inserimento manuale</b> puoi classificare tu la missione al posto del richiedente: scegli <b>📍 Luogo</b>, <b>📌 Motivo</b> e <b>📝 Dettaglio</b> (tutto, o niente — MEDICO ACUTO senza dettaglio) e sul live comparirà così (es. "STRADA - INCIDENTE STRADALE: AUTO/AUTO"). <b>✅ Crea intervento</b> fa partire tutto e chiude il blocco. Se è un falso allarme puoi premere <b>✖ Rifiuta</b> anche dopo aver risposto. Chi chiama non sempre dice la verità (c'è chi minimizza: "sarà la digestione"...), arrivano anche <b>trasporti programmati</b> (dialisi, visite, terapie) e chiamate dal <b>112/113</b>. Le <b>maxiemergenze</b> possono generarne altre vicine (<b>🔗 collegata</b> in radio e in Situazione: stessa zona, tipo coerente).<br>
-    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). In scheda vedi capacità e orario di arrivo di ogni mezzo. I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano — dal dettaglio del mezzo (i VVF attivati compaiono nella lista Stato/Mezzi col 🚒, i CNSAS attivati col ⛰️ e i PMA col ⛺); un mezzo che sta rientrando dal PS può anche <b>tornare sulla stessa scena</b>. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); dall'invio l'equipaggio impiega <b>30''–1' di gioco a uscire dalla sede</b> (30'' sul rosso, 1' sul bianco, in base alla gravità) e le <b>medicalizzate</b> (MSA/automediche) dirette sull'intervento sono <b>più veloci</b> (+25%); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (<b>un mezzo = un paziente</b>: ogni ambulanza segue un solo ferito (a fine scena i mezzi caricano prima il piu grave tra quelli liberi, eli compreso), MSA/MSI solo quello per cui è stato richiesto con salute sotto il 35% (regola universale: sotto il 35% la scena aspetta l'arrivo effettivo del medicalizzato e intanto la salute scende molto lentamente finché non arriva — a 0 il paziente decede e non serve più il trasporto; il mezzo avanzato prende in carico il paziente più critico tra quelli in attesa e gli altri restano in coda finché non tocca a loro, senza interrompere chi è già assistito) — segnato <b style="color:#d40000">MSA</b> in rosso solo sotto il 35% (sopra il 35% la scritta sparisce; sparisce anche quando un medicalizzato lo prende in carico); MSA ed elisoccorso sono più veloci, l'automedica aiuta; sotto il 35% la salute risale più lentamente, ×0,4) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e parte da solo per il <b>PS più vicino</b>; <b>1 paziente = 1 ambulanza, senza eccezioni</b>: ogni paziente (P1, P2…) è preso in carico da un solo mezzo e il mezzo che lo carica risulta <b>occupato</b> (non dirottabile, non rientrabile) finché non lo consegna in PS e rientra in servizio; con più feriti servono più ambulanze (una diversa per paziente, i feriti senza mezzo restano <b>⏳ in attesa di ambulanza</b>: mai eliminati, mai duplicati, mai due sullo stesso mezzo) e la missione non si chiude finché l'ultimo non è consegnato; chi è pronto dopo, senza pazienti liberi, <b>rientra in sede</b> invece di andare in ospedale a vuoto. Le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare — aspetta l'arrivo effettivo, senza limiti di tempo (se non resta più nessun paziente sotto il 35% si procede con l'equipaggio sul posto). Le richieste di rinforzi (ambulanza, VVF) si sentono solo via <b>Radio</b>, col nome del mezzo che le chiede (nella scheda intervento non si vedono); il mezzo medicalizzato si chiede una sola volta via radio, per il primo paziente sotto il 35%. All'arrivo l'equipaggio fa <b>sopralluogo</b> e solo dopo <b>riferisce via radio</b> cosa ha trovato e quanti sono i feriti <b>finora individuati</b>; il numero è <b>dinamico</b>: se il chiamante non sapeva dire si parte da <b>sconosciuto</b> e le squadre <b>scoprono gli altri via radio</b> (ognuno con la sua scheda, la sua ambulanza e le statistiche aggiornate — mai duplicati, mai sparizioni) oppure <b>confermano che non ce ne sono altri</b>; sulle missioni <b>🚒 VVF il numero di feriti dipende dalla tipologia</b> (crollo di palazzina 0–6, incendio in casa 0–3, edificio pubblico fino a 8, stradale 0–3, moto/incastrato/soccorso a persona di solito 1 solo, intervento tecnico 0) e se i VVF trovano feriti <b>chiedono subito l'ambulanza</b> (e un mezzo medicalizzato se c'è un critico sotto il 30%); i <b>🚒 VVF restano sul posto finché non decidi tu di farli rientrare</b> (↩️ Rientra nella scheda del mezzo, o Chiudi intervento: la missione resta aperta finché sono lì) con aggiornamenti radio sull'evoluzione (se un ferito resta senza ambulanza, la radio lo sollecita finché non arriva un mezzo — un solo sollecito alla volta, senza duplicati). La Radio mostra solo gli arrivi sul posto, i trasporti in ospedale (col numero di stato accanto al nome del mezzo: 4 sul posto, 7 in trasporto) e le richieste di un mezzo medicalizzato — arrivi dei rinforzi, rientri completati, meteo e orologio restano solo in scheda e mappa, senza messaggi. Se l'intervento è dei VVF ma ci sono feriti, la scena chiede subito un'ambulanza (missione congiunta: i VVF chiudono la loro parte e il 118 prosegue, o viceversa) e finché i feriti non sono in PS la missione non si chiude (né da sola né col tasto Chiudi). Ogni missione genera tanti pazienti quante sono le persone coinvolte nell'evento (solo maxiemergenze e MANV ne hanno di più), ognuno col suo profilo (età, sesso, coscienza, quadro clinico, vitali); gli incastrati (🔒) fanno chiedere i VVF per l'estricazione. Ogni evento ha anche una <b>variante di gravità</b> (lieve/media/grave/critica, più probabile grave se il codice vero è rosso): sposta solo la salute dei feriti, mai il loro numero, e le risorse seguono da sole (più pazienti → più ambulanze, salute sotto il 30% → MSA). Ogni paziente ha il suo <b>triage colorato</b> (🔴🟡🟢⚪ dalla salute) e i più gravi stanno in cima alla lista.<br>
+    3. <b>Spunta i mezzi</b> (ordinati per distanza) e premi <b>🚀 Invia selezionati</b>. Apri <b>🚒 Vigili del Fuoco</b> per scegliere APS/AS/AB dal distaccamento più vicino (i VVF non fanno trasporti in PS). In scheda vedi capacità e orario di arrivo di ogni mezzo. I mezzi <b>già impegnati</b> si possono <b>dirottare</b>: ripartono da dove si trovano — dal dettaglio del mezzo (i VVF attivati compaiono nella lista Stato/Mezzi col 🚒, i CNSAS attivati col ⛰️ e i PMA col ⛺); un mezzo che sta rientrando dal PS può anche <b>tornare sulla stessa scena</b>. Il paziente viaggia solo in <b>ambulanza</b> o in <b>🚁 elisoccorso</b> (volano dritti e veloci); dall'invio l'equipaggio impiega <b>~55'' di gioco a uscire dalla sede</b> (110'' l'elisoccorso, +/-20% come su LSTSim) e le <b>automediche</b> (NEF) sono <b>più veloci del 20%</b> come su LSTSim (MSA come le ambulanze); sul posto l'equipaggio <b>stabilizza i feriti finché la salute arriva al 100%</b> (<b>un mezzo = un paziente</b>: ogni ambulanza segue un solo ferito (a fine scena i mezzi caricano prima il piu grave tra quelli liberi, eli compreso), MSA/MSI solo quello per cui è stato richiesto con salute sotto il 35% (regola universale: sotto il 35% la scena aspetta l'arrivo effettivo del medicalizzato e intanto la salute scende molto lentamente finché non arriva — a 0 il paziente decede e non serve più il trasporto; il mezzo avanzato prende in carico il paziente più critico tra quelli in attesa e gli altri restano in coda finché non tocca a loro, senza interrompere chi è già assistito) — segnato <b style="color:#d40000">MSA</b> in rosso solo sotto il 35% (sopra il 35% la scritta sparisce; sparisce anche quando un medicalizzato lo prende in carico); MSA ed elisoccorso sono più veloci, l'automedica aiuta; sotto il 35% la salute risale più lentamente, ×0,4) e solo allora il mezzo diventa <b>PRONTO</b> (paziente a bordo) e parte da solo per il <b>PS più vicino</b>; <b>1 paziente = 1 ambulanza, senza eccezioni</b>: ogni paziente (P1, P2…) è preso in carico da un solo mezzo e il mezzo che lo carica risulta <b>occupato</b> (non dirottabile, non rientrabile) finché non lo consegna in PS e rientra in servizio; con più feriti servono più ambulanze (una diversa per paziente, i feriti senza mezzo restano <b>⏳ in attesa di ambulanza</b>: mai eliminati, mai duplicati, mai due sullo stesso mezzo) e la missione non si chiude finché l'ultimo non è consegnato; chi è pronto dopo, senza pazienti liberi, <b>rientra in sede</b> invece di andare in ospedale a vuoto. Le <b>automediche MSA1/MSA2</b> nei casi gravi seguono l'ambulanza in PS. Se la scena <b>chiede un MSA</b>, l'equipaggio lo <b>aspetta</b> (⏳) prima di stabilizzare e caricare — aspetta l'arrivo effettivo, senza limiti di tempo (se non resta più nessun paziente sotto il 35% si procede con l'equipaggio sul posto). Le richieste di rinforzi (ambulanza, VVF) si sentono solo via <b>Radio</b>, col nome del mezzo che le chiede (nella scheda intervento non si vedono); il mezzo medicalizzato si chiede una sola volta via radio, per il primo paziente sotto il 35%. All'arrivo l'equipaggio fa <b>sopralluogo</b> e solo dopo <b>riferisce via radio</b> cosa ha trovato e quanti sono i feriti <b>finora individuati</b>; il numero è <b>dinamico</b>: se il chiamante non sapeva dire si parte da <b>sconosciuto</b> e le squadre <b>scoprono gli altri via radio</b> (ognuno con la sua scheda, la sua ambulanza e le statistiche aggiornate — mai duplicati, mai sparizioni) oppure <b>confermano che non ce ne sono altri</b>; sulle missioni <b>🚒 VVF il numero di feriti dipende dalla tipologia</b> (crollo di palazzina 0–6, incendio in casa 0–3, edificio pubblico fino a 8, stradale 0–3, moto/incastrato/soccorso a persona di solito 1 solo, intervento tecnico 0) e se i VVF trovano feriti <b>chiedono subito l'ambulanza</b> (e un mezzo medicalizzato se c'è un critico sotto il 30%); i <b>🚒 VVF restano sul posto finché non decidi tu di farli rientrare</b> (↩️ Rientra nella scheda del mezzo, o Chiudi intervento: la missione resta aperta finché sono lì) con aggiornamenti radio sull'evoluzione (se un ferito resta senza ambulanza, la radio lo sollecita finché non arriva un mezzo — un solo sollecito alla volta, senza duplicati). La Radio mostra solo gli arrivi sul posto, i trasporti in ospedale (col numero di stato accanto al nome del mezzo: 4 sul posto, 7 in trasporto) e le richieste di un mezzo medicalizzato — arrivi dei rinforzi, rientri completati, meteo e orologio restano solo in scheda e mappa, senza messaggi. Se l'intervento è dei VVF ma ci sono feriti, la scena chiede subito un'ambulanza (missione congiunta: i VVF chiudono la loro parte e il 118 prosegue, o viceversa) e finché i feriti non sono in PS la missione non si chiude (né da sola né col tasto Chiudi). Ogni missione genera tanti pazienti quante sono le persone coinvolte nell'evento (solo maxiemergenze e MANV ne hanno di più), ognuno col suo profilo (età, sesso, coscienza, quadro clinico, vitali); gli incastrati (🔒) fanno chiedere i VVF per l'estricazione. Ogni evento ha anche una <b>variante di gravità</b> (lieve/media/grave/critica, più probabile grave se il codice vero è rosso): sposta solo la salute dei feriti, mai il loro numero, e le risorse seguono da sole (più pazienti → più ambulanze, salute sotto il 30% → MSA). Ogni paziente ha il suo <b>triage colorato</b> (🔴🟡🟢⚪ dalla salute) e i più gravi stanno in cima alla lista.<br>
     4. Segui tutto in <b>Radio</b> e sulla <b>Mappa</b> (<b>Satellite</b> per vista aerea, in basso a sinistra la scala e sotto il mouse le coordinate). Premi sull'<b>orologio</b> in alto per cambiare l'ora di gioco (presets o ora esatta: cambiano missioni, fasce e pesi notte/giorno). <b>Tasto destro</b> sulla mappa = crea una chiamata in quel punto, con la via reale del punto cliccato; <b>click su un mezzo</b> = i suoi dettagli (stato FMS 1-8: da libero in sede puoi metterlo <b>🔧 6 fuori servizio</b> e rimetterlo <b>✅ 1 in servizio</b>; i mezzi <b>a turno</b>, come le NEF di Magenta ⏰ 8:00-20:00 / 20:00-8:00, lavorano solo nella loro fascia oraria ed escono dal servizio da soli). Con <b>Afflusso ON</b> le chiamate arrivano da sole con un <b>ritmo vivo</b>: momenti di calma si alternano a <b>raffiche</b> di più chiamate a pochi secondi di distanza, il passo cambia con l'<b>ora di gioco</b> (di notte quasi niente, nelle ore di punta di più) e col <b>carico della centrale</b> (satura = rallenta da solo, mai missioni ingestibili); accettare o chiudere non azzera mai il conto alla rovescia della prossima. Col tasto quadrato <b>⏱️</b> scegli il passo: <b>🐢 Con calma</b>, <b>📞 Normale</b> o <b>⚡ Veloce</b>. Il <b>meteo</b> in alto è quello <b>reale di Milano</b> (aggiornato ogni 10 minuti: guida missioni coerenti e danni in diretta) e <b>picchia davvero</b> — premi sul <b>riquadro meteo</b> per aggiornarlo subito: col <b>temporale</b> cadono alberi e si allagano sottopassaggi e garage in diretta, con la <b>pioggia</b> esondano rogge e si allaga tutto, con <b>rovesci</b> e <b>pioggia intensa</b> i danni sono più frequenti, con la <b>grandine</b> chicchi pericolosi, con la <b>tromba d'aria</b> danni gravissimi, con <b>neve</b>, <b>gelo</b> e <b>pioggia gelata</b> strade scivolose e mezzi più lenti, con la <b>nebbia</b> (anche <b>con brina</b>) visibilità quasi zero. In tutto 31 condizioni WMO, ognuna con la sua emoji. Sulla mappa, col <b>Satellite</b>, vedi <b>— tutte le strade</b> mappate (bianche, posizioni reali): gli incidenti in autostrada/tangenziale/superstrada nascono esattamente sul tratto vero le missioni ferroviarie nascono sui binari veri (stazione, galleria o passaggio a livello), i mezzi raggiungono l'accesso più vicino senza mai entrare sui binari e la circolazione viene sospesa (i binari non si disegnano sulla mappa); le 27 missioni infrastrutturali (folgorati, fughe di gas, esondazioni, dispersi sui sentieri, crolli in galleria…) nascono sul punto vero della rete (i livelli grafici non si disegnano sulla mappa); e i mezzi tengono velocità contenute (90% del limite, automediche 95%) e la velocità reale in autostrada, con spinta gameplay (più rapidi già a 1x, ancora più rapidi a 5x/10x/30x). Con <b>⏰ Fasce</b> decidi cosa esce di più per fascia oraria: missioni da <b>ambulanza</b> (numero 0,5–10: 1 rarissime, 10 molto frequenti), <b>maxiemergenze</b> (tipo grosso, codice rosso, 5–15 feriti) e <b>MANV</b> (1–8 feriti); le <b>automediche</b> restano a probabilità base.<br>
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). La Situazione con l'elenco dei pazienti (salute % colorata, scritta <b style="color:#d40000">MSA</b> in rosso di fianco alla % se richiede un medicalizzato — solo sotto il 35% (sopra la scritta sparisce), e sparisce anche quando il medicalizzato lo prende in carico — e, per ognuno, la sigla H … della destinazione quando è in trasporto o in PS) si vede sotto la registrazione quando il primo mezzo arriva sul posto (l'elenco cresce da solo se vengono scoperti altri feriti; gli incidenti con 3+ veicoli, più rari, mostrano da 0 a 6 feriti di qualsiasi gravità già da subito). Ogni paziente segue i <b>14 stati</b> (segnalato → da valutare → attesa soccorso → valutazione sanitaria → eventuale attesa liberazione/ambulanza → preso in carico → caricato → trasporto → ospedale → missione conclusa; oppure concluso sul posto, rifiuto o decesso): un solo stato alla volta, ogni passaggio con orario registrato, i terminali non si riaprono. Il lieve (≥70%) valutato può <b>✋ rifiutare il trasporto</b> (bottone nella riga). Sulla mappa lo <b>spillo è grigio solo per le missioni VVF senza codice</b>: se dai un codice a una missione VVF, lo spillo prende quel colore. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, quando il mezzo è PRONTO parte da solo per il PS più vicino. <b>🆘 Richiedi assistenza</b> = apre la finestra per mandare altri mezzi. I 36 PS sulla mappa (H) hanno scheda con reparti verificati e fonti (🚁 = elisuperficie); passando il cursore sopra si vedono i mezzi al momento in PS. Gli elisoccorsi trasportano SOLO agli hub con elisuperficie (Bergamo, Brescia, Como S.Anna, Lecco, Legnano, Milano, Monza, Pavia, Varese): partono da PRONTO per l'hub più vicino (mai PMA né PS minori). Con <b>⛺ PMA</b> piazzi un ospedale da campo dove vuoi (click sul tasto, poi click sulla mappa; ESC annulla, click sul marker per rimuoverlo): con una missione da <b>10+ pazienti</b> in corso accoglie i feriti come un PS (sigla H PMA), altrimenti resta inattivo; se lo rimuovi mentre ambulanze ci sono dirette, vengono rirottate al PS più vicino.<br>
     6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
-    7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.
+    7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.<br>
+    8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -65911,40 +65938,48 @@ window.COEUSIM = (() => {
   let selectedId = null;
   let clockMin = 8*60; // 08:00
   let speed = 4; // game-sec per real-sec (1 = tempo reale, 5 = 5x, 30 = 30x)
-  // --- BOOST MOTO gameplay: a 1x il traffico reale (75 km/h) richiederebbe minuti veri
+  // --- NESSUNA SPINTA GAMEPLAY (come LSTSim): a 1x i mezzi vanno in tempo reale,
   // per pochi km; i mezzi in gioco sono quindi più rapidi del reale, e la spinta cresce
   // col passo di simulazione (1x < 5x < 10x < 30x). Vale SOLO per lo spostamento
   // (advanceAlongPath + stima etaMinuti): orologio, cure, sopralluogo e scene restano
   // in game-min invariati, quindi la missione resta coerente (si arriva prima, il resto uguale).
   function boostMoto(){
-    if(speed<=1) return 6;
-    if(speed<=5) return 6+(speed-1)*1; // 5x -> 10
-    if(speed<=30) return 10+(speed-5)*0.32; // 10x -> ~11.6, 30x -> 18
-    return 18;
+    return 1;
   }
-  // --- USCITA DALLA SEDE (game-min): l'equipaggio non parte subito — 30" sul rosso,
+  // --- USCITA DALLA SEDE stile LSTSim (wiki Fahrzeuge, con sirena): terrestri 55sec, ELI 110sec — 30" sul rosso,
   // 42" sul giallo, 51" sul verde, 60" sul bianco/VVF senza codice. A 1x sono secondi
   // veri, alle alte velocità scala col tempo di gioco. Vale solo uscendo dalla sede
   // (i dirottati ripartono da dove sono, senza attesa).
-  function turnoutPrio(prio){
-    if(prio<=1) return 0.5;
-    if(prio===2) return 0.7;
-    if(prio===3) return 0.85;
-    return 1.0;
+  function turnoutPrio(prio, mz){
+    if(mz && mz.tipo==="ELI") return (110/60)*(0.8+Math.random()*0.4);
+    return (55/60)*(0.8+Math.random()*0.4);
   }
-  // --- MEDICALIZZATE PIÙ SCATTANTI: MSA/automediche dirette sull'intervento (+25%)
+  // --- NESSUN BONUS EXTRA medicalizzate (wiki: solo NEF +20%, gia in lstSegVel). Resta 1 per compatibilita. MEDÙ SCATTANTI: MSA/automediche dirette sull'intervento (+25%)
  function medMult(mz){
-   return (mz && mz.stato==="viaggio" && (mz.tipo==="MSA"||mz.tipo==="AUTOMEDICA")) ? 1.25 : 1;
+   return 1;
  }
-  // --- MEZZI PIÙ LENTI (richiesta utente): fattore globale alle velocità
-  const LENTO = 0.7; // tutti i mezzi al 70% (strada, autostrada, meteo, eli)
-  const ELI_VEL = Math.round(180*LENTO); // 126 km/h
-  // velocità effettiva del mezzo in km/h (base × bonus medicalizzata; il boostMoto
-  // scala col tempo di gioco e non cambia i km/h): per scheda/test
+  // --- VELOCITÀ REALISTICHE stile LSTSim (formula ufficiale wiki LSTSim/Fahrzeuge):
+  // base = 85% del limite del tratto + bonus lampeggianti (<40 km/h: +50%,
+  // >=60: +30%, in mezzo interpolazione lineare); AUTOMEDICA (NEF): +20% piatto;
+  // autostrada (tratto >= 90): velocità reale; elicottero (RTH): 240 km/h, mai
+  // influenzato dal meteo. Il meteo frena solo i terrestri: pioggia -5%,
+  // temporale/grandine/nebbia/intensa -10%, neve/ghiaccio -15%.
+  const ELI_VEL = 240; // RTH come LSTSim
+  // fattore meteo sulla velocità (solo terrestri; gli eli non ne risentono)
+  function meteoVelFattore(){
+    const g = METEO_GRUPPO[meteo.cond]||"";
+    if(g==="neve"||g==="neveforte"||g==="gelida"||meteo.cond==="Gelo") return 0.85; // neve/ghiaccio -15%
+    if(meteo.temp<-5) return 0.85; // ghiaccio -15%
+    if(g==="temporale"||g==="grandine"||g==="tromba"||g==="intensa") return 0.9; // temporale/pioggia intensa -10%
+    if(g==="nebbia") return 0.9; // nebbia -10%
+    if(g==="pioggia"||g==="pioviggine") return 0.95; // pioggia -5%
+    return 1;
+  }
+  // velocità effettiva del mezzo in km/h (base × meteo, come LSTSim): per scheda/test
   function velEff(mz){
     if(!mz) return null;
-    const base = isEli(mz) ? ELI_VEL : ((METEO_VEL[meteo.cond]!=null ? Math.round(METEO_VEL[meteo.cond]*LENTO) : (mz.velKmh||Math.round(50*LENTO))));
-    return Math.round(base*medMult(mz)*10)/10;
+    const base = isEli(mz) ? ELI_VEL : (mz.velKmh||50);
+    return Math.round(base*(isEli(mz)?1:meteoVelFattore())*medMult(mz)*10)/10;
   }
   let paused = false;
   let autoInflow = false; // spento: le chiamate arrivano su richiesta (una a una)
@@ -66827,6 +66862,7 @@ window.COEUSIM = (() => {
       const call = { ...b, callId: callCounter++ };
       chiamate.unshift(call);
       statCall(call); notaChiamata(call); iaArricchisciRemoto(call);
+      dopAssegnaCall(call); // proprietario operativo: TU o collega IA
       logRadio(`🔗 Nuova chiamata collegata a <b>${p.parentTipo}</b> a <b>${call.comune}</b> (${call.prov}) — rispondi per i dettagli`, "alarm");
       blip(); toast("🔗 Chiamata collegata in arrivo!");
       refreshCallMarkers(); renderCalls(); updateStats();
@@ -67459,6 +67495,7 @@ window.COEUSIM = (() => {
     iaArricchisciRemoto(call);
     // maxiemergenze e MANV arrivano in silenzio: niente annunci nel radio, li scopri rispondendo
     if(!(b.maxi||b.manv)) log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm");
+    dopAssegnaCall(call, "IO"); // click destro sulla mappa = lavoro tuo
     if(tipo.zona!=="ferro" && tipo.zona!=="infra") precisaIndirizzoClick(call); // indirizzo reale del punto cliccato (via geocodifica inversa; ferroviarie e infrastrutturali restano sulla rete)
     blip(); if(!(b.maxi||b.manv)) toast("🔔 Nuova chiamata in arrivo!");
     refreshCallMarkers(); renderCalls(); updateStats();
@@ -67491,6 +67528,7 @@ window.COEUSIM = (() => {
     if(!(b.maxi||b.manv)) log(`🔔 Chiamata in arrivo da <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm");
     blip();
     if(!(b.maxi||b.manv)) toast("🔔 Nuova chiamata in arrivo!");
+    dopAssegnaCall(call); // proprietario operativo: TU o collega IA
     refreshCallMarkers();
     renderCalls();
     updateStats();
@@ -67529,6 +67567,7 @@ window.COEUSIM = (() => {
     statCall(call); // statistiche: diario chiamata pubblicata
     notaChiamata(call);
     iaArricchisciRemoto(call);
+    dopAssegnaCall(call); // proprietario operativo: TU o collega IA
     const emo = METEO_EMOJI[meteo.cond]||"🔔";
     logRadio(`${emo} Danno da maltempo a <b>${b.comune}</b> (${b.prov}) — rispondi per i dettagli`, "alarm"); // radio: era log(), ora logRadio (log mostra solo avvio turno)
     blip(); toast(`${emo} Danno da maltempo in arrivo!`);
@@ -67567,7 +67606,7 @@ function stormTick(dtGameMin){
   // --- CLASSIFICA: scegli il codice colore -> diventa intervento attivo ---
   // R = rosso(P1), G = giallo(P2), V = verde(P3), B = bianco(P4)
   const COLORI = { R:{prio:1, nome:"ROSSO", col:"#d00000"}, G:{prio:2, nome:"GIALLO", col:"#e6a100"}, V:{prio:3, nome:"VERDE", col:"#35a835"}, B:{prio:4, nome:"BIANCO", col:"#888888"} };
-  function accettaChiamata(callId, colore, mezziCodici, manTipo){
+  function accettaChiamata(callId, colore, mezziCodici, manTipo, owner){
     const idx = chiamate.findIndex(c=>c.callId===callId);
     if (idx<0) return false;
     const call = chiamate.splice(idx,1)[0];
@@ -67576,6 +67615,7 @@ function stormTick(dtGameMin){
     const iv = {
       id: idCounter++,
       callId: call.callId, // per aggiornare l'indirizzo se arriva la geocodifica inversa del click
+      prop: owner || call.prop || "IO", // proprietario operativo: TU o collega IA
       tipoNome: call.tipoNome, // vero tipo: nascosto fino a chiusura
       manTipo: manTipo || null, // etichetta manuale dell'operatore: tipo ufficiale su live + dettaglio
       truePrio: call.truePrio,
@@ -67633,6 +67673,7 @@ function stormTick(dtGameMin){
     renderListe();
     updateStats();
     statAccetta(call, iv); // statistiche: avvio missione
+    dopHookAccetta(iv); // statistiche per operatore (TU/IA)
     return true;
   }
   function COLORI_NOME(p){ return p===1?"ROSSO":p===2?"GIALLO":p===3?"VERDE":"BIANCO"; }
@@ -67705,14 +67746,14 @@ function stormTick(dtGameMin){
          if (!call.answered){
             // squilla stile LSTSim: ora + "Nuova telefonata." + Rispondi (il motivo NON si vede)
             div.innerHTML = `
-              <div class="callLST"><span class="callTime">${hhmmss(call.t0)}</span><span class="callText">Nuova telefonata.</span><button class="lstBtn small primary" data-act="ans">Rispondi</button><button class="lstBtn small" data-act="map" title="Mostra su mappa">🗺️</button><button class="lstBtn small" data-act="ref" title="Rifiuta">✖</button></div>`;
+              <div class="callLST"><span class="callTime">${hhmmss(call.t0)}</span><span class="opTag ${call.prop==="IA"?"opIA":"opIO"}" title="La segue: ${call.prop==="IA"?"il collega IA":"TU"}">${call.prop==="IA"?"IA":"TU"}</span><span class="callText">Nuova telefonata.</span><button class="lstBtn small primary" data-act="ans">Rispondi</button><button class="lstBtn small" data-act="map" title="Mostra su mappa">🗺️</button><button class="lstBtn small" data-act="ref" title="Rifiuta">✖</button></div>`;
             div.querySelector('[data-act="ans"]').onclick = ()=>{ call.answered = true; call.tAns = statClock; if(!(call.maxi||call.manv)) logRadio(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendi in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolta e classifica`); renderCalls(); }; // tAns = orario risposta (statistiche), era log() ora logRadio
             div.querySelector('[data-act="map"]').onclick = ()=>{ highlightCall = call.callId; if(map) map.panTo([call.lat,call.lng]); renderCalls(); };
             div.querySelector('[data-act="ref"]').onclick = ()=>rifiutaChiamata(call.callId);
           } else {
            // il richiedente parla: incarico in finestra separata (mezzi + codice)
    div.innerHTML = `
-             <div class="intTop"><b>☎️ In linea</b><span class="cod">${hhmm(call.t0)}</span></div>
+             <div class="intTop"><b>☎️ In linea</b><span class="opTag ${call.prop==="IA"?"opIA":"opIO"}" title="La segue: ${call.prop==="IA"?"il collega IA":"TU"}">${call.prop==="IA"?"IA":"TU"}</span><span class="cod">${hhmm(call.t0)}</span></div>
              <div class="intAddr">📍 ${luogoIV(call,true)}</div>
              <div class="dialogo">${call.dialogo}</div>
              ${call.incarico
@@ -67863,7 +67904,7 @@ function stormTick(dtGameMin){
         const cid = call.callId, cod = call.codSel || "VVF";
         const mz = [...body.querySelectorAll(".callMz input:checked")].map(xx=>xx.value);
         incaricoCallId = null; ov.style.display = "none";
-        accettaChiamata(cid, cod, mz, man);
+        accettaChiamata(cid, cod, mz, man, "IO"); // creata dall'operatore umano: resta sua (anche se la chiamata era instradata all'IA)
       }
     };});
     const t = document.querySelector("#incaricoTitle");
@@ -68964,13 +69005,14 @@ function stormTick(dtGameMin){
     mz.interventoId=iv.id; mz._t0=clockMin; mz.sulPostoTimer=0; mz.atteseFollow=0; mz.ospedale=null; mz.ospedaleScelto=null; mz.trasportaPz=false; mz.pazIdx=null; mz.affido=null; mz.tArrivo=null;
     const esceDallaSede = (mz.stato==="disponibile");
     vaiA(mz, iv.accLa!=null?iv.accLa:iv.lat, iv.accLng!=null?iv.accLng:iv.lng, "viaggio"); // ferroviarie: i mezzi vanno all'accesso, mai sui binari
-    if(esceDallaSede) mz.uscita = turnoutPrio(iv.prio); // equipaggio in uscita: 30" sul rosso, 60" sul bianco
+    if(esceDallaSede){ mz.uscita = turnoutPrio(iv.prio, mz); mz._v = 0; } // equipaggio in uscita (LSTSim: 55sec terrestri, 110sec ELI)
     if(!iv.mezziIds.includes(mz.codice)){ iv.mezziIds.push(mz.codice); iv.invii = iv.invii||{}; iv.invii[mz.codice]=(iv.invii[mz.codice]||0)+1; } // ogni nuovo invio conta: rientro + rinvio = 2° invio
     if(iv.stato==="attesa") iv.stato="viaggio";
     suppLog(iv, gruppoSupporto(mz), dirottato ? "dirottato" : "assegnato", mz.codice, dirottato && oldId!=null ? ("dalla missione " + oldId) : null);
     if(!silent) log(`${mz.corpo==="VVF"?"🚒":(mz.tipo==="AUTOMEDICA"||isMedica(mz))?"🚓":"🚑"} ${nomem(mz)} ${dirottato?"dirottato a":"→"} <b>${iv.comune}</b>`, "status");
     refreshMarkers(); renderListe(); updateStats();
     statAssegna(mz); // statistiche: invio mezzo
+    dopHookAssegna(iv, mz); // statistiche per operatore (TU/IA): mezzi usati + rinforzi
     invioBatch(); // raggruppa gli invii ravvicinati: un solo bip se partono 2+ mezzi insieme
     return true;
   }
@@ -69008,12 +69050,15 @@ function stormTick(dtGameMin){
     for(let i=0;i<coords.length-1;i++) mz.segLens.push(haversineKm(coords[i][0],coords[i][1],coords[i+1][0],coords[i+1][1]));
     mz.segIdx = 0; mz.segProg = 0;
   }
-  // velocita contenute: sotto il limite reale (90%; automediche 95%).
-  // Autostrade (tratto OSRM >= 90): la reale.
+  // formula ufficiale wiki LSTSim: 85% del limite + bonus lampeggianti
+  // (<40 km/h: +50%; >=60: +30%; in mezzo interpolazione lineare).
+  // AUTOMEDICA (NEF): +20% piatto. Autostrade (tratto OSRM >= 90): la reale.
   function lstSegVel(kmh, mz){
-    if(kmh>=90) return kmh*LENTO;
-    if(mz && mz.tipo==="AUTOMEDICA") return kmh*0.95*LENTO;
-    return kmh*0.9*LENTO;
+    if(kmh>=90) return kmh;
+    const bonus = kmh<40 ? 1.5 : (kmh>=60 ? 1.3 : 1.5-(kmh-40)/20*0.2);
+    let v = kmh*0.85*bonus;
+    if(mz && mz.tipo==="AUTOMEDICA") v *= 1.2;
+    return v;
   }
   // allinea le velocita OSRM (una per segmento annotato) ai punti della geometria:
   // ogni tratto eredita la velocita del segmento che lo contiene (LSTSim sotto i 90, reale sopra; 30-130)
@@ -69054,7 +69099,7 @@ function stormTick(dtGameMin){
     }
    mz.targetLat = lat; mz.targetLng = lng;
    setPath(mz, [[mz.lat,mz.lng],[lat,lng]]);
-    mz.velKmh = null; // in attesa del percorso reale: 35 fissi (50×LENTO), poi la media dei tratti
+    mz.velKmh = null; // in attesa del percorso reale: 50 fissi, poi la media dei tratti
     if(isEli(mz)) { refreshRoutes(); return; } // elisoccorso: niente strade, dritto per dritto
     const fromLat = mz.lat, fromLng = mz.lng;
     const stillThere = () => mz.targetLat===lat && mz.targetLng===lng &&
@@ -69064,10 +69109,10 @@ function stormTick(dtGameMin){
       const full = [[mz.lat,mz.lng], ...res.coords.slice(1)];
       const sv = alignSegVel(full, res, mz); // tratti LSTSim (autostrada = reale)
       if(sv){ let tot=0, wsum=0; for(let qi=0;qi<sv.length;qi++){ const L=haversineKm(full[qi][0],full[qi][1],full[qi+1][0],full[qi+1][1]); tot+=sv[qi]*L; wsum+=L; }
-        if(wsum>0) mz.velKmh = Math.max(20, Math.min(80, Math.round(tot/wsum*LENTO))); }
+        if(wsum>0) mz.velKmh = Math.max(20, Math.min(80, Math.round(tot/wsum))); }
       else if(res.distance>0 && res.duration>0){
         const v = (res.distance/1000)/(res.duration/3600);
-        mz.velKmh = Math.max(20, Math.min(80, Math.round(v*LENTO))); // fallback: media reale rallentata
+        mz.velKmh = Math.max(20, Math.min(80, Math.round(v))); // fallback: media reale
       }
       setPath(mz, full, sv); // velocita per tratto: base realistica, in autostrada si corre davvero
       for(const e of ospMarkers){ try{ e.marker.setTooltipContent(ospTooltipHTML(e.osp)); }catch(_){} }
@@ -69081,45 +69126,62 @@ function stormTick(dtGameMin){
       setTimeout(()=>{ fetchRoute(mz.lat, mz.lng, lat, lng).then(apply); }, 5000);
     });
   }
-  // avanza di gameHours ore: con velocita quasi reale per tratto (autostrada = reale),
-  // senza (fallback/eli/nebbia) con la media uniforme
+  // avanza di gameHours ore: con velocita LSTSim per tratto (autostrada = reale),
+  // il meteo rallenta solo i terrestri (gli eli volano sempre a 240 km/h)
   function advanceAlongPath(mz, gameHours){
     if(!mz.path || mz.path.length<2 || !mz.segLens){
       setPath(mz, [[mz.lat,mz.lng],[mz.targetLat,mz.targetLng]]);
     }
     const btO0 = mz.lat, btO1 = mz.lng; // totali browser: km percorsi in questo passo
-    const uni = isEli(mz) ? ELI_VEL : ((METEO_VEL[meteo.cond]!=null ? Math.round(METEO_VEL[meteo.cond]*LENTO) : (mz.velKmh||Math.round(50*LENTO))));
-    const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && (meteo.cond!=="Nebbia"&&meteo.cond!=="Nebbia con brina" && !isEli(mz))) ? mz.segVel : null;
-    let guard = 0;
-    if(sv){
-      let tLeft = gameHours;
-      while(tLeft>0 && mz.segIdx < mz.segLens.length && guard++<8000){
+    const uni = isEli(mz) ? ELI_VEL : (mz.velKmh||50); // media del percorso (meteo applicato sotto, a parte gli eli)
+    const wgt = isEli(mz) ? 1 : meteoVelFattore(); // fattore meteo LSTSim (pioggia/nebbia/neve…)
+    const sv = (mz.segVel && mz.segVel.length===mz.segLens.length && !isEli(mz)) ? mz.segVel : null;
+    // accelerazione/frenata LSTSim (wiki Fahrzeuge: 1 m/s2 in accelerazione, 4 m/s2 in frenata).
+    // _v = velocita attuale in m/s: parte da 0 a ogni uscita dalla sede, i dirottati tengono la loro.
+    if(!(mz._v>0)) mz._v = 0;
+    let dtSec = gameHours*3600;
+    if(!(dtSec>0)) dtSec = 0;
+    // passi da max 1 game-sec: la rampa e stabile anche a 30x/100x
+    let steps = Math.max(1, Math.min(900, Math.ceil(dtSec)));
+    const step = steps>0 ? dtSec/steps : 0;
+    for(let st=0; st<steps; st++){
+      if(mz.segIdx >= mz.segLens.length) break;
+      let targetKmh = sv ? Math.max(20, (sv[mz.segIdx]||uni)*wgt) : uni*wgt;
+      // frenata per fermarsi sullo spillo: v = sqrt(2*a*d) solo quando vicini (haversine, niente somme O(n))
+      const dArr = haversineKm(mz.lat, mz.lng, mz.targetLat, mz.targetLng)*1000;
+      if(dArr < 500){
+        const vAllow = Math.sqrt(2*4*Math.max(0, dArr));
+        const allowKmh = vAllow*3.6;
+        if(allowKmh < targetKmh) targetKmh = Math.max(0, allowKmh);
+      }
+      const target = targetKmh/3.6;
+      if(target > mz._v) mz._v = Math.min(target, mz._v + 1*step);
+      else mz._v = Math.max(target, mz._v - 4*step);
+      let d = mz._v*step/1000; // km in questo passo
+      let guard = 0;
+      while(d > 0 && mz.segIdx < mz.segLens.length && guard++<200){
         const segLen = mz.segLens[mz.segIdx];
         if(segLen < 1e-9){ mz.segIdx++; mz.segProg=0; continue; }
-        const v = Math.max(20, (sv[mz.segIdx]||uni)*medMult(mz)); // km/h su questo tratto (medicalizzate +25% verso scena)
         const left = segLen - mz.segProg;
-        const tNeed = left/v; // ore per finire il tratto
-        if(tLeft < tNeed){ mz.segProg += tLeft*v; tLeft=0; }
-        else { tLeft -= tNeed; mz.segIdx++; mz.segProg=0; }
+        if(d < left){ mz.segProg += d; d = 0; }
+        else { d -= left; mz.segIdx++; mz.segProg=0; }
       }
-    } else {
-      let remaining = uni*medMult(mz)*gameHours;
-      while(remaining>0 && mz.segIdx < mz.segLens.length && guard++<5000){
-        const segLen = mz.segLens[mz.segIdx];
-        if (segLen < 1e-9){ mz.segIdx++; mz.segProg=0; continue; }
-        const left = segLen - mz.segProg;
-        if(remaining < left){ mz.segProg += remaining; remaining=0; }
-        else { remaining -= left; mz.segIdx++; mz.segProg=0; }
-      }
+      if(mz.segIdx < mz.segLens.length){
+        const a2=mz.path[mz.segIdx], b2=mz.path[mz.segIdx+1];
+        const f2=mz.segLens[mz.segIdx]>0?mz.segProg/mz.segLens[mz.segIdx]:1;
+        mz.lat=a2[0]+(b2[0]-a2[0])*f2; mz.lng=a2[1]+(b2[1]-a2[1])*f2;
+      } else { mz.lat=mz.targetLat; mz.lng=mz.targetLng; }
+      if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.015){ mz._v = 0; break; }
     }
     if(mz.segIdx >= mz.segLens.length){ mz.lat=mz.targetLat; mz.lng=mz.targetLng;
       if(BT){ try{ btMezzo(mz.codice).km += haversineKm(btO0,btO1,mz.lat,mz.lng); }catch(_){} }
+      mz._v = 0;
       return true; }
     const a=mz.path[mz.segIdx], b=mz.path[mz.segIdx+1];
     const f=mz.segLens[mz.segIdx]>0?mz.segProg/mz.segLens[mz.segIdx]:1;
     mz.lat=a[0]+(b[0]-a[0])*f; mz.lng=a[1]+(b[1]-a[1])*f;
     if(BT){ try{ btMezzo(mz.codice).km += haversineKm(btO0,btO1,mz.lat,mz.lng); }catch(_){} }
-    if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.015) return true; // arrivo solo quasi sullo spillo (15 m), mai prima
+    if(haversineKm(mz.lat,mz.lng,mz.targetLat,mz.targetLng)<0.015){ mz._v = 0; return true; } // arrivo solo quasi sullo spillo (15 m), mai prima
     return false;
   }
 
@@ -69645,7 +69707,7 @@ function stormTick(dtGameMin){
     if(sal!=null && sal<40 && /trauma|frattura|schiacciamento|caduta|investimento/.test(q)) return "TRAUMA";
     return "GENERICO";
   }
-  function etaMinuti(km, mz){ return km/((mz&&isEli(mz))?ELI_VEL:((mz&&mz.velKmh)||Math.round(50*LENTO)))*60/boostMoto(); }
+  function etaMinuti(km, mz){ return km/((mz&&isEli(mz))?ELI_VEL:((mz&&mz.velKmh)||50))*60; }
   // proposte compatibili col bisogno, ordinate: reparto verificato (1 prima di "nd"),
   // poi distanza. Niente compatibili = ripiego sul PS più vicino.
   // Bellano (ps:0) non è mai proposta.
@@ -69953,6 +70015,7 @@ function stormTick(dtGameMin){
     const pendingPz = pazientiInSospeso(iv)>0 && (iv.trasporto || iv.vvf);
     if(iv.mezziIds.length===0 && iv.gestito && !(pendingPz || (iv.trasporto && (iv.daTrasportare||0)>0) || iv.pazDaVerificare || (iv.fuoco && !iv.fuoco.spento))){
       chiudiPazientiMissione(iv,"auto");
+      dopHookChiudi(iv); // statistiche per operatore (TU/IA)
       iv.stato="chiuso";
       chiusi++;
       const attesaMin = Math.max(0, clockMin - iv.t0);
@@ -70013,8 +70076,7 @@ function stormTick(dtGameMin){
  const METEO_GRUPPO = {Sereno:"sereno","Prevalentemente sereno":"sereno","Parzialmente nuvoloso":"nuvolo",Coperto:"nuvolo",Nebbia:"nebbia","Nebbia con brina":"nebbia","Pioviggine debole":"pioviggine","Pioviggine moderata":"pioviggine","Pioviggine intensa":"pioggia","Pioviggine gelata debole":"gelida","Pioviggine gelata intensa":"gelida","Pioggia debole":"pioggia","Pioggia moderata":"pioggia","Pioggia intensa":"intensa","Rovesci deboli":"pioggia","Rovesci moderati":"pioggia","Rovesci violenti":"intensa","Pioggia gelata debole":"gelida","Pioggia gelata intensa":"gelida","Neve debole":"neve","Neve moderata":"neve","Granuli di neve":"neve","Rovesci di neve deboli":"neve","Neve intensa":"neveforte","Rovesci di neve intensi":"neveforte",Temporale:"temporale","Temporale con grandine":"grandine","Temporale con grandine intensa":"grandine","Vento forte":"vento","Tromba d'aria":"tromba",Gelo:"gelo"};
  const METEO_STORM_LISTA = {pioggia:"Pioggia",intensa:"Pioggia",temporale:"Temporale",grandine:"Grandine",vento:"Vento",tromba:"Tromba d'aria"};
  const METEO_STORM_EVERY = {pioggia:12,intensa:6,temporale:4,grandine:5,vento:5,tromba:3}; // game-min tra un danno e l'altro
- const METEO_STRADA_RISCHIO = {Nebbia:1,"Nebbia con brina":1,"Pioviggine gelata debole":1,"Pioviggine gelata intensa":1,"Pioggia gelata debole":1,"Pioggia gelata intensa":1,"Neve debole":1,"Neve moderata":1,"Neve intensa":1,"Granuli di neve":1,"Rovesci di neve deboli":1,"Rovesci di neve intensi":1,Gelo:1}; // fondo/visibilita: +60% missioni su strada
- const METEO_VEL = {Nebbia:50,"Nebbia con brina":40,"Neve debole":60,"Neve moderata":60,"Granuli di neve":60,"Rovesci di neve deboli":60,"Neve intensa":50,"Rovesci di neve intensi":50}; // km/h mezzi con visibilita scarsa
+ const METEO_STRADA_RISCHIO = {Nebbia:1,"Nebbia con brina":1,"Pioviggine gelata debole":1,"Pioviggine gelata intensa":1,"Pioggia gelata debole":1,"Pioggia gelata intensa":1,"Neve debole":1,"Neve moderata":1,"Neve intensa":1,"Granuli di neve":1,"Rovesci di neve deboli":1,"Rovesci di neve intensi":1,Gelo:1}; // fondo/visibilita: +60% missioni su strada  // (velocita col maltempo: vedi meteoVelFattore)
  // Peso meteo del tipo: i nuovi stati riusano la chiave piu vicina, gli altri restano neutri.
  function meteoPesoTipo(x){
    const md = x.meteo; if(!md) return 1;
@@ -70171,9 +70233,9 @@ function stormTick(dtGameMin){
     for(const mz of mezzi){
       if(mz.stato==="viaggio"||mz.stato==="trasporto"||mz.stato==="rientro"){
        // avanza lungo il percorso stradale (fallback dritto se manca); gli eli volano dritti e più veloci
-        const gameHours = (dtRealSec*speed/60)/60*boostMoto();
+        const gameHours = (dtRealSec*speed/60)/60; // tempo di gioco reale: niente spinta extra (come LSTSim)
         if(mz.uscita>0){
-          // equipaggio ancora in uscita dalla sede: fermo finché non esce (30"-60" di gioco)
+          // equipaggio ancora in uscita dalla sede: fermo finché non esce (LSTSim: 55sec +/-20% terrestri, 110sec ELI)
           mz.uscita -= dtRealSec*speed/60;
           moveMarkerMz(mz);
         } else if (advanceAlongPath(mz, gameHours)){ // velocita reali per tratto dentro advanceAlongPath
@@ -70409,6 +70471,7 @@ function stormTick(dtGameMin){
     verificaTimer += dtRealSec*speed/60; if(verificaTimer>=5){ verificaTimer = 0; verificaStati(); }
     codeMortiCoda();
     scenaTick(dtRealSec*speed/60); // sopralluogo, evoluzione VVF e solleciti via radio
+    dopTick(dtRealSec*speed/60); // collega IA: risposte, invii, rinforzi, richiami, sovraccarico
 
     // refresh UI leggera ogni tick
     updateClock();
@@ -70470,6 +70533,7 @@ function stormTick(dtGameMin){
     if(!iv || iv.msaDetto) return;
     if(!iv.reportFatto) return; // la riga radio esce solo dopo il report (la scena deve prima comunicare cosa ha trovato)
     iv.msaDetto = true;
+    dopHookMSA(iv); // statistiche per operatore (TU/IA): criticità MSA
     logRadio(`⏳ A <b>${iv.comune}</b>: <b>P${k+1}</b> sotto il 35% — inviate un mezzo medicalizzato`, "alarm");
   }
   // motivo della richiesta MSA: clinico ma senza rivelare il tipo vero (già visibili salute e codice)
@@ -71561,10 +71625,10 @@ function stormTick(dtGameMin){
       const pulse = iv.stato==="attesa" ? " pulse" : "";
       const mk = L.marker([iv.lat,iv.lng],{
         icon: L.divIcon({className:'intIcon',
-          html:`<div class="intPin${pulse}">${pinSVG(iv)}</div>`,
+          html:`<div class="intPin${pulse}${iv.prop==="IA"?" intPinIA":""}" title="Operatore: ${iv.prop==="IA"?"collega IA":"TU"}">${pinSVG(iv)}</div>`,
           iconSize:[26,32], iconAnchor:[13,30]})
       });
-      mk.bindTooltip(`${luogoIV(iv,false)}<br>Stato: ${iv.stato}`);
+      mk.bindTooltip(`${luogoIV(iv,false)}<br>Stato: ${iv.stato} — ${iv.prop==="IA"?"collega IA":"TU"}`);
       mk.on('click', ()=>{ openIntervento(iv.id); });
       mk.addTo(layerInterventi);
       markersInt.set(iv.id, mk);
@@ -71648,9 +71712,10 @@ function stormTick(dtGameMin){
         div.className = "intRow" + (iv.id===selectedId?" sel":"");
         div.id = "introw-" + iv.id;
        const badge = iv.prio>0 ? `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>` : `<span title="Senza codice — VVF">🚒</span>`;
+       const opTag = `<span class="opTag ${iv.prop==="IA"?"opIA":"opIO"}" title="Operatore: ${iv.prop==="IA"?"collega IA":"TU"}">${iv.prop==="IA"?"IA":"TU"}</span>`;
         const hList = [...new Set(iv.mezziIds.map(c=>mezzi.find(x=>x.codice===c)).filter(m=>m&&m.ospedale&&(m.stato==="trasporto"||m.stato==="ospedale")).map(m=>ospShort(m.ospedale)+codQuadPaz(iv,(m.pazIdx!=null?m.pazIdx:m.affido))))];
-        div.innerHTML = badge + `<span style="flex:1;min-width:0">📍 ${luogoIV(iv,true)}${hList.length?`<div class="intH">${hList.join(" · ")}</div>`:""}</span><span class="caret">${iv.id===selectedId?"▾":"▸"}</span>`;
-        div.title=`#${iv.id} — ${statoLabel(iv.stato)} — ${iv.mezziIds.map(c=>nomem(mezzi.find(x=>x.codice===c))).join(", ")||"nessun mezzo"}`;
+        div.innerHTML = badge + opTag + `<span style="flex:1;min-width:0">📍 ${luogoIV(iv,true)}${hList.length?`<div class="intH">${hList.join(" · ")}</div>`:""}</span><span class="caret">${iv.id===selectedId?"▾":"▸"}</span>`;
+        div.title=`#${iv.id} — ${statoLabel(iv.stato)} — operatore ${iv.prop==="IA"?"IA":"TU"} — ${iv.mezziIds.map(c=>nomem(mezzi.find(x=>x.codice===c))).join(", ")||"nessun mezzo"}`;
         div.onclick = ()=>selectIntervento(iv.id);
         frag.appendChild(div);
         if(iv.id===selectedId){
@@ -71780,6 +71845,7 @@ function stormTick(dtGameMin){
       if(mezziConPaziente(iv).length>0){ toast("\uD83C\uDFE5 C\u2019\u00e8 un paziente a bordo: prima la consegna in PS"); return; }
       if(pazientiInSospeso(iv)>0 && (iv.trasporto||iv.vvf)){ toast(iv.vvf && !iv.trasporto ? "\uD83D\uDE92 Ci sono feriti senza ambulanza: mandane una prima di chiudere" : "\uD83C\uDFE5 Ci sono pazienti non ancora consegnati: completa i trasporti prima di chiudere"); return; }
       chiudiPazientiMissione(iv,"manuale");
+      dopHookChiudi(iv); // statistiche per operatore (TU/IA)
       iv.stato="chiuso"; iv.gestito=true; chiusi++; score+=50;
       for(const c of [...iv.mezziIds]){ const m=mezzi.find(x=>x.codice===c); if(m){ vaiA(m, m.baseLat, m.baseLng, "rientro"); } }
       iv.mezziIds=[];
@@ -71989,8 +72055,410 @@ function stormTick(dtGameMin){
     }catch(e){}
   }
 
-  return {
-    boot, generaN, nuovaChiamata, makeChiamataTipo, accettaChiamata, rifiutaChiamata, fuocoStato, fuocoClasse,
+  // ---------- DOPPIO OPERATORE: TU + collega IA ----------
+  // Secondo operatore autonomo nella stessa centrale: riceve missioni proprie,
+  // risponde, classifica e invia i mezzi con le funzioni reali (accettaChiamata,
+  // assegnaMezzo, rientraMezzo), chiede rinforzi, richiama VVF/CNSAS a scena
+  // esaurita e chiude con le regole esistenti. Niente motore separato: stesso
+  // parco mezzi, stesse missioni, stesso stato condiviso. La chat dedicata
+  // vive in dopChat; il pannello la legge via dopStato().
+  const DOP_MAX = 4; // missioni aperte oltre le quali l'IA segnala sovraccarico
+  let dopAssegn = "bilanciata"; // solo-tu|casuale|bilanciata|carico|manuale
+  let dopModo = "autonoma";     // autonoma|collaborativa|pausa
+  let dopChat = [];             // {t, da:"IA"|"TU", txt}
+  let dopRich = [];             // richieste pendenti {id, kind, ivId, codici, testo, t0, scad}
+  let dopSeq = 1;
+  let dopTimer = 0;
+  let dopForceNext = null;      // "IA": la prossima chiamata va all'IA
+  let dopNonLetti = 0;
+  let dopWarnMezzi = false;
+  let dopUltDomanda = -999;
+  function dopNuoveStats(){ return {ass:0, chiuse:0, tempo:0, mezzi:{}, rinforzi:0, crit:0}; }
+  let dopStats = {IO:dopNuoveStats(), IA:dopNuoveStats()};
+  function dopProp(iv){ return (iv && iv.prop==="IA") ? "IA" : "IO"; }
+  function dopAperti(prop){ return interventi.filter(iv=>iv.stato!=="chiuso" && dopProp(iv)===prop); }
+  function dopPazAttivi(iv){ let n=0; for(let k=0;k<(iv.pazienti||[]).length;k++) if(pazAttivo(iv,k)) n++; return n; }
+  function dopDaMin(t){ return ((clockMin - t)+1440)%1440; }
+  function dopCarico(prop){
+    const ap = dopAperti(prop);
+    let paz=0, mz=0;
+    const ids = {};
+    for(const iv of ap){ ids[iv.id]=1; paz+=dopPazAttivi(iv); }
+    for(const m of mezzi) if(m.interventoId!=null && ids[m.interventoId]) mz++;
+    return {missioni:ap.length, pazienti:paz, mezzi:mz};
+  }
+  function dopPesoCarico(prop){ const c=dopCarico(prop); return c.missioni*2+c.pazienti+c.mezzi; }
+  function dopChatAdd(da, txt){
+    dopChat.push({t:Math.round(clockMin), da, txt});
+    if(dopChat.length>80) dopChat.splice(0, dopChat.length-80);
+    if(da==="IA") dopNonLetti++;
+    try{ if(window.COEUDOP) COEUDOP.ping(); }catch(_){}
+  }
+  // punto di pubblicazione: ogni nuova chiamata riceve il proprietario operativo
+  function dopAssegnaCall(call, forza){
+    let p = "IO";
+    const modo = dopModo==="pausa" ? "solo-tu" : (forza || dopForceNext || dopAssegn);
+    dopForceNext = null;
+    if(modo==="casuale") p = Math.random()<0.5 ? "IA" : "IO";
+    else if(modo==="bilanciata"){
+      const a=dopAperti("IA").length, b=dopAperti("IO").length;
+      p = a<b ? "IA" : b<a ? "IO" : (Math.random()<0.5?"IA":"IO");
+    }
+    else if(modo==="carico"){
+      const a=dopPesoCarico("IA"), b=dopPesoCarico("IO");
+      p = a<b ? "IA" : b<a ? "IO" : (Math.random()<0.5?"IA":"IO");
+    }
+    else if(modo==="IA") p = "IA"; // chiamata forzata al collega (pannello/chat)
+    // solo-tu e manuale: resta IO (in manuale si passa con i tasti Trasferisci)
+    call.prop = p;
+    if(p==="IA" && dopModo!=="pausa") call.iaT = clockMin + rnd(1,3); // il collega risponde dopo 1-3 game-min
+    return p;
+  }
+  function dopRispondi(call){
+    call.answered = true; call.iaPresa = true; call.tAns = statClock;
+    if(!(call.maxi||call.manv)) logRadio(call.vvf ? `☎️ In linea con ${call.comune} (${call.prov}) — intervento VVF, prendo in carico` : `☎️ In linea con ${call.comune} (${call.prov}) — ascolto e classifico`);
+    dopChatAdd("IA", `Ho preso la chiamata di <b>${call.comune}</b>, ci penso io 👍`);
+    renderCalls();
+  }
+  function dopCodice(call){
+    if(call.vvf) return "VVF"; // le VVF restano senza codice, come da prassi
+    const p = call.truePrio;
+    return p===1?"R":p===2?"G":p===3?"V":"B";
+  }
+  function dopViciniVVF(lat,lng){
+    let best=null, bd=1e9;
+    const lib = mezziDisponibili(null,"VVF").filter(m=>m.tipo!=="ELI");
+    const pool = lib.length ? lib : mezziDisponibili(null,"VVF");
+    for(const m of pool){ const d=haversineKm(lat,lng,m.lat,m.lng); if(d<bd){ bd=d; best=m; } }
+    return best;
+  }
+  function dopLiberoTrasporto(lat,lng){
+    let best=null, bd=1e9;
+    for(const m of mezziDisponibili(null,"118")){
+      if(!m.trasporto || m.tipo==="CNSAS" || m.tipo==="PMA") continue;
+      const d=haversineKm(lat,lng,m.lat,m.lng);
+      if(d<bd){ bd=d; best=m; }
+    }
+    return best;
+  }
+  function dopAvanzato(lat,lng){
+    return nearestMezzo(lat,lng,"MSA","118") || nearestMezzo(lat,lng,"AUTOMEDICA","118") || nearestMezzo(lat,lng,"ELI","118");
+  }
+  // scelta mezzi dell'IA: stessi criteri della checklist (più vicini per categoria),
+  // fabbisogno del tipo + 1 ambulanza per paziente noto (il conteggio si vede alla
+  // risposta, la salute resta nascosta come per l'operatore umano)
+  function dopScegliMezzi(call){
+    const out = [];
+    const prendi = (mz)=>{ if(mz && out.indexOf(mz.codice)<0 && out.length<6){ out.push(mz.codice); return true; } return false; };
+    const lat = call.lat, lng = call.lng;
+    const ric = call.richiesti||{};
+    if(call.vvf){
+      const v = dopViciniVVF(lat,lng);
+      if(v) prendi(v);
+      const nP = ((call.pazienti||[]).filter(x=>x!=null)).length;
+      for(let i=0;i<nP;i++){ const mz = nearestMezzo(lat,lng,"MSB","118") || dopLiberoTrasporto(lat,lng); if(!prendi(mz)) break; }
+      return out;
+    }
+    for(const k of ["MSA","AUTOMEDICA","ELI"]){
+      const n = ric[k]||0;
+      for(let i=0;i<n;i++){
+        const mz = k==="MSA" ? dopAvanzato(lat,lng) : k==="AUTOMEDICA" ? (nearestMezzo(lat,lng,"AUTOMEDICA","118")||nearestMezzo(lat,lng,"MSA","118")) : nearestMezzo(lat,lng,"ELI","118");
+        if(!prendi(mz)) break;
+      }
+    }
+    if(ric.VVF>0){ for(let i=0;i<ric.VVF;i++){ if(!prendi(dopViciniVVF(lat,lng))) break; } }
+    const nNoti = ((call.pazienti||[]).filter(x=>x!=null)).length;
+    const needMSB = Math.max(ric.MSB||0, call.trasporto ? nNoti : 0);
+    for(let i=0;i<needMSB;i++){ const mz = nearestMezzo(lat,lng,"MSB","118") || dopLiberoTrasporto(lat,lng); if(!prendi(mz)) break; }
+    if(!out.length){
+      const needTot = Object.keys(ric).reduce((a,k)=>a+(ric[k]||0),0);
+      if(needTot>0 || nNoti>0 || call.trasporto){ const mz = nearestMezzo(lat,lng,null,"118"); prendi(mz); }
+    }
+    return out;
+  }
+  function dopCrea(call){
+    const cod = dopCodice(call);
+    const mz = dopScegliMezzi(call);
+    const ok = accettaChiamata(call.callId, cod, mz, null, "IA");
+    if(ok){
+      const iv = interventi.find(x=>x.callId===call.callId);
+      const nomi = mz.slice(0,3).map(c=>{ const m=mezzi.find(x=>x.codice===c); return m?nomem(m):c; }).join(", ");
+      dopChatAdd("IA", iv ? `Ho creato l'intervento a <b>${iv.comune}</b>${nomi?" — ho inviato "+nomi:" (nessun mezzo libero, riprovo appena si libera qualcosa)"} 👍` : "Ho creato l'intervento 👍");
+    }
+    return ok;
+  }
+  // --- rinforzi post-report: l'IA legge gli stessi fabbisogni dell'operatore ---
+  function dopChiediInvio(iv, codici, cosa){
+    if(dopRich.some(r=>r.kind==="invio" && r.ivId===iv.id)) return;
+    const nomi = codici.map(c=>{ const m=mezzi.find(x=>x.codice===c); return m?nomem(m):c; }).join(", ");
+    dopRich.push({id:dopSeq++, kind:"invio", ivId:iv.id, codici:codici.slice(), testo:`A <b>${iv.comune}</b> serve ${cosa}: mando ${nomi}?`, t0:clockMin, scad:clockMin+12});
+    dopChatAdd("IA", `A <b>${iv.comune}</b> serve ${cosa} — ti ho lasciato la richiesta nel pannello 👆`);
+  }
+  function dopBig(iv){ return (iv.pazienti||[]).length>=5; }
+  function dopServeMSA(iv){
+    const bis = msaInAttesa(iv);
+    if(!bis.length) return false;
+    const inArrivo = mezzi.some(m=>m.interventoId===iv.id && m.stato==="viaggio" && isAvanzato(m));
+    if(inArrivo) return false;
+    const mz = dopAvanzato(iv.lat, iv.lng);
+    if(!mz) return false; // niente libero: resta in attesa (l'overload lo segnala)
+    if(dopModo==="collaborativa" && dopBig(iv) && !(iv._collabKo>clockMin)){ dopChiediInvio(iv, [mz.codice], "un medicalizzato"); return true; }
+    assegnaMezzo(mz.codice, iv.id, true);
+    dopChatAdd("IA", `Ho inviato <b>${nomem(mz)}</b> a <b>${iv.comune}</b> (supporto medicalizzato) 🚑`);
+    return true;
+  }
+  function dopServeAmbulanze(iv){
+    if(!iv.trasporto) return false;
+    ensureSupporti(iv);
+    const ric = (iv.supporti && iv.supporti.ALTRO && iv.supporti.ALTRO.richiesti)||0;
+    if(!ric) return false;
+    let trasp = 0;
+    for(const c of iv.mezziIds){ const m = mezzi.find(x=>x.codice===c); if(m && m.trasporto && m.interventoId===iv.id) trasp++; }
+    if(trasp >= ric) return false;
+    const mz = nearestMezzo(iv.lat,iv.lng,"MSB","118") || dopLiberoTrasporto(iv.lat,iv.lng);
+    if(!mz) return false;
+    if(dopModo==="collaborativa" && dopBig(iv) && !(iv._collabKo>clockMin)){ dopChiediInvio(iv, [mz.codice], "un'altra ambulanza"); return true; }
+    assegnaMezzo(mz.codice, iv.id, true);
+    dopChatAdd("IA", `Ho inviato <b>${nomem(mz)}</b> a <b>${iv.comune}</b> (serve un'altra ambulanza) 🚑`);
+    return true;
+  }
+  function dopServeVVF(iv){
+    ensureSupporti(iv);
+    const ric = (iv.supporti && iv.supporti.VVF && iv.supporti.VVF.richiesti)||0;
+    if(!ric) return false;
+    const has = (iv.mezziIds||[]).some(c=>{ const m=mezzi.find(x=>x.codice===c); return m && m.corpo==="VVF" && m.interventoId===iv.id && m.stato!=="rientro"; });
+    if(has) return false;
+    const mz = dopViciniVVF(iv.lat, iv.lng);
+    if(!mz) return false;
+    if(dopModo==="collaborativa" && dopBig(iv) && !(iv._collabKo>clockMin)){ dopChiediInvio(iv, [mz.codice], "i Vigili del Fuoco"); return true; }
+    assegnaMezzo(mz.codice, iv.id, true);
+    dopChatAdd("IA", `Ho inviato <b>${nomem(mz)}</b> a <b>${iv.comune}</b> 🚒`);
+    return true;
+  }
+  function dopRinforzi(){
+    // priorità coerente: prima i codici gravi, poi i più vecchi
+    const mie = dopAperti("IA").filter(iv=>iv.reportFatto).sort((a,b)=>((a.prio||5)-(b.prio||5)) || (a.t0-b.t0));
+    for(const iv of mie){
+      if(iv.stato==="chiuso") continue;
+      if(dopServeMSA(iv)) continue; // una sola azione per missione per giro
+      if(dopServeAmbulanze(iv)) continue;
+      if(dopServeVVF(iv)) continue;
+    }
+    // missioni create senza mezzi (nessuno libero alla creazione): riprova l'invio
+    for(const iv of dopAperti("IA")){
+      if(iv.reportFatto || iv.mezziIds.length>0) continue;
+      if(dopDaMin(iv.t0) < 2) continue;
+      const mz = dopScegliMezzi({lat:iv.lat, lng:iv.lng, vvf:iv.vvf, richiesti:iv.richiesti, trasporto:iv.trasporto, pazienti:(iv.pazienti||[])});
+      if(mz.length && iv.stato!=="chiuso"){
+        for(const c of mz) assegnaMezzo(c, iv.id, true);
+        const m0 = mezzi.find(m=>m.codice===mz[0]);
+        dopChatAdd("IA", `Si è liberato <b>${m0?nomem(m0):mz[0]}</b>: lo mando a <b>${iv.comune}</b> 👍`);
+      }
+    }
+  }
+  // VVF/CNSAS a scena esaurita: li richiama (i 118 rientrano da soli col motore)
+  function dopRichiama(){
+    for(const iv of dopAperti("IA")){
+      if(!iv.vvf) continue;
+      if(!(iv.reportFatto||iv.valutato)) continue;
+      if(iv.fuoco && !iv.fuoco.spento) continue;
+      if(pazientiInSospeso(iv)>0) continue;
+      if(iv.pazDaVerificare) continue;
+      if((iv.daTrasportare||0)>0) continue;
+      if(dopDaMin(iv.t0) < Math.max(8, iv.durata||0)) continue;
+      const sul = mezzi.filter(m=>m.interventoId===iv.id && m.stato==="sul_posto" && (m.corpo==="VVF"||m.tipo==="CNSAS") && m.tipo!=="ELI");
+      if(!sul.length) continue;
+      for(const m of sul) rientraMezzo(m.codice);
+      dopChatAdd("IA", `Scena esaurita a <b>${iv.comune}</b>: faccio rientrare ${sul.length>1?"le squadre":"la squadra"} ✅`);
+    }
+  }
+  // --- sovraccarico: chiede supporto o propone il trasferimento ---
+  function dopMenoCritica(list){
+    const s = list.slice().sort((a,b)=>((b.prio||5)-(a.prio||5)) || (b.t0-a.t0));
+    return s[0]||null;
+  }
+  function dopSovraccarico(){
+    const mie = dopAperti("IA");
+    if(mie.length>=DOP_MAX && !dopRich.some(r=>r.kind==="via")){
+      const cand = dopMenoCritica(mie.filter(iv=>!(iv._richKoUntil>clockMin)));
+      if(cand){
+        dopRich.push({id:dopSeq++, kind:"via", ivId:cand.id, testo:`Ho <b>${mie.length}</b> missioni aperte 😅 — prendi tu quella di <b>${cand.comune}</b>?`, t0:clockMin, scad:0});
+        dopChatAdd("IA", `Ho troppe missioni (${mie.length}) — ti ho chiesto un passaggio nel pannello 🙏`);
+      }
+    }
+    const tue = dopAperti("IO");
+    if(tue.length>=mie.length+3 && tue.length>=3 && !dopRich.some(r=>r.kind==="prendi") && dopDaMin(dopUltDomanda)>30){
+      const cand = tue.slice().sort((a,b)=>a.t0-b.t0)[0];
+      if(cand && !(cand._richKoUntil>clockMin)){
+        dopRich.push({id:dopSeq++, kind:"prendi", ivId:cand.id, testo:`Vedo che hai <b>${tue.length}</b> missioni — vuoi che prenda io quella di <b>${cand.comune}</b>?`, t0:clockMin, scad:0});
+      }
+    }
+  }
+  // --- chiacchiere operative spontanee (mai fatti di gioco, solo coordinamento) ---
+  function dopSpontanei(){
+    if(dopDaMin(dopUltDomanda)>45){
+      const tue = dopAperti("IO");
+      const mie = dopAperti("IA");
+      if(tue.length && mie.length && Math.random()<0.3){
+        const q = tue[Math.floor(Math.random()*tue.length)];
+        dopChatAdd("IA", `Come procede la tua a <b>${q.comune}</b>? ${mie.length>2?"Io sono un po' sotto pressione qui 😅":"Qui tutto sotto controllo 👍"}`);
+        dopUltDomanda = clockMin;
+      }
+    }
+    const liberi = mezziDisponibili("MSB","118").length;
+    if(liberi<3 && !dopWarnMezzi){
+      dopWarnMezzi = true;
+      dopChatAdd("IA", `Ti segnalo che le ambulanze libere sono rimaste <b>${liberi}</b> — teniamone una di scorta ⚠️`);
+    } else if(liberi>4 && dopWarnMezzi) dopWarnMezzi = false;
+  }
+  function dopScadenze(){
+    for(let i=dopRich.length-1;i>=0;i--){
+      const r = dopRich[i];
+      if(r.kind!=="invio" || !r.scad) continue;
+      if(dopDaMin(r.t0)<12) continue;
+      const iv = interventi.find(x=>x.id===r.ivId);
+      if(iv && iv.stato!=="chiuso"){
+        for(const c of (r.codici||[])){ const m = mezzi.find(x=>x.codice===c); if(m && m.stato==="disponibile") assegnaMezzo(c, iv.id, true); }
+        dopChatAdd("IA", `Nessuna risposta per <b>${iv.comune}</b>: vado io con quello che c'è 👍`);
+      }
+      dopRich.splice(i,1);
+    }
+  }
+  function dopGiro(){
+    dopScadenze();
+    // 1. risposte: solo chiamate IA non ancora prese, senza incarico umano aperto
+    const mieOpen = dopAperti("IA").length;
+    for(const call of chiamate){
+      if(call.prop!=="IA" || call.answered || call.incarico) continue;
+      if(call.iaT==null) call.iaT = clockMin + rnd(1,3);
+      if(dopDaMin(call.t0)<1) continue;
+      if(clockMin < call.iaT && dopDaMin(call.t0)<3) continue;
+      if(mieOpen>=DOP_MAX+2){
+        if(dopDaMin(call.t0)>15){ call.prop="IO"; dopChatAdd("IA", `Non riesco a prendere quella di <b>${call.comune}</b>, lasciala a te 🙏`); renderCalls(); }
+        continue;
+      }
+      dopRispondi(call);
+    }
+    // 2. creazioni: chiamate IA in linea prese dall'IA
+    for(const call of chiamate.slice()){
+      if(call.prop!=="IA" || !call.answered || !call.iaPresa || call.incarico) continue;
+      dopCrea(call);
+    }
+    // 3. rinforzi sulle missioni IA valutate (rossi prima)
+    dopRinforzi();
+    // 4. richiamo VVF/CNSAS a scena esaurita
+    dopRichiama();
+    // 5. sovraccarico e coordinamento
+    dopSovraccarico();
+    dopSpontanei();
+  }
+  function dopTick(dtG){
+    if(dopModo==="pausa") return; // IA in pausa: tutto congelato
+    dopTimer += dtG;
+    if(dopTimer>=1){ dopTimer = 0; dopGiro(); }
+  }
+  // --- trasferimenti e richieste ---
+  function dopTrasferisci(id, to, why){
+    const iv = interventi.find(x=>x.id===id);
+    if(!iv || iv.stato==="chiuso") return false;
+    const from = dopProp(iv);
+    if(from===to) return false;
+    iv.prop = to;
+    for(let i=dopRich.length-1;i>=0;i--){ if(dopRich[i].ivId===id && dopRich[i].kind==="invio") dopRich.splice(i,1); }
+    dopChatAdd(to==="IA"?"IA":"TU", to==="IA" ? `Prendo io quella di <b>${iv.comune}</b> 👍${why?" ("+why+")":""}` : `Quella di <b>${iv.comune}</b> passa a te 👍${why?" ("+why+")":""}`);
+    refreshMarkers(); renderListe();
+    return true;
+  }
+  function dopPassaCall(callId, to){
+    const call = chiamate.find(c=>c.callId===callId);
+    if(!call) return false;
+    if(call.prop===to) return false;
+    call.prop = to;
+    if(to==="IA" && dopModo!=="pausa") call.iaT = clockMin + rnd(1,3);
+    dopChatAdd(to==="IA"?"IA":"TU", to==="IA" ? `Ok, la chiamata di <b>${call.comune}</b> la prendo io 👍` : `La chiamata di <b>${call.comune}</b> resta a te 👍`);
+    renderCalls();
+    return true;
+  }
+  function dopRispondiRichiesta(id, ok){
+    const i = dopRich.findIndex(r=>r.id===id);
+    if(i<0) return false;
+    const r = dopRich.splice(i,1)[0];
+    const iv = interventi.find(x=>x.id===r.ivId);
+    if(!iv || iv.stato==="chiuso") return true;
+    if(r.kind==="invio"){
+      if(ok){
+        let n = 0;
+        for(const c of (r.codici||[])){ const m = mezzi.find(x=>x.codice===c); if(m && m.stato==="disponibile" && assegnaMezzo(c, iv.id, true)) n++; }
+        dopChatAdd("IA", n?`Perfetto, mando ${n>1?"i mezzi":"il mezzo"} a <b>${iv.comune}</b> 👍`:`Accidenti, ${r.codici.length>1?"non sono più liberi":"non è più libero"} — ci penso io appena si libera qualcosa 👍`);
+      } else {
+        iv._collabKo = clockMin+30;
+        dopChatAdd("IA", "Ok, pensaci tu allora 👍");
+      }
+    } else if(r.kind==="via"){
+      if(ok){ dopTrasferisci(iv.id, "IO", "passaggio accettato"); }
+      else { iv._richKoUntil = clockMin+30; dopChatAdd("IA", "Va bene, la tengo io 💪"); }
+    } else if(r.kind==="prendi"){
+      if(ok){ dopTrasferisci(iv.id, "IA", "passaggio accettato"); dopChatAdd("IA", `Prendo io quella di <b>${iv.comune}</b>, staccati pure 👍`); }
+      else { iv._richKoUntil = clockMin+30; dopChatAdd("IA", "Ok, resta a te 👍"); }
+    }
+    try{ if(window.COEUDOP) COEUDOP.render(); }catch(_){}
+    return true;
+  }
+  function dopInvia(txt){
+    const t = String(txt||"").slice(0,140);
+    if(!t.trim()) return false;
+    dopChatAdd("TU", t);
+    const l = t.toLowerCase();
+    if(l.indexOf("prossima")>=0){ dopForceNext = "IA"; dopChatAdd("IA", "Ok, prendo io la prossima chiamata 👍"); }
+    else if(l.indexOf("come va")>=0 || l.indexOf("situazione")>=0){
+      const c = dopCarico("IA");
+      dopChatAdd("IA", c.missioni ? `Ho <b>${c.missioni}</b> missioni (${c.pazienti} pazienti, ${c.mezzi} mezzi impegnati) — ${c.missioni>=DOP_MAX?"sono al limite 😅":"tengo botta 💪"}` : "Tutto tranquillo da questa parte, pronto a dare una mano 👍");
+    }
+    else dopChatAdd("IA", ["Ricevuto 👍","Ok, tengo presente 👍","Perfetto, andiamo avanti così 💪"][Math.floor(Math.random()*3)]);
+    return true;
+  }
+  function dopForzaProssima(){ dopForceNext = "IA"; dopChatAdd("TU", "Prendi tu la prossima 🙏"); dopChatAdd("IA", "Ok, prendo io la prossima chiamata 👍"); }
+  // --- statistiche per operatore ---
+  function dopHookAccetta(iv){ dopStats[dopProp(iv)].ass++; }
+  function dopHookChiudi(iv){
+    const s = dopStats[dopProp(iv)];
+    s.chiuse++;
+    let dt = clockMin - iv.t0; if(dt<0) dt += 1440;
+    s.tempo += Math.max(0, Math.round(dt));
+  }
+  function dopHookAssegna(iv, mz){
+    const s = dopStats[dopProp(iv)];
+    if(mz) s.mezzi[mz.codice] = (s.mezzi[mz.codice]||0)+1;
+    if(iv.gestito || iv.reportFatto) s.rinforzi++; // invii dopo la valutazione = rinforzi
+  }
+  function dopHookMSA(iv){ dopStats[dopProp(iv)].crit++; }
+  function dopResetTurno(){
+    dopRich = []; dopTimer = 0; dopForceNext = null; dopNonLetti = 0;
+    dopWarnMezzi = false; dopUltDomanda = -999;
+    dopStats = {IO:dopNuoveStats(), IA:dopNuoveStats()};
+    for(const iv of interventi) if(iv.prop==null) iv.prop = "IO";
+    try{ if(window.COEUDOP) COEUDOP.render(); }catch(_){}
+  }
+  // --- stato per il pannello ---
+  function dopRiga(iv){
+    return {id:iv.id, comune:iv.comune, prov:iv.prov, prio:iv.prio||0, vvf:!!iv.vvf,
+      stato:iv.stato, statoTx:statoLabel(iv.stato), t0:Math.round(iv.t0),
+      mezzi:(iv.mezziIds||[]).map(c=>{ const m=mezzi.find(x=>x.codice===c); return m?nomem(m):c; }),
+      daTrasp:iv.daTrasportare||0, attesaMSA:!!iv.attesaMSA, valutato:!!iv.valutato};
+  }
+  function dopStato(){
+    const io = dopAperti("IO").map(dopRiga), ia = dopAperti("IA").map(dopRiga);
+    const calls = chiamate.map(c=>({callId:c.callId, comune:c.comune, prov:c.prov, prop:c.prop||"IO", answered:!!c.answered}));
+    const s = {};
+    for(const k of ["IO","IA"]){
+      const d = dopStats[k];
+      s[k] = {ass:d.ass, chiuse:d.chiuse, tempoMedio:d.chiuse?Math.round(d.tempo/d.chiuse):null, mezziN:Object.keys(d.mezzi).length, rinforzi:d.rinforzi, crit:d.crit};
+    }
+    return {assegn:dopAssegn, modo:dopModo, caricoIO:dopCarico("IO"), caricoIA:dopCarico("IA"),
+      io, ia, chiamate:calls, richieste:dopRich.slice(), chat:dopChat.slice(-30), nonLetti:dopNonLetti, stats:s};
+  }
+ return {
+   boot, generaN, nuovaChiamata, makeChiamataTipo, accettaChiamata, rifiutaChiamata, fuocoStato, fuocoClasse,
     creaChiamataQui, debugZone, statistiche, statsCSV, statsSave, statsLoad, statsReset,
     manLuoghi(){ return MAN_LUOGHI.slice(); },
     manMotivi(){ return MAN_MOTIVI.slice(); },
@@ -72001,6 +72469,25 @@ function stormTick(dtGameMin){
     nomeMezzo(cod){ const m = mezzi.find(x=>x&&x.codice===cod); return m ? (m.radio||m.codice) : cod; },
     setMezziCloudOccupati, mezziCloudOccupati,
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
+    // doppio operatore TU+IA: stato pannello, controlli, trasferimenti, chat, statistiche
+    dopStato(){ return dopStato(); },
+    dopSetAssegnazione(m){ if(["solo-tu","casuale","bilanciata","carico","manuale"].includes(m)) dopAssegn=m; return dopAssegn; },
+    dopSetModo(m){
+      if(!["autonoma","collaborativa","pausa"].includes(m)) return dopModo;
+      dopModo = m;
+      if(m==="pausa"){
+        for(const c of chiamate){ if(c.prop==="IA" && !c.answered){ c.prop="IO"; c.iaT=null; } }
+        dopChatAdd("IA", "Mi metto in pausa ⏸️ — gestisci tu, se serve passami qualcosa dal pannello");
+        renderCalls();
+      } else dopChatAdd("IA", m==="collaborativa" ? "Ok, lavoriamo fianco a fianco: per le scene grosse ti chiedo prima 🤝" : "Ci sono di nuovo, prendo le mie 👍");
+      return dopModo;
+    },
+    dopTrasferisci(id, to){ return dopTrasferisci(id, to==="IA"?"IA":"IO"); },
+    dopPassaCall(callId, to){ return dopPassaCall(callId, to==="IA"?"IA":"IO"); },
+    dopRispondiRichiesta(id, ok){ return dopRispondiRichiesta(id, !!ok); },
+    dopInvia(txt){ return dopInvia(txt); },
+    dopForzaProssima(){ dopForzaProssima(); return true; },
+    dopSegnaLetti(){ dopNonLetti = 0; return true; },
     bisognoPaziente, ospedaliPerBisogno, mostraOspedale, togglePMA, piazzaPMA, rimuoviPMA, pmaStato, maxiAperta,
     pazCat, pzvBucket, tipoRandom, meteoFattore, categoriaMissione, categorieMissioni, notaTipo, isMega, tiraConteggioMega,
     switchBase, toggleVVF, supportoStato,
@@ -72028,7 +72515,7 @@ function stormTick(dtGameMin){
     syncFasce(){ syncFasce(); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
-    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
+    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); dopResetTurno(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
     listMezziCodici(){ return mezzi.map(m=>m.codice); },
     // test generazioni: debugPazienti("Incidente stradale", 8) → 8 possibili equipaggi di feriti
     debugPazienti(nome, n){
@@ -72126,6 +72613,7 @@ function stormTick(dtGameMin){
       const iv = {
         id: idCounter++,
         midEsterno: mid, daIA: true,
+        prop: "IO", // presa in carico = la segue l'operatore umano
         callId: "IA-"+mid, tipo: "IA", tipoNome: r.tipologia||"?",
         col: { nome: r.codice||"SENZA CODICE" },
         prio,
@@ -72234,7 +72722,7 @@ function stormTick(dtGameMin){
     // validatore bozze (puro sulla bozza passata): per i test
     validaBozza,
     pazCat, intrAmmesso, dinamicaViolenta, nearestMezzo, pzvBucket,
-    // formula velocita contenuta per i test: velLST(50,{tipo:"MSB"}) -> 45
+    // formula velocita LSTSim per i test: velLST(50,{tipo:"MSB"}) -> 59.5
     velLST(kmh, tipo){ return lstSegVel(kmh, {tipo:tipo||"MSB"}); },
     // intervallo pazienti atteso per un tipo VVF (dinamico per tipologia; null per le sanitarie che restano esatte)
     pzvRange(nome){ const t = D().TIPI.find(x=>x.nome===nome); if(!t || !t.vvf) return null; const tab = PZV_TAB[pzvBucket(t.nome, t.desc)] || PZV_TAB.tecnico; return [tab.w[0][0], tab.w[tab.w.length-1][0]]; },
@@ -72736,6 +73224,146 @@ window.COEUTOT = (() => {
       }catch(_){}
     },
     render: refresh
+  };
+})();
+
+</script>
+<script>
+/* === src/doppio-operatore.js (inlinato) === */
+// COEUDOP — pannello DOPPIO OPERATORE (TU + collega IA).
+// Solo presentazione: legge COEUSIM.dopStato() e invoca le azioni esposte.
+// Il cervello (assegnazione, risposte, invii, rinforzi) vive in src/app.js.
+window.COEUDOP = (() => {
+  let timer = null, aperto = false;
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function hhmm(t){ t = Math.round(+t||0); return String(Math.floor(t/60)%24).padStart(2,"0")+":"+String(t%60).padStart(2,"0"); }
+  function prioTx(p){ return p===1?"🔴":p===2?"🟡":p===3?"🟢":p===4?"⚪":"🚒"; }
+  function opPill(p){ return `<span class="opTag ${p==="IA"?"opIA":"opIO"}">${p}</span>`; }
+
+  function open(){
+    const d = el("opDlg"); if(!d) return;
+    aperto = true;
+    try{ if(d.showModal) d.showModal(); }catch(_){}
+    try{ COEUSIM.dopSegnaLetti(); }catch(_){}
+    render();
+    if(timer) clearInterval(timer);
+    timer = setInterval(()=>{ if(aperto) render(); }, 2000);
+  }
+  function close(){
+    const d = el("opDlg"); aperto = false;
+    if(timer){ clearInterval(timer); timer = null; }
+    if(d && d.open) d.close();
+  }
+  function ping(){
+    try{
+      const b = el("opBadge"); if(!b) return;
+      if(aperto){ b.hidden = true; return; }
+      const st = COEUSIM.dopStato();
+      if(st.nonLetti>0){ b.hidden = false; b.textContent = st.nonLetti>9 ? "9+" : st.nonLetti; }
+      else b.hidden = true;
+    }catch(_){}
+  }
+
+  function barra(v, max){
+    const w = max>0 ? Math.min(100, Math.round(v/max*100)) : 0;
+    return `<span class="opBar"><span class="opBarFill" style="width:${w}%"></span></span>`;
+  }
+  function rigaMiss(iv, mia){
+    const flags = [];
+    if(iv.daTrasp>0) flags.push("🏥×"+iv.daTrasp);
+    if(iv.attesaMSA) flags.push("⏳ MSA");
+    if(!iv.valutato) flags.push("🔍 sopralluogo");
+    return `<div class="opRow"><span>${prioTx(iv.prio)}</span>` +
+      `<span style="flex:1"><b>${esc(iv.comune)}</b> <span class="small">(${esc(iv.prov)})</span> ` +
+      `<span class="small">${esc(iv.statoTx)}${iv.mezzi.length ? " · 🚑 "+iv.mezzi.length : ""}</span>` +
+      (flags.length ? ` <span class="small">${flags.join(" · ")}</span>` : "") + `</span>` +
+      `<button class="lstBtn small" onclick="COEUDOP.trasferisci(${iv.id},'${mia ? "IA" : "IO"}')" title="${mia ? "Passa questa missione al collega IA" : "Riprendi tu questa missione"}">${mia ? "→ IA" : "→ TU"}</button></div>`;
+  }
+  function rigaCall(c){
+    const to = c.prop==="IA" ? "IO" : "IA";
+    return `<div class="opRow">${opPill(c.prop)}<span style="flex:1"><b>${esc(c.comune)}</b> <span class="small">(${esc(c.prov)})${c.answered ? " · in linea" : ""}</span></span>` +
+      `<button class="lstBtn small" onclick="COEUDOP.passaCall(${c.callId},'${to}')" title="Cambia operatore">→ ${to}</button></div>`;
+  }
+  function rigaRich(r){
+    let ok = "✅ Ok", no = "✖ No";
+    if(r.kind==="invio"){ ok = "✅ Manda"; no = "✖ Ci penso io"; }
+    else if(r.kind==="via"){ ok = "✅ La prendo io"; no = "✖ Tienila tu"; }
+    else if(r.kind==="prendi"){ ok = "✅ Sì, prendila"; no = "✖ Resta a me"; }
+    return `<div class="opRow"><span style="flex:1">📨 ${r.testo}</span>` +
+      `<button class="lstBtn small primary" onclick="COEUDOP.richiesta(${r.id},1)">${ok}</button>` +
+      `<button class="lstBtn small" onclick="COEUDOP.richiesta(${r.id},0)">${no}</button></div>`;
+  }
+
+  function render(){
+    const box = el("opBody"); if(!box) return;
+    let st = null;
+    try{ st = COEUSIM.dopStato(); }catch(_){ box.innerHTML = '<div class="small">Motore non pronto.</div>'; return; }
+    const inp = el("opInput");
+    const keepV = inp ? inp.value : "", keepF = inp && document.activeElement===inp;
+    const maxC = Math.max(1, st.caricoIO.missioni, st.caricoIA.missioni);
+    const assOpts = [["solo-tu","Solo tu (l'IA non prende nuove)"],["casuale","Casuale"],["bilanciata","Bilanciata (a chi ha meno missioni)"],["carico","Carico di lavoro"],["manuale","Manuale (passi tu con → IA)"]];
+    let h = "";
+    h += `<h4>🎛️ Controlli</h4><div class="opRow"><span style="flex:1">Assegnazione nuove missioni:<br><select id="opAssegn" onchange="COEUDOP.setAssegn(this.value)" style="font:inherit;max-width:100%">` +
+      assOpts.map(o=>`<option value="${o[0]}"${st.assegn===o[0]?" selected":""}>${o[1]}</option>`).join("") + `</select></span></div>`;
+    h += `<div class="opRow"><span style="flex:1">Collega IA:<br>` +
+      [["autonoma","🤖 Autonoma"],["collaborativa","🤝 Collaborativa"],["pausa","⏸️ Pausa"]].map(m=>`<button class="lstBtn small${st.modo===m[0]?" primary":""}" onclick="COEUDOP.setModo('${m[0]}')">${m[1]}</button>`).join(" ") +
+      `</span><button class="lstBtn small" onclick="COEUDOP.prossima()" title="La prossima chiamata la prende l'IA">⏭️ Prossima all'IA</button></div>`;
+    h += `<h4>⚖️ Carico di lavoro</h4>`;
+    h += `<div class="opRow">${opPill("TU")}<span style="flex:1">${st.caricoIO.missioni} missioni · ${st.caricoIO.pazienti} pazienti · ${st.caricoIO.mezzi} mezzi</span>${barra(st.caricoIO.missioni, maxC)}</div>`;
+    h += `<div class="opRow">${opPill("IA")}<span style="flex:1">${st.caricoIA.missioni} missioni · ${st.caricoIA.pazienti} pazienti · ${st.caricoIA.mezzi} mezzi</span>${barra(st.caricoIA.missioni, maxC)}</div>`;
+    h += `<h4>📋 Le mie missioni (${st.io.length})</h4>`;
+    h += st.io.length ? st.io.map(iv=>rigaMiss(iv, true)).join("") : '<div class="small">Nessuna missione tua al momento.</div>';
+    h += `<h4>🤖 Missioni del collega (${st.ia.length})</h4>`;
+    h += st.ia.length ? st.ia.map(iv=>rigaMiss(iv, false)).join("") : '<div class="small">Il collega non ha missioni al momento.</div>';
+    h += `<h4>📞 In coda (${st.chiamate.length})</h4>`;
+    h += st.chiamate.length ? st.chiamate.map(rigaCall).join("") : '<div class="small">Nessuna chiamata in attesa.</div>';
+    h += `<h4>📨 Richieste (${st.richieste.length})</h4>`;
+    h += st.richieste.length ? st.richieste.map(rigaRich).join("") : '<div class="small">Nessuna richiesta in sospeso.</div>';
+    h += `<h4>💬 Comunicazioni</h4><div id="opChat">` +
+      (st.chat.length ? st.chat.map(c=>`<div class="${c.da==="IA"?"ia":c.da==="TU"?"tu":"sys"}"><b>${c.da==="IA"?"🤖 IA":c.da==="TU"?"👤 TU":"·"}</b> <span class="small">${hhmm(c.t)}</span> ${c.txt}</div>`).join("") : '<div class="small">Nessun messaggio.</div>') + `</div>`;
+    h += `<div style="display:flex;gap:4px;margin-top:4px"><input id="opInput" style="flex:1;font:inherit" maxlength="140" placeholder="Scrivi al collega…" onkeydown="if(event.key==='Enter')COEUDOP.invia()"><button class="lstBtn small primary" onclick="COEUDOP.invia()">Invia</button></div>`;
+    h += `<div style="display:flex;gap:4px;margin-top:4px"><button class="lstBtn small" onclick="COEUDOP.preset('Come va?')">Come va?</button><button class="lstBtn small" onclick="COEUDOP.preset('Prendi tu la prossima')">Prendi tu la prossima</button></div>`;
+    const s = st.stats;
+    const tot = {ass:s.IO.ass+s.IA.ass, chiuse:s.IO.chiuse+s.IA.chiuse, rinforzi:s.IO.rinforzi+s.IA.rinforzi, crit:s.IO.crit+s.IA.crit, mezziN:s.IO.mezziN+s.IA.mezziN};
+    const tIO = s.IO.chiuse ? s.IO.tempoMedio+"m" : "N/D", tIA = s.IA.chiuse ? s.IA.tempoMedio+"m" : "N/D";
+    h += `<h4>📊 Statistiche (questo turno)</h4><table class="opStat"><tr><th></th><th>👤 TU</th><th>🤖 IA</th><th>🏠 Centrale</th></tr>` +
+      `<tr><td>Missioni gestite</td><td>${s.IO.ass}</td><td>${s.IA.ass}</td><td>${tot.ass}</td></tr>` +
+      `<tr><td>Missioni concluse</td><td>${s.IO.chiuse}</td><td>${s.IA.chiuse}</td><td>${tot.chiuse}</td></tr>` +
+      `<tr><td>Tempo medio gestione</td><td>${tIO}</td><td>${tIA}</td><td>${tot.chiuse ? Math.round((s.IO.tempoMedio*s.IO.chiuse + s.IA.tempoMedio*s.IA.chiuse)/tot.chiuse)+"m" : "N/D"}</td></tr>` +
+      `<tr><td>Mezzi utilizzati</td><td>${s.IO.mezziN}</td><td>${s.IA.mezziN}</td><td>${tot.mezziN}</td></tr>` +
+      `<tr><td>Richieste di rinforzo</td><td>${s.IO.rinforzi}</td><td>${s.IA.rinforzi}</td><td>${tot.rinforzi}</td></tr>` +
+      `<tr><td>Criticità MSA</td><td>${s.IO.crit}</td><td>${s.IA.crit}</td><td>${tot.crit}</td></tr></table>`;
+    h += `<div class="small" style="margin-top:4px">Spilli con anello arancione tratteggiato = missioni del collega sulla mappa. I tag TU/IA sono su chiamate, righe e tooltip.</div>`;
+    const keepSY = box.scrollTop;
+    const oldChat = el("opChat");
+    const chatBottom = oldChat ? (oldChat.scrollHeight - oldChat.scrollTop - oldChat.clientHeight < 48) : true;
+    const keepCY = oldChat ? oldChat.scrollTop : 0;
+    box.innerHTML = h;
+    box.scrollTop = keepSY;
+    const chat = el("opChat");
+    if(chat) chat.scrollTop = chatBottom ? chat.scrollHeight : keepCY;
+    const ni = el("opInput");
+    if(ni){ ni.value = keepV; if(keepF) ni.focus(); }
+    try{ COEUSIM.dopSegnaLetti(); }catch(_){}
+    ping();
+  }
+
+  return {
+    open, close, ping, render,
+    setAssegn(v){ try{ COEUSIM.dopSetAssegnazione(v); }catch(_){} render(); },
+    setModo(v){ try{ COEUSIM.dopSetModo(v); }catch(_){} render(); },
+    trasferisci(id, to){ try{ COEUSIM.dopTrasferisci(id, to); }catch(_){} render(); },
+    passaCall(id, to){ try{ COEUSIM.dopPassaCall(id, to); }catch(_){} render(); },
+    richiesta(id, ok){ try{ COEUSIM.dopRispondiRichiesta(id, !!ok); }catch(_){} render(); },
+    prossima(){ try{ COEUSIM.dopForzaProssima(); }catch(_){} render(); },
+    invia(){
+      const i = el("opInput"); if(!i) return;
+      try{ COEUSIM.dopInvia(i.value); }catch(_){}
+      render();
+      const ni = el("opInput"); if(ni) ni.focus();
+    },
+    preset(t){ try{ COEUSIM.dopInvia(t); }catch(_){} render(); },
   };
 })();
 
