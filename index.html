@@ -173,6 +173,7 @@
     <div class="spacer"></div>
     <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span style="position:relative"><button class="lstBtn small" id="oraBtn" title="Scegli l'orario"><span id="clockEl">08:00</span> ▾</button><span id="oraMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:180px"><div class="small" style="margin-bottom:2px">Orario di gioco:</div><div><button class="lstBtn small" data-h="0">00</button> <button class="lstBtn small" data-h="4">04</button> <button class="lstBtn small" data-h="8">08</button> <button class="lstBtn small" data-h="12">12</button> <button class="lstBtn small" data-h="16">16</button> <button class="lstBtn small" data-h="20">20</button></div><div style="margin-top:3px"><input type="time" id="oraInput" value="08:00" style="font:inherit"> <button class="lstBtn small primary" id="oraVai">Vai</button></div></span></span></div>
     <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
+    <select id="modoSel" class="lstBtn" title="Centrale operativa (cambia e resetta la partita)" onchange="COEUSIM.setModoVVF(this.value==='vvf')"><option value="118">🚑 Centrale 118</option><option value="vvf">🚒 Centrale VVF</option></select>
     <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
     <span style="position:relative"><button class="lstBtn small" id="velBtn" title="Velocità di generazione missioni" style="width:26px;padding:2px 0;text-align:center">⏱️</button><span id="velMenu" hidden style="position:absolute;left:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:140px"><div class="small" style="margin-bottom:2px">Missioni generate:</div><div><button class="lstBtn small" data-vel="tranquillo" style="width:100%;text-align:left">🐢 Con calma</button></div><div style="margin-top:2px"><button class="lstBtn small" data-vel="normale" style="width:100%;text-align:left">📞 Normale</button></div><div style="margin-top:2px"><button class="lstBtn small" data-vel="intenso" style="width:100%;text-align:left">⚡ Veloce</button></div></span></span>
     <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
@@ -233,6 +234,16 @@
 <div id="assistOverlay" style="display:none"><div id="assistWin"><div id="assistHead"><span id="assistTitle">🆘 Assistenza</span><button class="lstBtn small" id="assistX">✖</button></div><div id="assistBody"></div></div></div>
 <div id="incaricoOverlay" style="display:none"><div id="incaricoWin"><div id="incaricoHead"><span id="incaricoTitle">📋 Nuovo incarico</span><button class="lstBtn small" id="incaricoX">✖</button></div><div id="incaricoBody"></div></div></div>
 <div id="toast" hidden></div>
+<div id="modoOverlay" style="position:fixed;inset:0;z-index:2000;background:#000a;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border:2px solid #333;border-radius:10px;padding:18px 22px;max-width:440px;text-align:center">
+    <div style="font-size:18px;font-weight:bold;margin-bottom:6px">🚨 Quale centrale vuoi operare?</div>
+    <div class="small" style="margin-bottom:12px">La scelta resetta la partita. Potrai cambiare in ogni momento dal selettore in alto (resetta di nuovo).</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="lstBtn primary" style="font-size:15px;padding:8px 14px" onclick="COEUSIM.setModoVVF(false)">🚑 Centrale 118</button>
+      <button class="lstBtn primary" style="font-size:15px;padding:8px 14px" onclick="COEUSIM.setModoVVF(true)">🚒 Centrale VVF</button>
+    </div>
+  </div>
+</div>
 
 <dialog id="statDlg">
   <div class="lstHead">📊 Statistiche di centrale <span class="right"><span id="statOra" class="small"></span> <button class="lstBtn small" onclick="COEUSTATS.close()">✖</button></span></div>
@@ -289,7 +300,8 @@
     5. Click sull'indirizzo = i dettagli si aprono a tendina lì sotto (secondo click = richiudi). La Situazione con l'elenco dei pazienti (salute % colorata, scritta <b style="color:#d40000">MSA</b> in rosso di fianco alla % se richiede un medicalizzato — solo sotto il 35% (sopra la scritta sparisce), e sparisce anche quando il medicalizzato lo prende in carico — e, per ognuno, la sigla H … della destinazione quando è in trasporto o in PS) si vede sotto la registrazione quando il primo mezzo arriva sul posto (l'elenco cresce da solo se vengono scoperti altri feriti; gli incidenti con 3+ veicoli, più rari, mostrano da 0 a 6 feriti di qualsiasi gravità già da subito). Ogni paziente segue i <b>14 stati</b> (segnalato → da valutare → attesa soccorso → valutazione sanitaria → eventuale attesa liberazione/ambulanza → preso in carico → caricato → trasporto → ospedale → missione conclusa; oppure concluso sul posto, rifiuto o decesso): un solo stato alla volta, ogni passaggio con orario registrato, i terminali non si riaprono. Il lieve (≥70%) valutato può <b>✋ rifiutare il trasporto</b> (bottone nella riga). Sulla mappa lo <b>spillo è grigio solo per le missioni VVF senza codice</b>: se dai un codice a una missione VVF, lo spillo prende quel colore. Dal dettaglio: <b>Chiudi intervento</b> = chiudi (tutti i mezzi rientrano), <b>Mostra su mappa</b> = centra, quando il mezzo è PRONTO parte da solo per il PS più vicino. <b>🆘 Richiedi assistenza</b> = apre la finestra per mandare altri mezzi. I 36 PS sulla mappa (H) hanno scheda con reparti verificati e fonti (🚁 = elisuperficie); passando il cursore sopra si vedono i mezzi al momento in PS. Gli elisoccorsi trasportano SOLO agli hub con elisuperficie (Bergamo, Brescia, Como S.Anna, Lecco, Legnano, Milano, Monza, Pavia, Varese): partono da PRONTO per l'hub più vicino (mai PMA né PS minori). Con <b>⛺ PMA</b> piazzi un ospedale da campo dove vuoi (click sul tasto, poi click sulla mappa; ESC annulla, click sul marker per rimuoverlo): con una missione da <b>10+ pazienti</b> in corso accoglie i feriti come un PS (sigla H PMA), altrimenti resta inattivo; se lo rimuovi mentre ambulanze ci sono dirette, vengono rirottate al PS più vicino.<br>
     6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
     7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.<br>
-    8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.
+    8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.<br>
+    9. Con <b>🚒 Centrale VVF</b> (selettore in alto o scelta all'avvio) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -65920,6 +65932,355 @@ window.INFRA={"P":{"VET":[[45.9534,9.38768,"Grigna Settentrionale"],[45.86209,9.
 
 </script>
 <script>
+/* === src/vvf.js (inlinato) === */
+// COEUVVF — Centrale Operativa VVF (modalità separata dalla centrale 118).
+// Catalogo interventi (§2, configurabile), domande al chiamante (§1),
+// direttore di scenario (§3: fasi, eventi, richieste rinforzi §5),
+// voci radio (§6). Il motore resta in src/app.js (flag modoVVF):
+// questo modulo legge via COEUSIM.chiamata/intervento/mezziDi e scrive
+// solo campi propri (vvfDomande, vvfPiano, vvfRich) + radio via COEUSIM.radio.
+window.COEUVVF = (() => {
+  const D = () => window.GAME_DATA;
+
+  // ---------- 1. CATALOGO TIPOLOGIE (§2): 8 macro-categorie, estendibile ----------
+  // match: regex testate su (nome + " " + desc). Prima che matcha vince.
+  const CATS = [
+    { id: "incendi", label: "🔥 Incendi", match: ["incendio", "fuoco", "fiamme", "rogo", "brucia", "falo", "canna fumaria", "fulmine", "ustione"] },
+    { id: "dissesti", label: "🏚️ Dissesti e crolli", match: ["crollo", "dissesto", "cedimento", "frana", "smottamento", "voragine", "muro pericolante", "stabil", "tegole", "camino", "balcone", "cornicione", "provvisional", "sisma", "terremoto", "puntella"] },
+    { id: "stradali", label: "🚗 Stradali e veicoli", match: ["incidente stradale", "scontro tra", "tamponamento", "ribalta", "investi", "fuori strada", "incastrata sotto", "sotto il camion", "sotto l'auto", "autocarro", "mezzo pesante", "merci pericolose", "messa in sicurezza", "recupero autovetture", "recupero veicoli", "rischio incendio"] },
+    { id: "soccorso", label: "🧗 Soccorso a persone", match: ["soccorso a persona", "soccorso in montagna", "salvataggio", "recupero persona", "persona dispers", "persona bloccata", "persona caduta", "persona intrappolata", "persona in quota", "ricerca persona", "scompars", "dirupo", "macerie", "anneg", "sommozz", "in quota", "speleo", "forra"] },
+    { id: "tecnici", label: "🔧 Interventi tecnici", match: ["apertura porte", "apertura porta", "ascensore", "fuga gas", "fuoriuscita", "asfissiante", "danni d'acqua", "tubazione", "allag", "prosciuga", "idrovora", "pompa", "perdita", "impianto", "lavaggio strada", "ostacolo", "recupero merci", "servizio di assistenza", "non pi\u00f9 necessario", "polizia giudiziaria"] },
+    { id: "animali", label: "🐾 Animali e ambiente", match: ["animal", "mucca", "cavallo", "cane", "gatto", "cinghiale", "cervo", "capriolo", "api\\b", "vespe", "calabroni", "nido", "sciame", "natante", "imbarcazione", "gommone", "navigazione", "salvataggio animali"] },
+    { id: "protez", label: "🌊 Protezione civile e maxi", match: ["protezione civile", "alluvione", "esondazione", "tromba d'aria", "nubifragio", "evento atmosferico", "emergenza.*aeroport", "ricognizione aerea", "centro operativo", "evacuazione di massa", "tendopoli"] },
+  ];
+  let RX = null;
+  function rx(){ if (!RX) RX = CATS.map(c => ({ c, re: c.match.map(s => new RegExp(s, "i")) })); return RX; }
+  function testoDi(nome, desc){ return (nome || "") + " " + (desc || ""); }
+  function categoriaDi(nome, desc){
+    const t = testoDi(nome, desc);
+    for (const r of rx()) if (r.re.some(x => x.test(t))) return r.c.id;
+    return "altri";
+  }
+  function labelCat(id){
+    if (id === "altri") return "📌 Altri interventi";
+    const c = CATS.find(x => x.id === id);
+    return c ? c.label : id;
+  }
+  // Fabbisogno di base per categoria (§4): classi di mezzi VVF suggerite.
+  const FAB_BASE = {
+    incendi: ["APS", "APS", "AB"],
+    dissesti: ["APS", "CARRO"],
+    stradali: ["APS"],
+    soccorso: ["APS"],
+    tecnici: ["APS"],
+    animali: ["APS"],
+    protez: ["APS", "APS", "AB", "CARRO"],
+    altri: ["APS"],
+  };
+  // Classi veicolo da tipo mezzo VVF (dati reali MEZZI_VVF).
+  const CLASSE = {
+    "APS": "APS", "APSS": "APS", "AB": "AB", "ABP": "AB",
+    "AS": "AS", "AUTOGRU": "AUTOGRU",
+    "CARRO SOCCORSO": "CARRO", "CARRO FIAMMA": "CARRO", "CARRO ARIA": "CARRO",
+    "CARRO TELI": "CARRO", "CARRO VENTILAZIONE": "CARRO", "CARRO SAF": "CARRO",
+    "CARRO MALTEMPO": "CARRO", "CARRO SOCCORSO/VENTILAZIONE": "CARRO",
+    "NBCR": "NBCR", "SAF": "SAF", "SAF FLUVIALE": "SAF",
+    "SOMMOZZATORI": "NAUTICI", "GOMMONE": "NAUTICI",
+    "CINOFILI": "CINOFILI", "USAR": "USAR", "CONTAINER USAR": "USAR",
+    "MODULO AIB": "AIB", "MODULO BOSCHIVO": "AIB", "BOSCHIVO": "AIB",
+    "RANGER AIB": "AIB", "MODULO": "AIB", "A-TRID": "AIB", "A-TRID 50M": "AIB",
+    "TRIDIMENSIONALE": "AIB", "UNIMOG FIAMMA": "AIB",
+    "AF/UCL": "COMANDO", "UMPROVIR": "COMANDO", "GOS": "COMANDO",
+    "VETTURETTA": "LOGISTICA", "DEFENDER": "LOGISTICA", "DIFENSORE": "LOGISTICA",
+    "MASSIF": "LOGISTICA", "DUCATO": "LOGISTICA", "COMBI": "LOGISTICA",
+    "PULLMAN": "LOGISTICA", "CARRO FIAMMA-SECONDA": "CARRO",
+    "ELI": "ELI",
+  };
+  function classeVeicolo(tipo){ return CLASSE[tipo] || "ALTRO"; }
+  // Fabbisogno mirato per tipo (§4 + keyword operative).
+  function fabbisogno(nome, desc){
+    const cat = categoriaDi(nome, desc);
+    const t = testoDi(nome, desc);
+    const out = (FAB_BASE[cat] || ["APS"]).slice();
+    const has = re => re.test(t);
+    if (/piano|palazzina|condominio|teatro|ospedale|albergo|hotel|scuola|chiesa|supermercato|centro commerciale/i.test(t) && !out.includes("AS")) out.push("AS");
+    if (/bosc|sterpagli|vegetazione|macchia|campagna|raccolto|pascolo|brughiera/i.test(t) && !out.includes("AIB")) out.push("AIB");
+    if (/lago|fiume|allag|sommer|pozzo|piscina|esonda|rogge|tromba d'acqua/i.test(t)) { if (!out.includes("SAF")) out.push("SAF"); if (/lago|fiume|navigazione|natante|imbarcazione/i.test(t) && !out.includes("NAUTICI")) out.push("NAUTICI"); }
+    if (/gas|metano|GPL|cisterna|serbatoio|chimic|carburante|merci pericolose|NBCR|ammoniaca/i.test(t) && !out.includes("NBCR")) out.push("NBCR");
+    if (/tetto|quota|gru|antenna|traliccio|ponteggio|gru|gruista/i.test(t) && !out.includes("AS") && cat !== "stradali") out.push("AS");
+    if (/pesante|tir\b|autocarro|autobus|pullman|autogr[uù]|ribaltato.*camion|camion.*ribaltato/i.test(t) && !out.includes("AUTOGRU")) out.push("AUTOGRU");
+    if (/macerie|sisma|terremoto|crollo generalizzato|sbancamento/i.test(t)) { if (!out.includes("USAR")) out.push("USAR"); if (!out.includes("CARRO")) out.push("CARRO"); }
+    if (/ricerca|dispers|scompars/i.test(t) && !out.includes("CINOFILI")) out.push("CINOFILI");
+    if (/persona.*quota|quota.*persona|parete|dirupo|burrone|canalone|forra|grotta/i.test(t) && !out.includes("SAF")) out.push("SAF");
+    if (has(/elettric|fotovoltaico|cabina|trasformatore/i) && !out.includes("CARRO")) out.push("CARRO");
+    return { cat, classi: out };
+  }
+  // Coerenza mezzi inviati vs fabbisogno (§4): {ok, mancano[], classiSulPosto[]}.
+  function verificaCoerenza(mezziAssegnati, fab){
+    const pool = mezziAssegnati.map(m => classeVeicolo(m.tipo));
+    const mancano = [];
+    const resto = pool.slice();
+    for (const c of fab.classi){
+      const k = resto.indexOf(c);
+      if (k >= 0) resto.splice(k, 1);
+      else mancano.push(c);
+    }
+    return { ok: mancano.length === 0, mancano, classi: pool };
+  }
+
+  // ---------- 2. DOMANDE AL CHIAMANTE (§1) ----------
+  const DOMANDE = [
+    { id: "luogo", t: "📍 Dov'è esattamente?" },
+    { id: "persone", t: "👥 Ci sono persone coinvolte?" },
+    { id: "fumo", t: "🔥 Vede fiamme o solo fumo?" },
+    { id: "pericoli", t: "⚠️ Pericoli vicini?" },
+    { id: "accesso", t: "🚒 Si arriva facilmente?" },
+  ];
+  function rispostaDomanda(call, qid){
+    const zona = call.zona || "misto";
+    if (qid === "luogo") return `È in ${call.indirizzo} — ${call.comune} (${call.prov}).` + (zona === "natura" ? " Zona fuori paese, vi guido io al telefono." : zona === "lago" ? " Sulla riva, si vede dall'acqua." : "");
+    if (qid === "persone"){
+      const noti = (call.pazienti || []).filter(x => x != null).length;
+      let r = noti > 0 ? `Sì, ${noti} ${noti > 1 ? "persone" : "persona"} che vedo.` : "Io non vedo nessuno.";
+      if (call.pazIgnoti || call.pazDaVerificare) r += " Ma non so se c'è qualcun altro.";
+      return r;
+    }
+    if (qid === "fumo"){
+      const cat = categoriaDi(call.tipoNome, call.desc);
+      if (cat === "incendi") return ["Vedo fiamme alte, sta bruciando forte.", "Tanto fumo nero, le fiamme si vedono a tratti.", "Per ora solo fumo denso e odore acre."][Math.floor(Math.random() * 3)];
+      return "No, niente fumo né fiamme da qui.";
+    }
+    if (qid === "pericoli"){
+      const t = testoDi(call.tipoNome, call.desc);
+      const p = [];
+      if (/gas|metano|GPL|bombola/i.test(t)) p.push("c'è odore di gas");
+      if (/cavi|traliccio|elettric|fotovoltaico/i.test(t)) p.push("ci sono cavi elettrici vicini");
+      if (/folla|festa|stadio|scuola|mercato|concerto/i.test(t)) p.push("c'è gente intorno");
+      if (/traffico|strada|carreggiata/i.test(t)) p.push("passano le macchine vicino");
+      if (/crollo|dissesto|instabile|muro/i.test(t)) p.push("il muro sembra muoversi ancora");
+      return p.length ? "Sì: " + p.join(", ") + "." : "Non mi pare, niente di evidente.";
+    }
+    // accesso
+    if (zona === "strada") return "Sì, è sul ciglio della strada, vedete i lampeggianti.";
+    if (zona === "natura") return "No, dovete lasciare i mezzi e proseguire a piedi per un tratto.";
+    if (zona === "lago") return "Arrivate dalla riva; in acqua serve il gommone.";
+    if (zona === "ferro") return "Dal passaggio a livello, i binari sono lì accanto.";
+    return "Sì, il civico è raggiungibile senza problemi.";
+  }
+  function domandeHTML(call){
+    const fatte = call.vvfDomande || {};
+    const restano = DOMANDE.filter(q => !fatte[q.id]);
+    if (!restano.length) return "";
+    return `<div class="small" style="margin:4px 0">❓ Fai una domanda:</div><div class="callBtns">` +
+      restano.map(q => `<button class="lstBtn small" onclick="COEUVVF_rispondi(${call.callId},'${q.id}')">${q.t}</button>`).join("") + `</div>`;
+  }
+  function rispondi(callId, qid){
+    try {
+      const call = window.COEUSIM.chiamata(callId);
+      if (!call || !call.answered) return;
+      if (!call.vvfDomande) call.vvfDomande = {};
+      if (call.vvfDomande[qid]) return;
+      call.vvfDomande[qid] = true;
+      const q = DOMANDE.find(x => x.id === qid);
+      call.dialogo = (call.dialogo || "") + `<div class="small">❓ <b>${q ? q.t : qid}</b><br>💬 ${rispostaDomanda(call, qid)}</div>`;
+      window.COEUSIM.renderCalls();
+    } catch (_) {}
+  }
+
+  // ---------- 3. DIRETTORE DI SCENARIO (§3 + §9) + RINFORZI (§5) ----------
+  let reqSeq = 1;
+  const REQ = {}; // reqId -> {ivId}
+  function speaker(iv){
+    try {
+      const ms = window.COEUSIM.mezziDi(iv.id) || [];
+      const s = ms.find(m => m.corpo === "VVF" && m.stato === "sul_posto") || ms.find(m => m.corpo === "VVF");
+      return s ? (s.radio || s.codice) : "Centrale";
+    } catch (_) { return "Centrale"; }
+  }
+  function radioCentrale(txt, cls){ try { window.COEUSIM.radio(txt, cls || "status"); } catch (_) {} }
+  // Costruisce il piano dell'intervento al primo report: fasi + eventi + richieste.
+  function armaPiano(iv){
+    if (!iv || iv.vvfPiano) return;
+    const fab = fabbisogno(iv.tipoNome, iv.desc);
+    const cat = fab.cat;
+    const piano = [];
+    const rich = [];
+    const step = (tra, k, x) => piano.push(Object.assign({ tra, k }, x));
+    // 1) conferma sul posto
+    step(1, "conferma", {});
+    // 2) verifica coerenza + richieste tecniche mirate (§4-§5)
+    step(4, "fabbisogno", { fab });
+    const extra = fab.classi.filter(c => ["AS", "AUTOGRU", "NBCR", "SAF", "NAUTICI", "USAR", "CINOFILI", "AIB", "AB"].includes(c));
+    for (const c of extra.slice(0, 2)) rich.push({ tra: 6 + rich.length * 3, classe: c });
+    if (cat === "incendi" && /palazzina|piani|tetto|condominio/i.test(testoDi(iv.tipoNome, iv.desc))) rich.push({ tra: 8, classe: "AS" });
+    if (cat === "protez" || (iv.pazienti || []).filter(x => x != null).length >= 4) rich.push({ tra: 10, classe: "FUNZ" });
+    // 3) eventi di scenario (§9): 1-2 coerenti col tipo
+    const ev = [];
+    if (cat === "incendi"){
+      ev.push("vento");
+      ev.push(/bosc|sterpagli|vegetazione/i.test(testoDi(iv.tipoNome, iv.desc)) ? "propagazione" : "acqua");
+      if (iv.fuoco) ev.push("crollo");
+    }
+    else if (cat === "tecnici" && /gas/i.test(testoDi(iv.tipoNome, iv.desc))) ev.push("evacuazione", "acqua");
+    else if (cat === "tecnici") ev.push("acqua", "falso");
+    else if (cat === "dissesti") ev.push("crollo", "evacuazione");
+    else if (cat === "soccorso") ev.push("persona", "evacuazione");
+    else if (cat === "stradali") ev.push("viabilita", "acqua");
+    else if (cat === "animali") ev.push("falso", "persona");
+    else if (cat === "protez") ev.push("evacuazione", "vento");
+    else ev.push("falso");
+    ev.slice(0, 2).forEach((e, k) => step(8 + k * 5, "evento", { evento: e }));
+    // 4) bonifica finale (solo flavor, mai blocco chiusura)
+    step(17, "bonifica", {});
+    iv.vvfPiano = piano;
+    iv.vvfRich = [];
+    iv.vvfReqSeq = 1;
+    for (const r of rich) piano.push({ tra: r.tra, k: "richiesta", classe: r.classe });
+    piano.sort((a, b) => a.tra - b.tra);
+  }
+  const CLASSE_TXT = { APS: "un'APS", AB: "un'autobotte", AS: "un'autoscala", AUTOGRU: "un'autogrù", CARRO: "un carro soccorso", SAF: "il SAF", NAUTICI: "il nucleo nautici", NBCR: "il nucleo NBCR", USAR: "l'USAR", CINOFILI: "i cinofili", AIB: "il modulo boschivo", COMANDO: "l'unità di comando locale", LOGISTICA: "un mezzo logistico", ELI: "l'elisoccorso", FUNZ: "il funzionario tecnico", ALTRO: "altri mezzi" };
+  function nuovaRichiesta(iv, classe){
+    const id = iv.id + "-" + (iv.vvfReqSeq++);
+    const txt = classe === "FUNZ" ? "richiesto funzionario tecnico sul posto"
+      : `richiesto rinforzo: ${CLASSE_TXT[classe] || classe}`;
+    iv.vvfRich.push({ id, testo: txt, classi: [classe], stato: "aperta" });
+    REQ[id] = { ivId: iv.id };
+    radioCentrale(`🚒 ${speaker(iv)} da <b>${iv.comune}</b>: ${txt}`, "alarm");
+  }
+  function tickScena(iv, dtG){
+    if (!iv || !iv.vvfPiano) return;
+    let bang = false;
+    for (const s of iv.vvfPiano){
+      if (s.fatto) continue;
+      s.tra -= dtG;
+      if (s.tra > 0) continue;
+      s.fatto = true;
+      if (s.k === "conferma") conferma(iv);
+      else if (s.k === "fabbisogno") verificaFabbisogno(iv, s.fab);
+      else if (s.k === "richiesta") nuovaRichiesta(iv, s.classe);
+      else if (s.k === "evento") evento(iv, s.evento);
+      else if (s.k === "bonifica") radioCentrale(`🚒 ${speaker(iv)} da <b>${iv.comune}</b>: ${["bonifica in corso, quasi concluso", "messa in sicurezza quasi ultimata", "ultimi controlli prima del rientro"][Math.floor(Math.random() * 3)]}`, "status");
+      bang = true;
+    }
+    if (bang){ try { window.COEUSIM.renderListe(); } catch (_) {} }
+  }
+  function conferma(iv){
+    const cat = categoriaDi(iv.tipoNome, iv.desc);
+    const t = {
+      incendi: "incendio confermato, iniziamo l'attacco e la ricerca di persone",
+      dissesti: "dissesto confermato, transenniamo e valutiamo la stabilità",
+      stradali: "scenario confermato, mettiamo in sicurezza i veicoli",
+      soccorso: "confermiamo la persona, prepariamo il recupero",
+      tecnici: "situazione confermata, iniziamo la messa in sicurezza",
+      animali: "confermato, avviciniamo con cautela",
+      protez: "scenario confermato, organizziamo il dispositivo",
+      altri: "situazione confermata, lavoriamo in sicurezza",
+    }[cat] || "situazione confermata";
+    radioCentrale(`🚒 ${speaker(iv)} sul posto a <b>${iv.comune}</b> — ${iv.tipoNome}: ${t}`, "status");
+  }
+  function verificaFabbisogno(iv, fab){
+    let mezzi = [];
+    try { mezzi = window.COEUSIM.mezziDi(iv.id) || []; } catch (_) {}
+    const vvf = mezzi.filter(m => m.corpo === "VVF");
+    const v = verificaCoerenza(vvf, fab);
+    if (v.ok) radioCentrale(`🚒 ${speaker(iv)} da <b>${iv.comune}</b>: dispositivo adeguato, lavoriamo`, "status");
+    else radioCentrale(`🚒 ${speaker(iv)} da <b>${iv.comune}</b>: servono ${v.mancano.map(c => CLASSE_TXT[c] || c).join(", ")}`, "alarm");
+  }
+  function evento(iv, ev){
+    const sp = speaker(iv);
+    const fuoco = iv.fuoco && !iv.fuoco.spento;
+    if (ev === "vento"){
+      if (fuoco) iv.fuoco.fronte = Math.min(99, (iv.fuoco.fronte || 40) + 8);
+      radioCentrale(`💨 ${sp} da <b>${iv.comune}</b>: il vento gira e spinge il fumo verso ${fuoco ? "il fronte — fronte in crescita" : "le case vicine, controlliamo la propagazione"}`, "alarm");
+    } else if (ev === "propagazione"){
+      if (fuoco) iv.fuoco.fronte = Math.min(99, (iv.fuoco.fronte || 40) + 12);
+      radioCentrale(`🔥 ${sp} da <b>${iv.comune}</b>: il rogo si propaga, allarghiamo il perimetro`, "alarm");
+    } else if (ev === "acqua"){
+      nuovaRichiesta(iv, "AB"); // idrica insufficiente: serve l'autobotte (radio dentro)
+    } else if (ev === "crollo"){
+      if (fuoco){ iv.fuoco.fronte = Math.min(99, (iv.fuoco.fronte || 40) + 10); iv.fuoco.crollo = true; }
+      radioCentrale(`🧱 ${sp} da <b>${iv.comune}</b>: cedimento parziale della struttura — arretriamo e rivalutiamo`, "alarm");
+      nuovaRichiesta(iv, "USAR");
+    } else if (ev === "evacuazione"){
+      iv.vvfEvac = (iv.vvfEvac || 0) + Math.max(2, Math.floor(Math.random() * 8));
+      radioCentrale(`📢 ${sp} da <b>${iv.comune}</b>: evacuate ${iv.vvfEvac} persone dagli stabili vicini a scopo precauzionale`, "alarm");
+    } else if (ev === "viabilita"){
+      radioCentrale(`🚧 ${sp} da <b>${iv.comune}</b>: viabilità interrotta, deviazioni in corso con la polizia locale`, "status");
+    } else if (ev === "persona"){
+      radioCentrale(`🚒 ${sp} da <b>${iv.comune}</b>: segnalata una persona in difficoltà oltre a quelle note — verifichiamo subito`, "alarm");
+    } else { // falso attenuato (§9: non tutto peggiora)
+      if (fuoco) iv.fuoco.fronte = Math.max(0, (iv.fuoco.fronte || 40) - 25);
+      radioCentrale(`🚒 ${sp} da <b>${iv.comune}</b>: situazione meno grave del chiamato, ridimensioniamo il dispositivo`, "status");
+    }
+  }
+  // Autorizza/Rifiuta richieste (§5) — dal dettaglio intervento.
+  function richiesta(reqId, ok){
+    const r = REQ[reqId];
+    if (!r) return;
+    let iv = null;
+    try { iv = window.COEUSIM.intervento(r.ivId); } catch (_) {}
+    if (!iv || !iv.vvfRich) return;
+    const q = iv.vvfRich.find(x => x.id === reqId);
+    if (!q || q.stato !== "aperta") return;
+    if (ok){
+      q.stato = "autorizzata";
+      radioCentrale(`📻 Centrale a ${speaker(iv)}: richiesta autorizzata — ${q.testo}`, "status");
+      try { window.COEUSIM.apriAssistenza(iv.id); } catch (_) {}
+      try { window.COEUSIM.toast(`Scegli dalla finestra Assistenza: servono ${q.classi.join(", ")}`); } catch (_) {}
+    } else {
+      q.stato = "rifiutata";
+      radioCentrale(`📻 Centrale a ${speaker(iv)}: richiesta non autorizzata, si prosegue con i mezzi sul posto`, "status");
+    }
+    try { window.COEUSIM.renderListe(); } catch (_) {}
+  }
+  function richiesteHTML(iv){
+    if (!iv || !iv.vvf) return "";
+    let h = "";
+    try {
+      const mezzi = window.COEUSIM.mezziDi(iv.id) || [];
+      const v = verificaCoerenza(mezzi.filter(m => m.corpo === "VVF"), fabbisogno(iv.tipoNome, iv.desc));
+      h += `<div class="kv small">🚒 Dispositivo: ${v.ok ? "<b>adeguato</b>" : "manca " + v.mancano.join(", ")}</div>`;
+    } catch (_) {}
+    const aperte = (iv.vvfRich || []).filter(q => q.stato === "aperta");
+    const altre = (iv.vvfRich || []).filter(q => q.stato !== "aperta");
+    if (aperte.length){
+      h += `<div class="kv"><b>🆘 Richieste di rinforzo</b></div>`;
+      for (const q of aperte)
+        h += `<div class="opRow"><span style="flex:1">📨 ${q.testo}</span><button class="lstBtn small primary" data-vvfrok="${q.id}">✅ Autorizza</button><button class="lstBtn small" data-vvfrno="${q.id}">✖ Rifiuta</button></div>`;
+    }
+    for (const q of altre.slice(-3))
+      h += `<div class="small" style="color:#666">• ${q.testo} — ${q.stato === "autorizzata" ? "✅ autorizzata" : "✖ rifiutata"}</div>`;
+    return h;
+  }
+
+  // ---------- 4. CONFIGURABILE: categorie estendibili senza toccare il motore ----------
+  function categorie(){
+    return CATS.map(c => ({ id: c.id, label: c.label })) .concat([{ id: "altri", label: "📌 Altri interventi" }]);
+  }
+  function aggiungiCategoria(id, label, matchArr, fabClassi){
+    if (!id || CATS.some(c => c.id === id)) return false;
+    CATS.push({ id, label: label || id, match: matchArr || [] });
+    if (fabClassi) FAB_BASE[id] = fabClassi.slice();
+    RX = null;
+    return true;
+  }
+  function tipiCategoria(id){
+    const arr = (D().TIPI || []).filter(t => t && t.vvf);
+    return arr.filter(t => categoriaDi(t.nome, t.desc) === id).map(t => t.nome);
+  }
+
+  return {
+    categorie, categoriaDi, labelCat, aggiungiCategoria, tipiCategoria,
+    fabbisogno, classeVeicolo, verificaCoerenza,
+    domandeHTML, rispondi,
+    armaPiano, tickScena, richiesta, richiesteHTML, speaker,
+  };
+})();
+window.COEUVVF_rispondi = (callId, qid) => window.COEUVVF.rispondi(callId, qid);
+window.COEUVVF_richiesta = (reqId, ok) => window.COEUVVF.richiesta(reqId, !!ok);
+
+</script>
+<script>
 /* === src/app.js (inlinato) === */
 // COEU SIM - engine VA/CO/LC - mappa Google come LSTSim
 window.COEUSIM = (() => {
@@ -66046,7 +66407,8 @@ window.COEUSIM = (() => {
   let contaColori = {1:0,2:0,3:0,4:0}; // codici classificati finora
   // MI = Milano e tutta la provincia (133 comuni)
   let filters = { VA:true, CO:true, LC:true, MB:true, MI:true, BS:true, PC:true, PV:true, NO:true, BG:true, SO:true, P1:true, P2:true, P3:true, P4:true, soloAttesa:false, search:"" };
-  let zonaSel = "tutte"; // 🗺️ selettore zona header: tutte | ovest (VA·CO·LC·MB) | milano (MI, peso x13 alla città) | est (BG·BS·SO)
+  let zonaSel = "tutte";
+  let modoVVF = false; // centrale VVF separata: true = solo missioni/mezzi/procedure VVF (il 118 resta intatto) // 🗺️ selettore zona header: tutte | ovest (VA·CO·LC·MB) | milano (MI, peso x13 alla città) | est (BG·BS·SO)
   let markersInt = new Map();
   let markersMz = new Map();
   let sedeMarkers = []; // {marker, sede} 118 — tooltip con mezzi in sede
@@ -66248,7 +66610,7 @@ window.COEUSIM = (() => {
     // notte/fascia/boost. Resta solo l'anti-ripetizione: mai tipo già aperto, mai
     // ultimi 10 usciti.
     const open = tipiAperti();
-    const arr = D().TIPI;
+    const arr = modoVVF ? D().TIPI.filter(x=>x&&x.vvf) : D().TIPI; // centrale VVF: solo interventi VVF
     // pesi solo-meteo calcolati una volta sola (meteo/temp non cambiano nel giro)
     const cum = new Array(arr.length);
     let tot = 0;
@@ -66796,6 +67158,7 @@ window.COEUSIM = (() => {
     return 8;
   }
   function tiraEventoGrande(){
+    if(modoVVF) return null; // centrale VVF: niente maxi/MANV sanitari
     // maxiemergenza (8-15 feriti, 20-50 per le MEGA) e MANV (5-7 feriti) — i pazienti si assegnano dopo;
     // riprova finché non trova un tipo sensato, non aperto e non appena uscito
     const f = FASCE[fasciaIdx()];
@@ -67582,8 +67945,9 @@ window.COEUSIM = (() => {
  }
 function stormTick(dtGameMin){
  
-    const lista = stormLista();
-    if(!lista){ stormTimer = 0; return; }
+    let lista = stormLista();
+    if(modoVVF && lista){ const vn = {}; for(const tx of D().TIPI) if(tx&&tx.vvf) vn[tx.nome]=1; lista = lista.filter(n=>vn[n]); }
+    if(!lista || !lista.length){ stormTimer = 0; return; }
     const dmg = METEO_GRUPPO[meteo.cond];
     stormTimer += dtGameMin;
     if(stormTimer < (METEO_STORM_EVERY[dmg]||999)+rnd(0,4)) return;
@@ -67652,6 +68016,7 @@ function stormTick(dtGameMin){
     };
     iv.pazIds = (iv.pazienti||[]).map((_,k)=>"M"+iv.id+"-P"+(k+1)); // identificativo univoco per paziente, stabile per tutta la missione
     iv.pazGrav = (iv.pazienti||[]).slice(); // foto della gravita iniziale: il carico segue questa (vedi ordinaCarico)
+    if(modoVVF && isVVF) iv.emsT = rnd(4,9); // centrale VVF: EMS esterno allertato subito, consegna dopo il report
     iv.pazS = {}; iv.affidi = {}; iv.liberati = {}; iv.avvisi = {}; iv.libTimer = 0; iv.noVVFTimer = 0;
     // classifica con il colore scelto (niente punti: il codice serve solo a gestire l'intervento)
     // VVF: nessun codice, nessun conteggio nei codici classificati
@@ -67691,6 +68056,31 @@ function stormTick(dtGameMin){
 
   // checklist mezzi nella chiamata: i più vicini (118 + VVF), da inviare insieme al codice
   function callMzHTML(call){
+    if(modoVVF){
+      // centrale VVF: solo mezzi VVF (liberi vicini + impegnati dirottabili), niente 118
+      const sel = call.incaricoMz||[];
+      const ck = c => sel.includes(c) ? " checked" : "";
+      const stTx = s=>s==="viaggio"?"in viaggio":s==="rientro"?"in rientro":"sul posto";
+      const dV = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice])
+        .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
+        .sort((a,b)=>a.d-b.d).slice(0,10);
+      const bV = mezzi.filter(m=>(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto")&&m.corpo==="VVF")
+        .map(mz=>({mz, d:haversineKm(call.lat,call.lng,mz.lat,mz.lng)}))
+        .sort((a,b)=>a.d-b.d).slice(0,6);
+      let h = '<div class="small" style="margin:4px 0">🚒 Spunta i mezzi VVF da inviare (i più vicini):</div><div class="callMz">';
+      for(const e of dV)
+        h += '<label title="' + (e.mz.radio||e.mz.codice) + " — " + e.mz.tipo + " — " + e.mz.sede + '"><input type="checkbox" value="' + e.mz.codice + '"' + ck(e.mz.codice) + '> 🚒 ' + mzNomeHTML(e.mz) + ' (' + e.mz.tipo + ") — " + e.d.toFixed(1) + " km</label>";
+      if(!dV.length) h += '<div class="small">Nessun mezzo VVF libero.</div>';
+      if(bV.length){
+        h += '<div class="small" style="margin:4px 0">↩️ Impegnati — spunta per dirottarli subito (ripartono da dove sono):</div>';
+        for(const e of bV){
+          const m = e.mz;
+          h += '<label title="' + m.codice + " — " + stTx(m.stato) + '"><input type="checkbox" value="' + m.codice + '"' + ck(m.codice) + '> 🚒 ' + mzNomeHTML(m) + " (" + m.tipo + ") 🟠 " + stTx(m.stato) + " — " + e.d.toFixed(1) + " km</label>";
+        }
+      }
+      h += "</div>";
+      return h;
+    }
     const sel = call.incaricoMz||[];
     const ck = c => sel.includes(c) ? " checked" : "";
     const d118 = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice])
@@ -67756,6 +68146,7 @@ function stormTick(dtGameMin){
              <div class="intTop"><b>☎️ In linea</b><span class="opTag ${call.prop==="IA"?"opIA":"opIO"}" title="La segue: ${call.prop==="IA"?"il collega IA":"TU"}">${call.prop==="IA"?"IA":"TU"}</span><span class="cod">${hhmm(call.t0)}</span></div>
              <div class="intAddr">📍 ${luogoIV(call,true)}</div>
              <div class="dialogo">${call.dialogo}</div>
+             ${(modoVVF&&window.COEUVVF)?window.COEUVVF.domandeHTML(call):""}
              ${call.incarico
                ? '<div class="callBtns"><button class="lstBtn small primary" data-act="open">📋 Continua incarico</button></div>'
                : '<div class="callBtns"><button class="lstBtn small primary" data-act="open">📋 Crea nuovo incarico</button></div>'}
@@ -67875,12 +68266,12 @@ function stormTick(dtGameMin){
       <div class="intTop"><b>📋 Nuovo incarico</b></div>
       <div class="intAddr">📍 ${luogoIV(call,true)}</div>
       <div class="dialogo">${call.dialogo}</div>
-      <div class="small" style="margin:6px 0 2px">✍️ <b>Inserimento manuale</b> <span class="small">(al posto della chiamata: compila tutto, o lascia tutto vuoto — MEDICO ACUTO non ha dettaglio)</span></div>
+      ${modoVVF?"":`<div class="small" style="margin:6px 0 2px">✍️ <b>Inserimento manuale</b> <span class="small">(al posto della chiamata: compila tutto, o lascia tutto vuoto — MEDICO ACUTO non ha dettaglio)</span></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
         <label class="small">📍 Luogo<br><select id="manLuogoSel" style="max-width:190px">${manOptions(MAN_LUOGHI, call.manLuogo)}</select></label>
         <label class="small">📌 Motivo<br><select id="manMotivoSel" style="max-width:190px">${manOptions(MAN_MOTIVI, call.manMotivo)}</select></label>
         <label class="small">📝 Dettaglio<br><select id="manDettSel" style="max-width:190px"${call.manMotivo === "MEDICO ACUTO" ? " disabled" : ""}>${manOptions(MAN_DETT, call.manMotivo === "MEDICO ACUTO" ? null : call.manDett)}</select></label>
-      </div>
+      </div>`}
       ${callMzHTML(call)}
       ${call.vvf
         ? '<div class="small" style="margin:4px 0">🚒 Vigili del Fuoco — codice (oppure senza):</div><div class="colorBtns">' + codeBtn("R","🔴 Rosso","#d00000") + " " + codeBtn("G","🟡 Giallo","#e6a100") + " " + codeBtn("V","🟢 Verde","#35a835") + " " + codeBtn("B","⚪ Bianco","#888") + " " + codeBtn("VVF","🚒 Senza codice","#666") + "</div>"
@@ -67929,12 +68320,12 @@ function stormTick(dtGameMin){
     wirePop("#assistHead", "#assistWin", "#assistX", ()=>closeAssist());
     const iv = interventi.find(x=>x.id===assistIvId);
     if(!iv){ ov.style.display = "none"; return; }
-    const disp = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo!=="VVF"&&!cloudBusy[m.codice]);
+    const disp = mezzi.filter(m=>m.stato==="disponibile"&&!cloudBusy[m.codice]&&(modoVVF?m.corpo==="VVF":m.corpo!=="VVF"));
     const dispVVF = mezzi.filter(m=>m.stato==="disponibile"&&m.corpo==="VVF"&&!cloudBusy[m.codice]);
     body.innerHTML = `
-      <div class="intTop"><b>🆘 Assistenza</b></div>
+      <div class="intTop"><b>🆘 Assistenza${modoVVF?" — 🚒 solo VVF":""}</b></div>
       <div class="intAddr">📍 ${luogoIV(iv,true)}</div>
-      <div class="small" style="margin:4px 0">${iv.vvf ? "Scegli liberamente i mezzi da inviare (118 e/o VVF, senza vincoli):" : "Spunta i mezzi da inviare (ordinati per distanza):"}</div>
+      <div class="small" style="margin:4px 0">${modoVVF?"🚒 Solo mezzi VVF (i feriti vanno all'EMS esterno, niente 118):":(iv.vvf ? "Scegli liberamente i mezzi da inviare (118 e/o VVF, senza vincoli):" : "Spunta i mezzi da inviare (ordinati per distanza):")}</div>
       <div class="selGrid" id="selGrid"></div>
       <button class="lstBtn primary" id="sendSelBtn">🚀 Invia selezionati (0)</button>
       <details class="vvfSec" id="vvfSec">
@@ -67943,7 +68334,7 @@ function stormTick(dtGameMin){
         <button class="lstBtn primary" id="sendVvfBtn">🚀 Invia VVF selezionati (0)</button>
       </details>
       <details class="vvfSec" id="eliSec">
-        <summary>🚁 Elisoccorso <span class="small">— tutti gli elicotteri</span></summary>
+        <summary>🚁 ${modoVVF?"Elicotteri VVF":"Elisoccorso"} <span class="small">— ${modoVVF?"solo mezzi VVF":"tutti gli elicotteri"}</span></summary>
         <div id="eliGrid"></div>
         <button class="lstBtn primary" id="sendEliBtn">🚀 Invia ELI selezionati (0)</button>
       </details>
@@ -67974,7 +68365,7 @@ function stormTick(dtGameMin){
     }
     if(disp.length===0) sg.innerHTML=`<div class="small">Nessun mezzo libero.</div>`;
     // già impegnati ma dirottabili: ripartono da dove si trovano
-    const busy = mezzi.filter(m=>m.corpo!=="VVF"&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto"))
+    const busy = mezzi.filter(m=>(modoVVF?m.corpo==="VVF":m.corpo!=="VVF")&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto"))
       .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
       .sort((a,b)=>a.d-b.d).slice(0,10);
     if(busy.length){
@@ -68091,12 +68482,12 @@ function stormTick(dtGameMin){
         lab.title=`${mz.radio||mz.codice} — ${mz.tipo} — ${mz.sede}`;
         eg.appendChild(lab);
       };
-      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile"&&!cloudBusy[m.codice])
+      const eliFree = mezzi.filter(m=>m.tipo==="ELI"&&m.stato==="disponibile"&&!cloudBusy[m.codice]&&(!modoVVF||m.corpo==="VVF"))
         .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
         .sort((a,b)=>a.d-b.d);
       for(const {mz, d} of eliFree) eliAddRow(mz, ` — ${d.toFixed(1)} km`);
       if(eliFree.length===0) eg.innerHTML=`<div class="small">Nessun elicottero libero.</div>`;
-      const eliBusy = mezzi.filter(m=>m.tipo==="ELI"&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto"))
+      const eliBusy = mezzi.filter(m=>m.tipo==="ELI"&&(m.stato==="viaggio"||m.stato==="rientro"||m.stato==="sul_posto")&&(!modoVVF||m.corpo==="VVF"))
         .map(mz=>({mz, d:haversineKm(iv.lat,iv.lng,mz.lat,mz.lng)}))
         .sort((a,b)=>a.d-b.d);
       if(eliBusy.length){
@@ -69350,6 +69741,7 @@ function stormTick(dtGameMin){
     return k;
   }
   function aggiornaMSA(iv){ // una sola fonte per flag/coda/attesa (niente sistemi paralleli)
+    if(modoVVF) return; // centrale VVF: niente medicalizzati, i feriti vanno all'EMS esterno (emsEsternoTick)
     if(!iv || iv.stato==="chiuso") return;
     const L = iv.pazienti||[];
     if(!iv.msaDi) iv.msaDi = {};
@@ -69766,6 +70158,7 @@ function stormTick(dtGameMin){
     b.title = pma ? "PMA piazzato — tasto per spostarlo, click sul marker per rimuoverlo" : (pmaArmed ? "Clicca sulla mappa dove piazzare il PMA (ESC annulla)" : "Piazza un ospedale da campo (si attiva con missioni da 10+ pazienti)");
   }
   function togglePMA(){
+    if(modoVVF){ toast("⛺ Il PMA è un asset 118: non disponibile in centrale VVF"); return "off"; }
     if(pmaArmed){ pmaArmed = false; refreshPmaBtn(); toast("⛺ Piazzamento PMA annullato"); return "off"; }
     pmaArmed = true; refreshPmaBtn();
     toast("⛺ Clicca sulla mappa dove piazzare il PMA (ESC o tasto per annullare)");
@@ -70254,7 +70647,7 @@ function stormTick(dtGameMin){
         // anche a scena ferma): ogni paziente sotto il 35% chiede il medicalizzato, una
         // volta sola per paziente — il ritrovamento non aspetta le cure in corso.
         // Radio: una sola riga per missione, per il primo critico (annunciaMSA).
-        if(iv && (mz.corpo!=="VVF"||isEli(mz))){
+        if(iv && !modoVVF && (mz.corpo!=="VVF"||isEli(mz))) {
           for(let k=0;k<(iv.pazienti||[]).length;k++){
             if(iv.pazienti[k]!=null && iv.pazienti[k]<SOGLIA_MSA && pazAttivo(iv,k)){
               if(!iv.pazMSA) iv.pazMSA = [];
@@ -70471,7 +70864,7 @@ function stormTick(dtGameMin){
     verificaTimer += dtRealSec*speed/60; if(verificaTimer>=5){ verificaTimer = 0; verificaStati(); }
     codeMortiCoda();
     scenaTick(dtRealSec*speed/60); // sopralluogo, evoluzione VVF e solleciti via radio
-    dopTick(dtRealSec*speed/60); // collega IA: risposte, invii, rinforzi, richiami, sovraccarico
+    if(!modoVVF) dopTick(dtRealSec*speed/60); // collega IA: solo in centrale 118
 
     // refresh UI leggera ogni tick
     updateClock();
@@ -70576,7 +70969,7 @@ function stormTick(dtGameMin){
       ensureSupporti(iv);
       registraRichiesta(iv, "ALTRO", Math.max(iv.supporti.ALTRO.richiesti||0, (iv.pazienti||[]).length), "ambulanze per i pazienti da trasportare");
     } else apriFabbisognoSanitario(iv); // missioni VVF: la parte sanitaria vive se c'è un 118 con trasporto
-    if(s<SOGLIA_MSA){ // critico scoperto dopo: medicalizzato come al report (stessa soglia,
+    if(s<SOGLIA_MSA && !modoVVF){ // critico scoperto dopo: medicalizzato come al report (stessa soglia,
       // anche con un avanzato già sul posto: resta in coda finché non lo prende in carico)
       if(!iv.pazMSA) iv.pazMSA = [];
       iv.pazMSA[k] = true;
@@ -70585,7 +70978,7 @@ function stormTick(dtGameMin){
       annunciaMSA(iv, k); // una sola riga per missione: solo il primo critico
       aggiornaMSA(iv); // attesa se nessuno sul posto, altrimenti coda per gravità
     }
-    log(`🔍 ${nomem(mz)} a <b>${iv.comune}</b>: trovato un altro ferito (${Math.round(s)}%${s<SOGLIA_MSA?", critico":""}) — ${iv.pazienti.length} pazienti finora, serve un'altra ambulanza!`, "alarm");
+    log(`🔍 ${nomem(mz)} a <b>${iv.comune}</b>: trovato un altro ferito (${Math.round(s)}%${s<SOGLIA_MSA?", critico":""}) — ${iv.pazienti.length} pazienti finora${modoVVF?", lo prende in carico il supporto sanitario esterno":", serve un'altra ambulanza!"}`, "alarm");
     return true;
   }
   // verifiche in corso: rivela a gruppi (1-2 alla volta) oppure conferma che non ce ne sono altri
@@ -70618,7 +71011,11 @@ function stormTick(dtGameMin){
     if(iv.vvf){
       logRadio(`\uD83D\uDE92 ${nomem(mz)} sul posto a <b>${iv.comune}</b> \u2014 ${iv.emoji||""} <b>${iv.tipoNome}</b>: ${iv.desc||""} (${pazientiTXT(iv.pazienti)})`);
       const nF = pazientiInSospeso(iv);
-      if(nF>0){
+      if(nF>0 && modoVVF && window.COEUVVF){
+        logRadio("🚑 A <b>"+iv.comune+"</b>: "+nF+" ferit"+(nF>1?"i":"o")+" da assistere — supporto sanitario esterno in arrivo, i VVF restano al lavoro", "alarm");
+        if(iv.emsT==null) iv.emsT = rnd(4,9);
+      }
+      if(nF>0 && !(modoVVF && window.COEUVVF)){
         ensureSupporti(iv);
         registraRichiesta(iv, "ALTRO", Math.max(iv.supporti.ALTRO.richiesti||0, nF), "feriti da portare in PS");
         logRadio(`\uD83D\uDE91 A <b>${iv.comune}</b>: ${nF} ferit${nF>1?"i":"o"} da assistere e portare in PS \u2014 mandate un\u2019ambulanza!`, "alarm");
@@ -70633,7 +71030,8 @@ function stormTick(dtGameMin){
           const primoCritico = (iv.pazienti||[]).findIndex((s,k)=>s!=null && s<SOGLIA_MSA && pazAttivo(iv,k));
           if(primoCritico>=0 && !iv.msaDetto){ iv.msaDetto = true; logRadio(`\u23F3 A <b>${iv.comune}</b>: ${motivoMSA(iv)} \u2014 inviate un mezzo medicalizzato`, "alarm"); } // VVF col motivo: una sola riga per missione
         }
-      } else logRadio(`\u2705 ${nomem(mz)}: intervento in gestione, nessun altro mezzo richiesto`);
+      } else if(!(modoVVF && nF>0)) logRadio(`\u2705 ${nomem(mz)}: intervento in gestione, nessun altro mezzo richiesto`);
+      if(modoVVF && window.COEUVVF){ try{ COEUVVF.armaPiano(iv); }catch(_){} } // centrale VVF: piano di scenario
       return;
     }
     const dot = `<span class="prioDot" style="background:${prioColor(iv.prio)}"></span>`;
@@ -70868,6 +71266,34 @@ function stormTick(dtGameMin){
 
   // sopralluogo ed evoluzione scene, ogni tick: gli equipaggi valutano prima di riferire;
   // i VVF aggiornano via radio mentre lavorano; i feriti senza ambulanza vengono sollecitati
+  // ---------- EMS ESTERNO (solo centrale VVF) ----------
+  // I VVF non trasportano: i feriti restano in attesa del supporto sanitario
+  // esterno (autoambulanza convenzionata), che arriva da solo dopo 6-12
+  // game-min dal report e li prende in carico (stato 10 + consegnati, come un
+  // handover). La missione poi si chiude col rientro manuale o Chiudi.
+  function emsEsternoTick(iv, dtG){
+    if(!modoVVF || !iv || iv.stato==="chiuso" || !iv.vvf) return;
+    const nF = pazientiInSospeso(iv);
+    if(!nF) { iv.emsT = null; return; }
+    if(iv.emsT==null) iv.emsT = rnd(4,9);
+    else {
+      iv.emsT -= dtG;
+      if(iv.emsT<=0){
+        iv.emsT = null; // l'ambulanza esterna va da sola, anche prima del report VVF
+        let n = 0;
+        for(let k=0;k<(iv.pazienti||[]).length;k++){
+          if(iv.pazienti[k]==null || (iv.pazConsegnati&&iv.pazConsegnati[k]) || !pazAttivo(iv,k)) continue;
+          if(!iv.pazConsegnati) iv.pazConsegnati = {};
+          iv.pazConsegnati[k] = true;
+          forzaStatoPaziente(iv,k,10,"supporto sanitario esterno: preso in carico e portato in PS");
+          n++;
+        }
+        if(n>0) logRadio(`🚑 Supporto sanitario esterno a <b>${iv.comune}</b>: ${n} ferit${n>1?"i presi":"o preso"} in carico e portat${n>1?"i":"o"} in PS — i VVF restano al lavoro`, "status");
+        renderListe();
+      }
+    }
+  }
+
   function scenaTick(dtG){
     for(const iv of interventi){
       if(iv.stato==="chiuso") continue;
@@ -70911,7 +71337,7 @@ function stormTick(dtGameMin){
         iv.sollecito = (iv.sollecito==null ? 10 : iv.sollecito) - dtG;
         if(iv.sollecito<=0){
           iv.sollecito = 12;
-          if(bisAmb>0) log(iaRadio("sollecito", {comune:iv.comune, n:bisAmb}, `⏳ A <b>${iv.comune}</b>: ${bisAmb} ferit${bisAmb>1?"i":"o"} ancora senza ambulanza \u2014 serve un mezzo sul posto`), "alarm");
+          if(bisAmb>0 && !modoVVF) log(iaRadio("sollecito", {comune:iv.comune, n:bisAmb}, `⏳ A <b>${iv.comune}</b>: ${bisAmb} ferit${bisAmb>1?"i":"o"} ancora senza ambulanza \u2014 serve un mezzo sul posto`), "alarm");
           else log(`🔍 A <b>${iv.comune}</b>: verifiche sui feriti non completate — mandate un mezzo a controllare`, "alarm");
         }
       } else iv.sollecito = 10;
@@ -70928,6 +71354,10 @@ function stormTick(dtGameMin){
       }
       aggiornaMSA(iv); // coda MSA/MSI per gravità + attesa: una sola fonte, a ogni tick
       affidoImmediato(iv); // scritta "in attesa di ambulanza": sparisce appena un'ambulanza è sul posto (affido immediato)
+      if(modoVVF && iv.vvf){
+        try{ if(window.COEUVVF) window.COEUVVF.tickScena(iv, dtG); }catch(_){}
+        emsEsternoTick(iv, dtG); // supporto sanitario esterno: corre anche a scena vuota
+      }
       // anti-zombie: verifica aperta ma niente da scoprire e nessuno sul posto che possa
       // verificare (es. collettivi con tutti i feriti già noti e mezzi già ripartiti ai PS):
       // gira anche a scena vuota (prima del gate sulPosto); chiude e prova la chiusura
@@ -71741,10 +72171,10 @@ function stormTick(dtGameMin){
     if(mzEl){
       mzEl.innerHTML="";
       const f2 = document.createDocumentFragment();
-      const mezzi118 = mezzi.filter(m=>m.corpo!=="VVF" && m.tipo!=="CNSAS" && m.tipo!=="PMA");
-      const vvfAttivi = mezzi.filter(m=>m.corpo==="VVF" && m.interventoId!=null);
-      const cnsasAttivi = mezzi.filter(m=>m.tipo==="CNSAS" && m.interventoId!=null);
-      const pmaAttivi = mezzi.filter(m=>m.tipo==="PMA" && m.interventoId!=null);
+      const mezzi118 = modoVVF ? [] : mezzi.filter(m=>m.corpo!=="VVF" && m.tipo!=="CNSAS" && m.tipo!=="PMA");
+      const vvfAttivi = modoVVF ? mezzi.filter(m=>m.corpo==="VVF") : mezzi.filter(m=>m.corpo==="VVF" && m.interventoId!=null);
+      const cnsasAttivi = modoVVF ? [] : mezzi.filter(m=>m.tipo==="CNSAS" && m.interventoId!=null);
+      const pmaAttivi = modoVVF ? [] : mezzi.filter(m=>m.tipo==="PMA" && m.interventoId!=null);
       for(const mz of [...mezzi118, ...vvfAttivi, ...cnsasAttivi, ...pmaAttivi]){
         if(cloudBusy[mz.codice] && mz.stato==="disponibile") continue; // occupato dal cloud: nascosto
         const d=document.createElement("div");
@@ -71756,9 +72186,9 @@ function stormTick(dtGameMin){
         f2.appendChild(d);
       }
       mzEl.appendChild(f2);
-      const disp = mezzi118.filter(m=>mezzoLibero(m)).length;
+      const disp = (modoVVF?vvfAttivi:mezzi118).filter(m=>mezzoLibero(m)).length;
       const cloudN = mezzi.filter(m=>m.stato==="disponibile"&&cloudBusy[m.codice]).length;
-      if($("mzCount")) $("mzCount").textContent = `${disp}/${mezzi118.length}` + (cloudN ? ` ☁️${cloudN}` : "");
+      if($("mzCount")) $("mzCount").textContent = (modoVVF?`${disp}/${vvfAttivi.length} 🚒`:`${disp}/${mezzi118.length}`) + (cloudN ? ` ☁️${cloudN}` : "");
     }
     if(selMz) showMzDetail(selMz);
     renderDetail();
@@ -71843,7 +72273,7 @@ function stormTick(dtGameMin){
       if(iv.stato==="chiuso") return; // già chiusa: niente doppi
       // niente chiusure in anticipo: paziente a bordo o feriti non consegnati (118 o VVF)
       if(mezziConPaziente(iv).length>0){ toast("\uD83C\uDFE5 C\u2019\u00e8 un paziente a bordo: prima la consegna in PS"); return; }
-      if(pazientiInSospeso(iv)>0 && (iv.trasporto||iv.vvf)){ toast(iv.vvf && !iv.trasporto ? "\uD83D\uDE92 Ci sono feriti senza ambulanza: mandane una prima di chiudere" : "\uD83C\uDFE5 Ci sono pazienti non ancora consegnati: completa i trasporti prima di chiudere"); return; }
+      if(pazientiInSospeso(iv)>0 && (iv.trasporto||iv.vvf)){ if(modoVVF){ toast("🚒 Ci sono feriti in attesa del supporto sanitario esterno"); return; } toast(iv.vvf && !iv.trasporto ? "\uD83D\uDE92 Ci sono feriti senza ambulanza: mandane una prima di chiudere" : "\uD83C\uDFE5 Ci sono pazienti non ancora consegnati: completa i trasporti prima di chiudere"); return; }
       chiudiPazientiMissione(iv,"manuale");
       dopHookChiudi(iv); // statistiche per operatore (TU/IA)
       iv.stato="chiuso"; iv.gestito=true; chiusi++; score+=50;
@@ -71871,6 +72301,18 @@ function stormTick(dtGameMin){
       // il trasporto parte da solo appena il paziente è a bordo: niente tasti, niente rientro manuale
     }
     if(!os.children.length) os.innerHTML = `<div class="small">—</div>`;
+    if(modoVVF && window.COEUVVF && iv.vvf){
+      // centrale VVF: dispositivo + richieste di rinforzo (autorizza/rifiuta)
+      let rq = null;
+      try{ rq = window.COEUVVF.richiesteHTML(iv); }catch(_){ rq = null; }
+      if(rq){
+        const rd = document.createElement("div");
+        rd.innerHTML = rq;
+        box.appendChild(rd);
+        box.querySelectorAll("[data-vvfrok]").forEach(b=>{ b.onclick = ()=>{ try{ window.COEUVVF.richiesta(b.getAttribute("data-vvfrok"), true); }catch(_){} }; });
+        box.querySelectorAll("[data-vvfrno]").forEach(b=>{ b.onclick = ()=>{ try{ window.COEUVVF.richiesta(b.getAttribute("data-vvfrno"), false); }catch(_){} }; });
+      }
+    }
   }
 
   // ---------- UI helpers ----------
@@ -72096,6 +72538,7 @@ function stormTick(dtGameMin){
   }
   // punto di pubblicazione: ogni nuova chiamata riceve il proprietario operativo
   function dopAssegnaCall(call, forza){
+    if(modoVVF){ call.prop = "IO"; return "IO"; } // centrale VVF: niente collega IA
     let p = "IO";
     const modo = dopModo==="pausa" ? "solo-tu" : (forza || dopForceNext || dopAssegn);
     dopForceNext = null;
@@ -72457,7 +72900,43 @@ function stormTick(dtGameMin){
     return {assegn:dopAssegn, modo:dopModo, caricoIO:dopCarico("IO"), caricoIA:dopCarico("IA"),
       io, ia, chiamate:calls, richieste:dopRich.slice(), chat:dopChat.slice(-30), nonLetti:dopNonLetti, stats:s};
   }
- return {
+   // ---------- MODALITA CENTRALE: 118 oppure VVF (separata, 118 intatto) ----------
+  // VVF: solo TIPI vvf, niente maxi/MANV, niente MSA/118, EMS esterno per i feriti,
+  // liste/checklist/assistenza solo VVF, PMA/fasce/doppio-operatore nascosti,
+  // sedi 118 + ospedali nascosti in mappa. Il 118 non cambia (tutti i gate sono
+  // dietro modoVVF). Il cambio resetta la partita ma la modalità resta.
+  function doReset(){
+    pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); dopResetTurno(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats();
+  }
+  function syncModoUI(){
+    try{
+      const s = document.getElementById("modoSel"); if(s) s.value = modoVVF ? "vvf" : "118";
+      const t = document.querySelector("#lstTop .title");
+      if(t) t.textContent = modoVVF ? "🚒 Centrale Operativa VVF — il soccorso tecnico non si ferma mai!" : "🚨 Simulatore Emergenze - soreu dei laghi - Il soccorso non si ferma mai!- mezzi reali";
+      for(const id of ["pmaBtn","fasceBtn","fascePanel"]) { const e = document.getElementById(id); if(e) e.hidden = !!modoVVF; }
+      const opB = document.querySelector('[onclick="COEUDOP.open()"]'); if(opB) opB.hidden = !!modoVVF;
+      const ov = document.getElementById("modoOverlay"); if(ov) ov.style.display = "none";
+      if(map){
+        try{
+          if(modoVVF){ if(layerSedi && map.hasLayer(layerSedi)) map.removeLayer(layerSedi); if(layerVVF && !map.hasLayer(layerVVF)) layerVVF.addTo(map); }
+          else { if(layerSedi && !map.hasLayer(layerSedi)) layerSedi.addTo(map); if(layerVVF && !map.hasLayer(layerVVF)) layerVVF.addTo(map); }
+        }catch(_){}
+      }
+      renderCalls(); renderListe(); updateStats();
+    }catch(_){}
+  }
+  function setModoVVF(m){
+    const nv = !!m;
+    if(nv===modoVVF){ syncModoUI(); return modoVVF; }
+    modoVVF = nv;
+    pmaArmed = false;
+    try{ if(typeof refreshPmaBtn==="function") refreshPmaBtn(); }catch(_){}
+    doReset();
+    syncModoUI();
+    toast(modoVVF ? "🚒 Centrale Operativa VVF: solo interventi e mezzi VVF" : "🚑 Centrale 118: operatività completa");
+    return modoVVF;
+  }
+return {
    boot, generaN, nuovaChiamata, makeChiamataTipo, accettaChiamata, rifiutaChiamata, fuocoStato, fuocoClasse,
     creaChiamataQui, debugZone, statistiche, statsCSV, statsSave, statsLoad, statsReset,
     manLuoghi(){ return MAN_LUOGHI.slice(); },
@@ -72468,6 +72947,21 @@ function stormTick(dtGameMin){
     btReset(){ btInit(); btSave(); },
     nomeMezzo(cod){ const m = mezzi.find(x=>x&&x.codice===cod); return m ? (m.radio||m.codice) : cod; },
     setMezziCloudOccupati, mezziCloudOccupati,
+    // centrale VVF (window.COEUVVF): accesso in lettura + UI condivisa
+    chiamata(callId){ return chiamate.find(c=>c.callId===callId) || null; },
+    intervento(id){ return interventi.find(x=>x.id===id) || null; },
+    mezziDi(ivId){ return mezzi.filter(m=>m && m.interventoId===ivId); },
+    radio(msg, cls){ logRadio(msg, cls); },
+    toast(msg){ toast(msg); },
+    renderCalls(){ renderCalls(); },
+    renderListe(){ renderListe(); },
+    apriAssistenza(ivId){ openAssist(ivId); },
+    setModoVVF(m){ return setModoVVF(m); },
+    syncModoUI(){ syncModoUI(); },
+    get modoVVF(){ return modoVVF; },
+    liberiVVF(){ return mezzi.filter(m=>m && m.corpo==="VVF" && m.stato==="disponibile").slice(0,12).map(m=>({codice:m.codice, tipo:m.tipo, sede:m.sede})); },
+    openIncarico(id){ openIncarico(id); },
+    callMzHTML(id){ const c = chiamate.find(x=>x.callId===id); return c ? callMzHTML(c) : ""; },
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
     // doppio operatore TU+IA: stato pannello, controlli, trasferimenti, chat, statistiche
     dopStato(){ return dopStato(); },
@@ -72515,7 +73009,7 @@ function stormTick(dtGameMin){
     syncFasce(){ syncFasce(); },
     getMeteo(){ return meteo.cond+", "+Math.round(meteo.temp)+" °C"; },
     chiudiChiusi(){ interventi=interventi.filter(i=>i.stato!=="chiuso"); refreshMarkers(); renderListe(); updateStats(); },
-    reset(){ pmaReset(); fuocoReset(); interventi=[]; chiamate=[]; ultimiTipi=[]; ultimeChiamate=[]; storicoPazienti=[]; idCounter=1; callCounter=1; selectedId=null; selMz=null; highlightCall=null; chiusi=0; score=0; contaColori={1:0,2:0,3:0,4:0}; clockMin=8*60; flusso.fuochi=[]; cloudBusy={}; programmaFlusso(); statsReset(); dopResetTurno(); try{ if(window.COEUGLOB) COEUGLOB.resetSession(); }catch(_){} initMezzi(); refreshCallMarkers(); refreshMarkers(); renderCalls(); renderListe(); updateStats(); },
+    reset(){ doReset(); },
     listMezziCodici(){ return mezzi.map(m=>m.codice); },
     // test generazioni: debugPazienti("Incidente stradale", 8) → 8 possibili equipaggi di feriti
     debugPazienti(nome, n){
