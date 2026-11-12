@@ -149,7 +149,6 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         <span class="name">🚨 Simulatore Emergenze</span> <small style="font-weight:normal;opacity:.7">VARESE · COMO · LECCO · MONZA + altre province</small>
       </div>
       <button class="searchbtn" id="searchBtn" title="Cerca">🔍</button>
-      <button class="searchbtn" id="vvfBtn" title="Vai alla sezione 🚒 Interventi VVF">🚒</button>
     </div>
     <div class="toolbar" id="toolbar">
       <input id="cerca" type="search" placeholder="🔍 Cerca tipologia, luogo, comune…" autocomplete="off">
@@ -729,7 +728,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         '<div class="comp">' + esc(ospBreve) + "</div>" +
         '<div class="sub">' + topOspN + " trasporti</div></div>";
     }
-    t += '<div class="pannello" id="sezioneVVF"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
+    t += '<div class="pannello"><h3>🚒 INTERVENTI VVF</h3><b style="font-size:18px">' + intVVF + "</b></div>";
     var mortR = null, mortN = 0, mortT = "";
     righe7.forEach(function(r){
       var nm = 0;
@@ -920,10 +919,6 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     $("cerca").addEventListener("input", disegna);
     $("filtroStato").addEventListener("change", disegna);
     $("cfgBtn").addEventListener("click", mostraSetup);
-    $("vvfBtn").addEventListener("click", function(){
-      var s = $("sezioneVVF");
-      if(s && s.scrollIntoView) s.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
     $("searchBtn").addEventListener("click", function(){
       var t = $("toolbar");
       t.style.display = (t.style.display === "none") ? "flex" : "none";

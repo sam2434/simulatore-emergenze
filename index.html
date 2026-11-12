@@ -174,6 +174,7 @@
     <div id="lstStats">Aperti <b id="statAperti">0</b> • In attesa <b id="statAttesa">0</b> • Mezzi <b id="statMezzi">0</b> • Chiusi <b id="statChiusi">0</b> • <span style="position:relative"><button class="lstBtn small" id="oraBtn" title="Scegli l'orario"><span id="clockEl">08:00</span> ▾</button><span id="oraMenu" hidden style="position:absolute;right:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:180px"><div class="small" style="margin-bottom:2px">Orario di gioco:</div><div><button class="lstBtn small" data-h="0">00</button> <button class="lstBtn small" data-h="4">04</button> <button class="lstBtn small" data-h="8">08</button> <button class="lstBtn small" data-h="12">12</button> <button class="lstBtn small" data-h="16">16</button> <button class="lstBtn small" data-h="20">20</button></div><div style="margin-top:3px"><input type="time" id="oraInput" value="08:00" style="font:inherit"> <button class="lstBtn small primary" id="oraVai">Vai</button></div></span></span></div>
     <button class="lstBtn primary" onclick="COEUSIM.nuovaChiamata()">📞 Nuova chiamata</button>
     <select id="modoSel" class="lstBtn" title="Centrale operativa (cambia e resetta la partita)" onchange="COEUSIM.setModoVVF(this.value==='vvf')"><option value="118">🚑 Centrale 118</option><option value="vvf">🚒 Centrale VVF</option></select>
+    <button class="lstBtn" id="vvfGoBtn" title="Vai alla Centrale Operativa VVF (solo missioni e mezzi VVF); se sei già in VVF apre la guida della sezione" onclick="vaiVVF()">🚒 Vai al VVF</button>
     <button class="lstBtn" id="inflowBtn" onclick="toggleInflow(this)">Afflusso: OFF</button>
     <span style="position:relative"><button class="lstBtn small" id="velBtn" title="Velocità di generazione missioni" style="width:26px;padding:2px 0;text-align:center">⏱️</button><span id="velMenu" hidden style="position:absolute;left:0;top:110%;z-index:1000;background:#fff;border:1px solid #808080;padding:3px;min-width:140px"><div class="small" style="margin-bottom:2px">Missioni generate:</div><div><button class="lstBtn small" data-vel="tranquillo" style="width:100%;text-align:left">🐢 Con calma</button></div><div style="margin-top:2px"><button class="lstBtn small" data-vel="normale" style="width:100%;text-align:left">📞 Normale</button></div><div style="margin-top:2px"><button class="lstBtn small" data-vel="intenso" style="width:100%;text-align:left">⚡ Veloce</button></div></span></span>
     <button class="lstBtn" id="fasceBtn" onclick="toggleFasce()">⏰ Fasce</button>
@@ -301,7 +302,7 @@
     6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
     7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.<br>
     8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.<br>
-    9. Con <b>🚒 Centrale VVF</b> (selettore in alto o scelta all'avvio) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.
+    <span id="vvfHelpSec">9. Con <b>🚒 Centrale VVF</b> (selettore in alto, scelta all'avvio o pulsante 🚒 Vai al VVF) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.</span>
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -66322,10 +66323,12 @@ window.COEUSIM = (() => {
   // --- VELOCITÀ REALISTICHE stile LSTSim (formula ufficiale wiki LSTSim/Fahrzeuge):
   // base = 85% del limite del tratto + bonus lampeggianti (<40 km/h: +50%,
   // >=60: +30%, in mezzo interpolazione lineare); AUTOMEDICA (NEF): +20% piatto;
+  // +10% su tutti i tratti non autostradali (VEL_UP, richiesta utente: un pelo più scattanti);
   // autostrada (tratto >= 90): velocità reale; elicottero (RTH): 240 km/h, mai
   // influenzato dal meteo. Il meteo frena solo i terrestri: pioggia -5%,
   // temporale/grandine/nebbia/intensa -10%, neve/ghiaccio -15%.
   const ELI_VEL = 240; // RTH come LSTSim
+  const VEL_UP = 1.1; // +10% leggero sui tratti calcolati (non su autostrada reale né eli)
   // fattore meteo sulla velocità (solo terrestri; gli eli non ne risentono)
   function meteoVelFattore(){
     const g = METEO_GRUPPO[meteo.cond]||"";
@@ -69444,12 +69447,13 @@ function stormTick(dtGameMin){
   // formula ufficiale wiki LSTSim: 85% del limite + bonus lampeggianti
   // (<40 km/h: +50%; >=60: +30%; in mezzo interpolazione lineare).
   // AUTOMEDICA (NEF): +20% piatto. Autostrade (tratto OSRM >= 90): la reale.
+  // VEL_UP (+10%) su tutto il ramo calcolato, mai sull'autostrada reale.
   function lstSegVel(kmh, mz){
     if(kmh>=90) return kmh;
     const bonus = kmh<40 ? 1.5 : (kmh>=60 ? 1.3 : 1.5-(kmh-40)/20*0.2);
     let v = kmh*0.85*bonus;
     if(mz && mz.tipo==="AUTOMEDICA") v *= 1.2;
-    return v;
+    return v*VEL_UP;
   }
   // allinea le velocita OSRM (una per segmento annotato) ai punti della geometria:
   // ogni tratto eredita la velocita del segmento che lo contiene (LSTSim sotto i 90, reale sopra; 30-130)
@@ -72913,7 +72917,9 @@ function stormTick(dtGameMin){
       const s = document.getElementById("modoSel"); if(s) s.value = modoVVF ? "vvf" : "118";
       const t = document.querySelector("#lstTop .title");
       if(t) t.textContent = modoVVF ? "🚒 Centrale Operativa VVF — il soccorso tecnico non si ferma mai!" : "🚨 Simulatore Emergenze - soreu dei laghi - Il soccorso non si ferma mai!- mezzi reali";
-      for(const id of ["pmaBtn","fasceBtn","fascePanel"]) { const e = document.getElementById(id); if(e) e.hidden = !!modoVVF; }
+      for(const id of ["pmaBtn","fasceBtn"]) { const e = document.getElementById(id); if(e) e.hidden = !!modoVVF; }
+      const fp = document.getElementById("fascePanel");
+      if(fp){ if(modoVVF){ fp.dataset.pre = fp.hidden ? "1" : "0"; fp.hidden = true; } else if(fp.dataset.pre === "0"){ fp.hidden = false; delete fp.dataset.pre; } }
       const opB = document.querySelector('[onclick="COEUDOP.open()"]'); if(opB) opB.hidden = !!modoVVF;
       const ov = document.getElementById("modoOverlay"); if(ov) ov.style.display = "none";
       if(map){
@@ -74519,6 +74525,19 @@ window.COEULIVE = (() => {
     p.hidden = !p.hidden;
     document.getElementById("fasceBtn").classList.toggle("active", !p.hidden);
     if(!p.hidden && window.COEUSIM && COEUSIM.syncFasce) COEUSIM.syncFasce();
+  }
+  function vaiVVF(){
+    if(window.COEUSIM && !COEUSIM.modoVVF){
+      COEUSIM.setModoVVF(true);
+      var s = document.getElementById("modoSel"); if(s) s.value = "vvf";
+    }else{
+      var d = document.getElementById("helpDlg");
+      if(!d) return;
+      d.style.maxHeight = "92vh"; d.style.overflow = "auto";
+      if(!d.open) d.showModal();
+      var t = document.getElementById("vvfHelpSec");
+      if(t) d.scrollTop = Math.max(0, t.offsetTop - 12);
+    }
   }
   function switchBase(which){
     if(window.COEUSIM && COEUSIM.switchBase) COEUSIM.switchBase(which);
