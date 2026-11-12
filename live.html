@@ -235,7 +235,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       })
       .catch(function(){ /* resta l'ultimo valore noto */ });
   }
-  var righe = [], righe48 = [], righe7 = [], canale = null, client = null, pronte = false;
+  var righe = [], righe48 = [], righe7 = [], canale = null, client = null, pronte = false, totFetch = 0;
 
   var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
 
@@ -479,8 +479,32 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return ((r.tipologia || "") + " " + (r.localita || "") + " " + (r.comune || "")).toLowerCase().indexOf(q) >= 0;
     });
     var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
+    var chiuse = righe.filter(function(r){ return r.stato === "chiusa"; }).length;
     $("conto").textContent = "· " + aperte + " aperte · aggiornato " + new Date().toLocaleTimeString("it-IT");
-    $("vuoto").hidden = vis.length > 0;
+    var box = $("vuoto");
+    box.hidden = vis.length > 0;
+    if(!vis.length){
+      if(righe.length && !totFetch) totFetch = righe.length;
+      if(!righe.length && totFetch > 0){
+        box.innerHTML = "Nessuna missione di <b>oggi</b>: nel database ci sono " + totFetch +
+          " righe di altri giorni (a mezzanotte il tabellone riparte da zero). 🚑";
+      }else if(righe.length && chiuse === righe.length && f === "attive"){
+        box.innerHTML = "Oggi ci sono già <b>" + chiuse + "</b> missioni chiuse e nessuna aperta: " +
+          "cambia il filtro in <b>«Tutte quelle di oggi»</b> per vederle. 🚑";
+      }else if(righe.length && q){
+        box.innerHTML = "Nessun risultato per questa ricerca tra le <b>" + righe.length +
+          "</b> missioni di oggi: svuota il campo 🔍. 🚑";
+      }else if(righe.length){
+        box.innerHTML = "Nessuna missione con questo filtro tra le <b>" + righe.length +
+          "</b> di oggi: prova <b>«Tutte quelle di oggi»</b>. 🚑";
+      }else{
+        box.innerHTML = "Nessuna missione pubblicata al momento. 🚑<br>" +
+          '<small style="color:var(--mut)">Se nel simulatore ci sono missioni aperte, controlla: ' +
+          "1) stesso Project URL + Publishable key qui e nel simulatore (⚙️ Connessione), " +
+          "2) nel simulatore login operatore fatto e scritta 🟢 live con orario, " +
+          "3) toggle pubblica su ON, 4) missioni create oggi.</small>";
+      }
+    }
     var visSX = vis.filter(function(r){ return !inDX(r); });
     var visDX = vis.filter(function(r){ return inDX(r); });
     $("contoSX").textContent = "· " + visSX.length;
@@ -859,6 +883,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       if(res.error) throw res.error;
       // solo oggi: a mezzanotte il tabellone riparte da zero (tabella + pannello OGGI);
       // i pannelli di destra lavorano su oggi + ieri
+      totFetch = (res.data || []).length;
       righe = (res.data || []).filter(diOggi);
       righe48 = (res.data || []).filter(nelle48h);
       righe7 = (res.data || []).filter(nellaSettimana);
