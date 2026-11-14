@@ -236,6 +236,9 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       .catch(function(){ /* resta l'ultimo valore noto */ });
   }
   var righe = [], righe48 = [], righe7 = [], canale = null, client = null, pronte = false, totFetch = 0;
+  // Anti-blocco 24h: guardia ricariche sovrapposte, ultimo fetch riuscito,
+  // debounce eventi realtime, timer di ri-sottoscrizione, ultimo evento realtime.
+  var ricaricaInCorso = false, ultimoOk = 0, resubTimer = null, ultimaRealtime = 0;
 
   var LS_CFG = "coeulive_config"; // configurazione solo su questo browser
 
@@ -480,7 +483,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     });
     var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
     var chiuse = righe.filter(function(r){ return r.stato === "chiusa"; }).length;
-    $("conto").textContent = "· " + aperte + " aperte · " + righe.length + " di oggi / " + totFetch + " nel database · aggiornato " + new Date().toLocaleTimeString("it-IT");
+    statoRiga();
     var box = $("vuoto");
     box.hidden = vis.length > 0;
     if(!vis.length){
@@ -871,8 +874,43 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     if(btn) btn.onclick = function(){ b.hidden = true; ricarica(); };
   }
 
-  async function ricarica(){
+  // Realtime con riconnessione: se il canale cade (stato CLOSED/ERROR/TIMED_OUT),
+  // riprova ogni 30s. Gli eventi in raffica vengono accorpati (max 1 ricarica / 5s).
+  function programmaResub(){
+    if(resubTimer) return;
+    resubTimer = setTimeout(function(){ resubTimer = null; sottoscriviRealtime(); }, 30000);
+  }
+  function sottoscriviRealtime(){
     if(!client) return;
+    try{
+      if(canale){ try{ client.removeChannel(canale); }catch(_){} canale = null; }
+      canale = client.channel("missioni-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "missioni_live" }, function(){
+          var ora = Date.now();
+          if(ora - ultimaRealtime < 5000) return;
+          ultimaRealtime = ora;
+          ricarica();
+        })
+        .subscribe(function(stato){
+          if(stato === "SUBSCRIBED"){ if(resubTimer){ clearTimeout(resubTimer); resubTimer = null; } }
+          else if(stato === "CLOSED" || stato === "CHANNEL_ERROR" || stato === "TIMED_OUT"){ programmaResub(); }
+        });
+    }catch(_){ programmaResub(); }
+  }
+  // Riga di stato con avviso se i dati sono fermi da oltre 3 minuti.
+  function statoRiga(){
+    var aperte = righe.filter(function(r){ return r.stato === "attiva" || r.stato === "in_corso"; }).length;
+    var txt = "· " + aperte + " aperte · " + righe.length + " di oggi / " + totFetch + " nel database · aggiornato " + new Date().toLocaleTimeString("it-IT");
+    if(ultimoOk && Date.now() - ultimoOk > 180000){
+      txt += " · ⚠️ dati fermi da " + Math.round((Date.now() - ultimoOk) / 60000) + " min — riconnessione in corso…";
+    }
+    var el = $("conto");
+    if(el) el.textContent = txt;
+  }
+
+  async function ricarica(){
+    if(!client || ricaricaInCorso) return; // un giro appeso alla rete non ne accumula altri
+    ricaricaInCorso = true;
     try{
       var q = client.from("missioni_live")
         .select("missione_id,tipologia,descrizione,localita,comune,provincia,num_pazienti,pazienti,stato,codice,mezzi,cronologia,origine,created_at,updated_at,chiusa_il")
@@ -888,6 +926,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       righe48 = (res.data || []).filter(nelle48h);
       righe7 = (res.data || []).filter(nellaSettimana);
       pronte = true;
+      ultimoOk = Date.now();
+      $("errBox").hidden = true; // errore rientrato: via il banner, non resta appeso per sempre
       $("caricamento").hidden = true;
       disegna();
     }catch(e){
@@ -895,6 +935,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       $("caricamento").hidden = true;
       if(erroreDiRete(msg)) mostraErroreRete(msg);
       else mostraErrore("impossibile caricare le missioni (" + msg.slice(0, 180) + "). Il gioco non è toccato: riprova tra poco.", true);
+    }finally{
+      ricaricaInCorso = false;
     }
   }
 
@@ -933,12 +975,18 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
       return;
     }
     ricarica();
-    try{
-      canale = client.channel("missioni-live")
-        .on("postgres_changes", { event: "*", schema: "public", table: "missioni_live" }, function(){ ricarica(); })
-        .subscribe();
-    }catch(_){ /* il polling sotto copre comunque gli aggiornamenti */ }
+    sottoscriviRealtime();
     setInterval(ricarica, POLL_MS); // rete di sicurezza se il Realtime salta
+    // Tab chiusa in background per ore: al ritorno ricarica subito se i dati sono vecchi.
+    document.addEventListener("visibilitychange", function(){
+      if(!document.hidden && Date.now() - ultimoOk > 30000) ricarica();
+    });
+    // Watchdog 24h: se l'ultimo fetch riuscito è vecchio di oltre 3 minuti,
+    // segnalalo nella riga di stato e forza una ricarica (coperta da guardia).
+    setInterval(function(){
+      statoRiga();
+      if(!document.hidden && ultimoOk && Date.now() - ultimoOk > 180000) ricarica();
+    }, 60000);
     aggiornaMeteoLive();
     setInterval(aggiornaMeteoLive, 600000); // meteo reale di Milano ogni 10 minuti
     $("cerca").addEventListener("input", disegna);
