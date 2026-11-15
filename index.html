@@ -302,7 +302,8 @@
     6. Il <b>Livello 3 — IA generativa locale</b> lavora in silenzio (consultivo: propone testi ed evoluzioni, il motore verifica e dispone): rende chiamate e radio più varie e naturali senza mai cambiare i fatti, offline e senza chiavi.<br>
     7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.<br>
     8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.<br>
-    <span id="vvfHelpSec">9. Con <b>🚒 Centrale VVF</b> (selettore in alto, scelta all'avvio o pulsante 🚒 Vai al VVF) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.</span>
+    <span id="vvfHelpSec">9. Con <b>🚒 Centrale VVF</b> (selettore in alto, scelta all'avvio o pulsante 🚒 Vai al VVF) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.</span><br>
+    10. Il <b>codice di trasporto</b> di ogni paziente (bollino e quadratino colorati) lo decidi tu: cambialo a piacimento dal menu nella riga del paziente — resta separato dal codice di invio della missione.
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -69265,7 +69266,10 @@ function stormTick(dtGameMin){
       const tcol = prioColor((p&&p.t)||3);
       const dot = p ? `<span class="prioDot" style="background:${tcol}" title="triage P${p.t||3}"></span> ` : "";
       const _crit = !!((s!=null && s<SOGLIA_MSA && pazAttivo(iv,k)) && !msaAssegnatoA(iv,k)); // scritta MSA solo sotto il 35%: sopra sparisce (anche col flag di gestione ancora attivo); alla presa in carico sparisce
-      const base = `Paziente ${k+1}: <b style="color:${saluteCol(s)}">${Math.round(s)}%</b>${_crit?' <b style="color:#d40000">MSA</b>':""}`;
+      const tcur = (p && p.t) || 3;
+      const tnames = ["","ROSSO","GIALLO","VERDE","BIANCO"];
+      const tsel = `<select data-tcode="${k}" title="Codice di trasporto (modificabile a piacimento)" style="font-size:11px;margin-left:6px;background:${tcol};color:#fff;border-radius:8px;padding:0 4px;border:none;">${[1,2,3,4].map(v=>`<option value="${v}"${v===tcur?" selected":""}>${tnames[v]}</option>`).join("")}</select>`;
+      const base = `Paziente ${k+1}: <b style="color:${saluteCol(s)}">${Math.round(s)}%</b>${_crit?' <b style="color:#d40000">MSA</b>':""}${tsel}`;
       const bis = bisognoPaziente(iv,k);
       const st = statoPaziente(iv,k);
       const _rifOk = iv.trasporto && iv.reportFatto && (st===4||st===6) && Math.round(s)>=70;
@@ -69290,6 +69294,18 @@ function stormTick(dtGameMin){
     let extra = "";
     if(iv.evac>0) extra += `<div>🏃 Da evacuare: ${iv.evac}</div>`;
     return `${righe.join("")}${extra}`;
+  }
+  // codice di trasporto del paziente (colore modificabile a piacimento dall'operatore)
+  function setCodiceTrasportoPaziente(id,k,t){
+    const iv = interventi.find(x=>x.id===id);
+    if(!iv) return false;
+    t = +t;
+    if(!(t>=1&&t<=4)) return false;
+    const p = (iv.profili||[])[k];
+    if(!p) return false;
+    p.t = t;
+    renderListe();
+    return true;
   }
   // luogo senza doppioni: natura/lago hanno già "VIA - COMUNE" nell'indirizzo
   function luogoIV(o, bold){
@@ -72291,6 +72307,7 @@ function stormTick(dtGameMin){
     };
     if(mb) mb.onclick=()=>{ if(map) map.panTo([iv.lat,iv.lng]); };
     { const _dd = $("detDrop"); if(_dd) _dd.querySelectorAll("[data-rif]").forEach(b=>{ b.onclick=()=>{ registraRifiuto(iv.id, +b.getAttribute("data-rif")); }; }); }
+    { const _dt = $("detDrop"); if(_dt) _dt.querySelectorAll("[data-tcode]").forEach(sel=>{ sel.onchange=()=>{ setCodiceTrasportoPaziente(iv.id, +sel.getAttribute("data-tcode"), +sel.value); }; }); }
     const os=$("onScene");
     os.innerHTML="";
     for(const c of iv.mezziIds){
@@ -73010,6 +73027,7 @@ return {
    meteoReale(){ return meteoReale(); },
    debugMeteo(code,vento,temp){ return meteoDaCodice(code,vento,temp); },
    setOrario(h,m){ return impostaOrario(h,m); },
+    oraGioco(){ return Math.round(clockMin*10)/10; },
     setFascia(i,k,v){ setFascia(i,k,v); },
     applicaFasce(){ applicaFasce(); },
     syncFasce(){ syncFasce(); },
@@ -73319,6 +73337,7 @@ return {
       renderListe();
       return true;
     },
+    setCodiceTrasporto(id,k,t){ return setCodiceTrasportoPaziente(id,k,t); },
     __dbg(){ return {cache: routeCache.size, roadPaths: mezzi.filter(m=>m.path&&m.path.length>2).map(m=>m.codice+":"+m.path.length)}; },
   };
 })();
@@ -73926,7 +73945,7 @@ window.COEULIVE = (() => {
   const POLL_MS = 5000;
 
   let client = null, timer = null, booted = false;
-  let lastError = "", lastSync = null, moveCount = 0, tickCount = 0;
+  let lastError = "", lastSync = null, moveCount = 0, tickCount = 0, tickInCorso = false;
   let cache = new Map(); // missione_id -> hash riga (solo righe attive viste in questa sessione)
 
   function $(id){ return document.getElementById(id); }
@@ -74014,6 +74033,13 @@ window.COEULIVE = (() => {
   }
 
   async function tick(){
+    if(tickInCorso) return; // giro precedente ancora appeso alla rete: non accumulare
+    tickInCorso = true;
+    try{ await tickCorpo(); }
+    finally{ tickInCorso = false; }
+  }
+
+  async function tickCorpo(){
     if(!client || !configurato()) return;
     // mezzi occupati dal cloud (missioni ia che il cloud gestisce da solo):
     // il simulatore li nasconde finché restano attive, poi tornano da soli.
@@ -74047,16 +74073,22 @@ window.COEULIVE = (() => {
     for(const m of snap){
       const r = buildRow(m);
       const prev = righe[r.missione_id];
-      // stesso intervento (stesso tipo+luogo): accumula tutti i mezzi visti finora.
-      // Se l'id è stato riusato da un nuovo intervento (dopo un reset), si riparte da zero.
-      if(prev && prev.tipologia === r.tipologia && prev.localita === r.localita){
+      // stesso intervento (stesso tipo+luogo, mai chiuso prima): accumula tutti i mezzi visti finora.
+      // Se l'id e stato riusato da una NUOVA missione (dopo un reset gli id ripartono da 1),
+      // si riparte da zero E si refresha created_at: l'upsert da solo conserverebbe la data
+      // vecchia e la missione sparirebbe dal tabellone "di oggi" pur essendo scritta.
+      const fresh = !(prev && prev.tipologia === r.tipologia && prev.localita === r.localita && !chiuse.has(r.missione_id));
+      if(!fresh){
         r.mezzi = unisciMezzi(prev.mezzi, r.mezzi);
+      }else{
+        r.created_at = new Date().toISOString();
+        chiuse.delete(r.missione_id);
       }
       const h = hashRow(r);
       righe[r.missione_id] = r;
       ora.add(r.missione_id);
       visti.add(r.missione_id);
-      if(cache.get(r.missione_id) !== h){ daScrivere.push(r); cache.set(r.missione_id, h); }
+      if(fresh || cache.get(r.missione_id) !== h){ daScrivere.push(r); cache.set(r.missione_id, h); }
     }
     // chiuse per sparizione: viste prima, non piu presenti, mai marcate.
     // Alla chiusura si salva la riga COMPLETA (tutti i mezzi accumulati fino alla
