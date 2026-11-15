@@ -303,7 +303,7 @@
     7. Con <b>🗺️ Zona</b> scegli dove nascono le nuove missioni: <b>Tutte le zone</b>, <b>Varese·Como·Lecco·Milano·Monza</b> oppure <b>Bergamo·Brescia·Sondrio</b>; quelle già aperte restano dov'erano e i mezzi di tutte le sedi restano disponibili. Con <b>🖥️ Totali browser</b> vedi i numeri cumulativi di questo browser fusi con quelli del cloud IA (missioni chiuse con/senza trasporto, tabella dei veicoli con missioni sommate: quelle IA prese in carico qui sono già nei numeri locali, niente doppi conteggi): tempo totale di gioco, rianimazioni, tempi medi, straordinario e chilometri restano solo di questo browser perché il cloud non li trasmette. I totali locali sopravvivono al reset e si azzerano solo col tasto apposito (il cloud resta sempre). Con <b>📊 Statistiche globali</b> vedi invece i numeri condivisi tra tutti i giocatori (visitatori, attivi, missioni, pazienti, interventi per codice): si aggiornano da soli, se il servizio contatori non risponde trovi N/D.<br>
     8. Con <b>👥 Doppio operatore</b> lavori in centrale con un <b>collega IA autonomo</b>: riceve le sue missioni (tag <b>IA</b> su chiamate, righe e spilli con anello arancione — le tue hanno tag <b>TU</b>), risponde, classifica e invia i mezzi da solo con le tue stesse regole; il parco mezzi è condiviso, mai doppi invii. Nel pannello vedi <b>mie/IA</b>, carichi di lavoro, coda, <b>chat</b> (scrivigli pure: capisce "prendi la prossima" e "come va"), <b>richieste</b> (passaggi di missioni e invii da approvare o rifiutare — se non rispondi entro 12 minuti di gioco decide lui) e <b>statistiche separate</b> con riepilogo. Nei <b>🎛️ Controlli</b> scegli come arrivano le missioni (bilanciata tra voi due, casuale, per carico, solo tue, manuale) e come lavora lui: <b>🤖 autonoma</b>, <b>🤝 collaborativa</b> (sulle scene grosse ti chiede prima) o <b>⏸️ pausa</b> (resta tutto a te). Puoi sempre <b>passargli una missione o riprendertela</b> (→ IA / → TU) e girare una chiamata all'uno o all'altra.<br>
     <span id="vvfHelpSec">9. Con <b>🚒 Centrale VVF</b> (selettore in alto, scelta all'avvio o pulsante 🚒 Vai al VVF) operi come <b>centrale operativa dei Vigili del Fuoco</b>: solo missioni VVF e solo mezzi VVF (niente 118, niente MSA, niente PMA/fasce/doppio-operatore, sedi 118 e ospedali nascosti in mappa). Il <b>118 resta intatto</b> nell'altra modalità. In VVF: solo <b>domande tecniche al chiamante</b> (❓ dopo la risposta), <b>catalogo interventi</b> per categoria, <b>direttore di scenario</b> (conferma, dispositivo, eventi coerenti col tipo, bonifica), <b>richieste di rinforzo</b> da autorizzare/rifiutare nel dettaglio, <b>radio operativa</b> dedicata; i <b>feriti</b> vanno al <b>supporto sanitario esterno</b> che arriva da solo e li porta in PS (i VVF non trasportano e restano sul posto finché non li richiami); il <b>meteo</b> guida danni coerenti come nel 118.</span><br>
-    10. Il <b>codice di trasporto</b> di ogni paziente (bollino e quadratino colorati) lo decidi tu: cambialo a piacimento dal menu nella riga del paziente — resta separato dal codice di invio della missione.
+    10. Il <b>codice di trasporto</b> di ogni paziente (bollino e quadratino colorati) lo decidi tu: cambialo a piacimento dal menu nella riga del paziente — resta separato dal codice di invio della missione.<br>
   </div>
   <div style="margin-top:10px; text-align:right"><button class="lstBtn primary" onclick="document.getElementById('helpDlg').close()">Chiudi</button></div>
 </dialog>
@@ -68184,28 +68184,8 @@ function stormTick(dtGameMin){
   const MAN_LUOGHI = ["CASA","STRADA","UFFICIO LUOGO PUBBLICO","STR. RESIDENZIALE",
     "STR. SANITARIA","IMPIANTO SPORTIVO","IMPIANTO SCI","IMPIANTO LAVORATIVO",
     "SCUOLE","FERROVIA","QUESTURA/CASERME","IMPERVIO","ALTRO LUOGO","AEREOPORTI"];
-  const MAN_MOTIVI = ["MEDICO ACUTO","---","CADUTA","---","NON NOTO","---",
-    "INTOSSICAZIONE","---","ANIMALI","PREVENZIONE","EVENTO VIOLENTO","SOCCORSO PERSONA",
-    "---","INCIDENTE/INFORTUNIO","INCIDENTE STRADALE","INCIDENTE FERROVIA",
-    "INCIDENTE ARIA","INCIDENTE MONTANO","INCIDENTE SPELEO/FORRA","INCIDENTE ACQUA",
-    "EVENTO DI MASSA","---","TRASFERIMENTO","TRASFERIMENTO URGENTE"];
-  const MAN_DETT = ["---","ALTRO","ALTRO/NON IDENTIFICA","---","ORECCHIO/NASO/GOLA",
-    "FERITA LACERO CONTUSA","CUTE/TESS.CONNETTIVO","FRATTURE/DISTOR ARTI",
-    "OSTEO MUSCOLARE","---","SOFFOCAMENTO","FOLGORATO","USTIONI","AMPUTAZIONE",
-    "IMPICCAMENTO","SCHIACCIAMENTO","SCONTRO DI GIOCO","PRECIPITATO","---",
-    "MORSO ANIMALE","PUNTURA ANIMALE","---","CADUTA SUOLO","CADUTA DALL ALTO",
-    "CADUTA DA SCALA","CADUTA DA BICI","CADUTA DA MOTO","CADUTA DA CAVALLO",
-    "CADUTA DA VEICOLO FERMO","CADUTA CAUSA MALORE","---","INVESTIMENTO PEDONE",
-    "INVESTIMENTO CICLISTA","SCONTRO BICICLETTE","RIBALTAMENTO","SBALZATO/PROIETTATO",
-    "FUORI STRADA","CONTRO OSTACOLO","MOTO/MOTO","AUTO/AUTO","AUTO/MOTO",
-    "AUTO/MEZZO PESANTE","MEZZO PESANTE/MOTO","MEZZO PESANTE / MEZZO PESANTE",
-    "DINAMICA NON NOTA","PIU DI DUE VEICOLI","ARROTAMENTO PERSONA","INCASTRATO",
-    "AUTOVETTURA","---","ASSISTENZA FF.OO.","RISSA","AGGRESSIONE","TENTATO SUICIDIO",
-    "FERITA","FERITA ARMA DA FUOCO","FERITA ARMA BIANCA","---","ASSISTENZA VV.FF.",
-    "INCENDIO","ANNEGAMENTO","APERTURA APPARTAMENTO","AUTOVETTURA","RICERCA DISPERSO",
-    "---","ETILICA","ALIMENTARE","FARMACI","DA SOSTANZE PERICOLOSE","INFETTIVO",
-    "---","INCRODATO","PZ GRANDE OBESO","---","AEROMOBILE","COLLISIONE","IMBARCAZIONE",
-    "---","ESPLOSIONE","FUGA GAS/ SOST. PERICOLOSE","SCOPPIO","CROLLO","MODALITA NON NOTA"];
+  const MAN_MOTIVI = ["MEDICO ACUTO","---","SOCCORSO PERSONA","EVENTO VIOLENTO","---","CADUTA","INCIDENTE/INFORTUNIO","INC. STRADALE","INC. FERROVIA","INC. ARIA","INC. ACQUA","INC. MONTANO","INC. SPELEO/FORRA","---","INTOSSICAZIONE","---","ANIMALI","PREVENZIONE","---","EVENTO DI MASSA","MAXI EMERGENZA","---","SOCCORSO SECONDARIO","ELISOCCORSO SECONDARIO","TRASPORTO ORGANI","TRASPORTO EQUIPE TRAPIANTI","---","ALTRO / NON NOTO"];
+  const MAN_DETT = ["CARDIOCIRCOLATORIA","RESPIRATORIA","DIGERENTE","NEUROLOGICA","METABOLICA","NEOPLASTICA","URO-GENITALE","PSICHIATRICA","GRAVIDANZA/PARTO","---","OSTEO MUSCOLARE","FERITA LACERO CONTUSA","FRATTURE/DISTOR ARTI","---","ORECCHIO/NASO/GOLA","OCULISTICA","CUTE/TESS.CONNETTIVO","---","SOFFOCAMENTO","FOLGORATO","USTIONI","AMPUTAZIONE","IMPICCAMENTO","SCHIACCIAMENTO","SCONTRO DI GIOCO","TENTATO SUICIDIO","---","CADUTA SUOLO","CADUTA DA SCALA","CADUTA DA BICI","CADUTA DA MOTO","CADUTA DA CAVALLO","PRECIPITATO","INC. DOMESTICO","INFORTUNIO SUL LAVORO","---","INVESTIMENTO PEDONE","INVESTIMENTO CICLISTA","SCONTRO BICICLETTE","RIBALTAMENTO","SBALZATO/PROIETTATO","FUORI STRADA","CONTRO OSTACOLO","MOTO/MOTO","AUTO/AUTO","AUTO/MOTO","AUTO/MEZZO PESANTE","MEZZO PESANTE/MOTO","MEZZO PESANTE","MEZZO PESANTE + VEICOLI","DINAMICA NON NOTA","INCASTRATO","ARROTAMENTO PERSONA","MICROMOB. ELETTRICA","AUTOVETTURA","---","PUNTURA ANIMALE","MORSO ANIMALE","---","ASSISTENZA FF.OO.","RISSA","AGGRESSIONE","FERITA","FERITA ARMA DA FUOCO","FERITA ARMA BIANCA","---","ASSISTENZA VV.FF.","INCENDIO","ANNEGAMENTO","APERTURA APPARTAMENTO","RICERCA DISPERSO","---","INFETTIVA","IPERPIRESSIA","ETILICA","ALIMENTARE","FARMACI","DA SOSTANZE PERICOLOSE","---","INCRODATO","PZ GRANDE OBESO","---","AEROMOBILE","IMBARCAZIONE","ESPLOSIONE","SCOPPIO","COLLISIONE","CROLLO","ESONDAZIONE","FRANA/VALANGA","NUBIFRAGIO","TERREMOTO","TROMBA D ARIA","FUGA GAS/ SOST. PERICOLOSE","INC. NUCLEARE","NUBE TOSSICA","---","ALTRO","ALTRO/NON IDENTIFICA"];
   function manOptions(list, sel){
     let h = '<option value="">—</option>';
     for(const v of list){
@@ -68215,9 +68195,11 @@ function stormTick(dtGameMin){
     return h;
   }
   function manTipoDi(lu, mo, de){
-    if(mo === "MEDICO ACUTO") return lu ? lu + " - " + mo : null; // niente dettaglio
-    if(lu && mo && de) return lu + " - " + mo + ": " + de;
-    return null;
+    if(mo === "MEDICO ACUTO") return lu ? lu + " - " + mo : mo; // niente dettaglio
+    let s = lu || ""; // basta anche un solo campo: il resto resta vuoto
+    if(mo) s = s ? s + " - " + mo : mo;
+    if(de) s = s ? s + ": " + de : de;
+    return s || null;
   }
   // incarico in finestra separata (stile LSTSim): mezzi + codice, poi crea e si chiude
   let incaricoCallId = null;
@@ -68270,7 +68252,7 @@ function stormTick(dtGameMin){
       <div class="intTop"><b>📋 Nuovo incarico</b></div>
       <div class="intAddr">📍 ${luogoIV(call,true)}</div>
       <div class="dialogo">${call.dialogo}</div>
-      ${modoVVF?"":`<div class="small" style="margin:6px 0 2px">✍️ <b>Inserimento manuale</b> <span class="small">(al posto della chiamata: compila tutto, o lascia tutto vuoto — MEDICO ACUTO non ha dettaglio)</span></div>
+      ${modoVVF?"":`<div class="small" style="margin:6px 0 2px">✍️ <b>Inserimento manuale</b> <span class="small">(al posto della chiamata: basta anche un solo campo, o lascia tutto vuoto — MEDICO ACUTO non ha dettaglio)</span></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px">
         <label class="small">📍 Luogo<br><select id="manLuogoSel" style="max-width:190px">${manOptions(MAN_LUOGHI, call.manLuogo)}</select></label>
         <label class="small">📌 Motivo<br><select id="manMotivoSel" style="max-width:190px">${manOptions(MAN_MOTIVI, call.manMotivo)}</select></label>
@@ -71364,7 +71346,7 @@ function stormTick(dtGameMin){
       // attesa MSA a tempo: l'equipaggio aspetta il supporto avanzato ma non all'infinito —
       // REGOLA UNIVERSALE: si aspetta l'arrivo effettivo del medicalizzato (niente fallback).
       // Se non resta più nessun paziente sotto il 35% (decesso o fine gestione)
-      // l'attesa si chiude da sola — mai stallo, mai attesa fantasma.
+      // l'attesa si chiude da sola — mai stallo.
       if(msaAtteso(iv)){
         const critici = (iv.pazienti||[]).some((s,k)=>s!=null && s<SOGLIA_MSA && pazAttivo(iv,k));
         if(!critici){
@@ -72986,6 +72968,7 @@ return {
     openIncarico(id){ openIncarico(id); },
     callMzHTML(id){ const c = chiamate.find(x=>x.callId===id); return c ? callMzHTML(c) : ""; },
     autoAssegna, assegnaMezzo, rientraMezzo, mandaOspedale, selectIntervento,
+    prioDaTipo, generaPazienti,
     // doppio operatore TU+IA: stato pannello, controlli, trasferimenti, chat, statistiche
     dopStato(){ return dopStato(); },
     dopSetAssegnazione(m){ if(["solo-tu","casuale","bilanciata","carico","manuale"].includes(m)) dopAssegn=m; return dopAssegn; },
