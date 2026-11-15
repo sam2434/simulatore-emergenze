@@ -159,7 +159,8 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
         <option value="in_corso">Solo in corso</option>
         <option value="chiusa">Solo chiuse</option>
       </select>
-      <button id="cfgBtn" type="button" title="Configura connessione">⚙️ Connessione</button>
+     <button id="cfgBtn" type="button" title="Configura connessione">⚙️ Connessione</button>
+      <button id="diagBtn" type="button" title="Verifica connessione e dati">🧪 Verifica</button>
     </div>
   </div>
 </header>
@@ -179,7 +180,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   <aside class="side sideR" id="latoDX"></aside>
   </div>
 </main>
-<footer>Solo lettura — i dati si aggiornano da soli. <a href="index.html">Apri il simulatore</a></footer>
+<footer>Solo lettura — i dati si aggiornano da soli. <a href="index.html">Apri il simulatore</a> · <span id="liveVer">live v2026-11-15</span></footer>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
@@ -798,6 +799,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
   }
 
   function mostraSetup(){
+    if($("diagBtn")) $("diagBtn").onclick = diagnosticaLive;
     var b = $("errBox");
     var salvata = leggiCfgSalvata();
     var urlIn = salvata.url ||
@@ -940,6 +942,54 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     }
   }
 
+  // Diagnostica con un click: dice esattamente dove si ferma la catena
+  // (config di questo browser, libreria, rete/tabella, filtro). Nulla esce dal browser.
+  async function diagnosticaLive(){
+    var b = $("errBox");
+    var righe = [];
+    var salvata = leggiCfgSalvata();
+    var url = salvata.url || "";
+    var key = salvata.key || "";
+    var cfgOk = url.indexOf("http") === 0 && key.length > 20 && url.indexOf("INSERISCI") < 0;
+    righe.push("1) Configurazione in QUESTO browser: " + (cfgOk ? "presente" : "MANCANTE — premi ⚙️ Connessione e incolla gli stessi 2 valori del simulatore"));
+    if(!cfgOk){
+      b.hidden = false;
+      b.innerHTML = "🧪 <b>Verifica</b><br>" + righe.map(esc).join("<br>") + '<br><button id="riprovaBtn">⚙️ Apri connessione</button>';
+      $("riprovaBtn").onclick = function(){ mostraSetup(); };
+      return;
+    }
+    righe.push("2) Libreria Supabase: " + (window.supabase && window.supabase.createClient ? "caricata" : "NON caricata — serve internet (unpkg.com)"));
+    if(!window.supabase || !window.supabase.createClient){
+      b.hidden = false;
+      b.innerHTML = "🧪 <b>Verifica</b><br>" + righe.map(esc).join("<br>");
+      return;
+    }
+    righe.push("3) Lettura tabella in corso…");
+    b.hidden = false;
+    b.innerHTML = "🧪 <b>Verifica</b><br>" + righe.map(esc).join("<br>");
+    try{
+      var cl = window.supabase.createClient(url, key);
+      var tot = await cl.from("missioni_live").select("missione_id", { count: "exact", head: true }).eq("pubblica", true);
+      if(tot.error) throw tot.error;
+      righe[2] = "3) Righe con pubblica=true nel database: " + tot.count;
+      var oggi = new Date(); oggi.setHours(0,0,0,0);
+      var od = await cl.from("missioni_live").select("missione_id", { count: "exact", head: true }).eq("pubblica", true).gte("created_at", oggi.toISOString());
+      if(od.error) throw od.error;
+      righe.push("4) di cui create oggi: " + od.count + " (il tabellone mostra solo queste)");
+      righe.push("5) Filtro in alto: " + $("filtroStato").value + " — se e «attive» e quelle di oggi sono tutte chiuse, passa a «tutte»");
+      if(!(od.count > 0)){
+        righe.push("→ Il tabellone e VUOTO perche non ci sono righe di oggi: nel simulatore fai login, controlla la scritta verde live e crea una missione, poi ricarica qui.");
+      }
+      b.innerHTML = "🧪 <b>Verifica</b><br>" + righe.map(esc).join("<br>") + '<br><button id="riprovaBtn">🔄 Chiudi e ricarica</button>';
+      $("riprovaBtn").onclick = function(){ b.hidden = true; ricarica(); };
+    }catch(e){
+      var msg = String((e && e.message) || e);
+      righe[2] = "3) ERRORE di lettura: " + msg.slice(0, 160);
+      righe.push("→ Controlla URL/key, progetto attivo, tabella missioni_live e lettura pubblica.");
+      b.innerHTML = "🧪 <b>Verifica</b><br>" + righe.map(esc).join("<br>");
+    }
+  }
+
   function avvia(){
     var salvata = leggiCfgSalvata();
     if(salvata.url && salvata.key){
@@ -992,6 +1042,7 @@ footer{ color:var(--mut); font-size:12px; text-align:center; padding:20px; }
     $("cerca").addEventListener("input", disegna);
     $("filtroStato").addEventListener("change", disegna);
     $("cfgBtn").addEventListener("click", mostraSetup);
+    $("diagBtn").onclick = diagnosticaLive;
     $("searchBtn").addEventListener("click", function(){
       var t = $("toolbar");
       t.style.display = (t.style.display === "none") ? "flex" : "none";
